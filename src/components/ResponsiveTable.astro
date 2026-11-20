@@ -1,0 +1,12 @@
+---
+type Props = { label?: string; variant?: "plain" | "striped" };
+const { label, variant = "plain" } = Astro.props;
+---
+
+<div
+  class:list={["table-scroll", variant === "striped" && "table-striped"]}
+  tabindex="0"
+  aria-label={label}
+>
+  <slot />
+</div>

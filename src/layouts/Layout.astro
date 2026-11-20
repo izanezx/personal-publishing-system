@@ -3,8 +3,9 @@ import { Font } from "astro:assets";
 import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { SITE } from "@/config";
+import { serializeJsonLd } from "@/utils/serializeJsonLd";
 import SearchModal from "@/components/SearchModal.astro";
-import { useTranslations, getTargetLanguageUrl } from "@/i18n/utils";
+import { getTargetLanguageUrl } from "@/i18n/utils";
 import "@/styles/global.css";
 
 type Props = {
@@ -21,6 +22,7 @@ type Props = {
   next?: string;
   structuredData?: Record<string, unknown>;
   tags?: string[];
+  noindex?: boolean;
 };
 
 const {
@@ -28,7 +30,7 @@ const {
   author = SITE.author,
   profile = SITE.profile,
   description = SITE.desc,
-  ogImage = SITE.ogImage ? `/${SITE.ogImage}` : "/devosfera-og.webp",
+  ogImage = SITE.ogImage ? `/${SITE.ogImage}` : undefined,
   canonicalURL: canonicalURLProp,
   pubDatetime,
   modDatetime,
@@ -36,11 +38,11 @@ const {
   prev,
   next,
   structuredData: structuredDataProp,
+  noindex = false,
   tags,
 } = Astro.props;
 
 const locale = Astro.currentLocale || SITE.lang || "en";
-const t = useTranslations(locale);
 
 // Always build canonical from SITE.website (production URL), never localhost.
 // Normalize trailing slash: always include it for consistency.
@@ -58,7 +60,7 @@ const esUrl = new URL(
   Astro.site ?? SITE.website
 );
 
-const socialImageURL = new URL(ogImage, Astro.url);
+const socialImageURL = ogImage && new URL(ogImage, SITE.website);
 
 // Whether this page is a blog post (has a publish date)
 const isArticle = Boolean(pubDatetime);
@@ -75,22 +77,17 @@ const finalStructuredData =
         },
         headline: title,
         description,
-        image: socialImageURL.toString(),
+        ...(socialImageURL && { image: socialImageURL.href }),
         url: canonicalURL.toString(),
         datePublished: pubDatetime!.toISOString(),
         ...(modDatetime && { dateModified: modDatetime.toISOString() }),
-        author: [
-          {
+        ...(author && {
+          author: {
             "@type": "Person",
             name: author,
             ...(profile && { url: profile }),
           },
-        ],
-        publisher: {
-          "@type": "Person",
-          name: author,
-          ...(profile && { url: profile }),
-        },
+        }),
       }
     : rawPath === "" || rawPath === "/es"
       ? {
@@ -98,23 +95,9 @@ const finalStructuredData =
           "@type": "WebSite",
           name: SITE.title,
           url: SITE.website,
-          description: locale === "es" ? t("index.heroDesc") : SITE.desc,
+          ...(description && { description }),
         }
-      : rawPath === "/about" || rawPath === "/es/about"
-        ? {
-            "@context": "https://schema.org",
-            "@type": "ProfilePage",
-            mainEntity: {
-              "@type": "Person",
-              name: author,
-              description:
-                locale === "es"
-                  ? "Desarrollador, estudiante y videojugador. Creador de Astro Devosfera."
-                  : "Developer, student, and gamer. Creator of Astro Devosfera.",
-              ...(profile && { url: profile }),
-            },
-          }
-        : null);
+      : null);
 
 const showCursorGlow = SITE.backdropEffects.cursorGlow;
 const showGrain = SITE.backdropEffects.grain;
@@ -141,11 +124,11 @@ const showGrain = SITE.backdropEffects.grain;
     <meta name="viewport" content="width=device-width" />
     <meta name="theme-color" content="" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="canonical" href={canonicalURL} />
     <link rel="alternate" hreflang="en" href={enUrl} />
     <link rel="alternate" hreflang="es" href={esUrl} />
     <link rel="alternate" hreflang="x-default" href={enUrl} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <meta name="generator" content={Astro.generator} />
 
     <!-- Relational Pagination Links -->
@@ -163,8 +146,8 @@ const showGrain = SITE.backdropEffects.grain;
 
     <!-- General Meta Tags -->
     <title>{title}</title>
-    <meta name="description" content={description} />
-    <meta name="author" content={author} />
+    {description && <meta name="description" content={description} />}
+    {author && <meta name="author" content={author} />}
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <!-- Open Graph / Facebook -->
@@ -176,11 +159,9 @@ const showGrain = SITE.backdropEffects.grain;
       content={locale === "es" ? "en_US" : "es_ES"}
     />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    {description && <meta property="og:description" content={description} />}
     <meta property="og:url" content={canonicalURL} />
-    <meta property="og:image" content={socialImageURL} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    {socialImageURL && <meta property="og:image" content={socialImageURL} />}
 
     <!-- Article Published/Modified time -->
     {pubDatetime && (
@@ -200,19 +181,21 @@ const showGrain = SITE.backdropEffects.grain;
       tags.map(tag => <meta property="article:tag" content={tag} />)}
 
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:card"
+      content={socialImageURL ? "summary_large_image" : "summary"}
+    />
     <meta name="twitter:url" content={canonicalURL} />
     <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={socialImageURL} />
-    <meta name="twitter:creator" content={SITE.author} />
+    {description && <meta name="twitter:description" content={description} />}
+    {socialImageURL && <meta name="twitter:image" content={socialImageURL} />}
 
     <!-- Google JSON-LD Structured data -->
     {finalStructuredData && (
       <script
         type="application/ld+json"
         is:inline
-        set:html={JSON.stringify(finalStructuredData)}
+        set:html={serializeJsonLd(finalStructuredData)}
       />
     )}
 
@@ -237,6 +220,7 @@ const showGrain = SITE.backdropEffects.grain;
       )
     }
 
+    <slot name="Head" />
     <ClientRouter />
 
     <!-- Minimal inline script to prevent FOUC - sets theme immediately -->
@@ -325,6 +309,7 @@ const showGrain = SITE.backdropEffects.grain;
     <script src="../scripts/theme.ts"></script>
     <!-- Smart prefetch for slow connections -->
     <script src="../scripts/smart-prefetch.ts"></script>
+    <slot name="BodyEnd" />
   </body>
 </html>
 

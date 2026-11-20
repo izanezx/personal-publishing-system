@@ -1,3 +1,5 @@
+import { serializeJsonLd } from "../src/utils/serializeJsonLd";
+import { isPublished } from "../src/utils/postFilter";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { getTargetLanguageUrl, isActive } from "@/i18n/utils";
@@ -24,7 +26,10 @@ test("getReadingTime strips frontmatter/code and formats by locale", () => {
   assert.equal(getReadingTime(""), "< 1 min read");
   assert.equal(getReadingTime("", "es"), "< 1 min de lectura");
   assert.equal(getReadingTime("word ".repeat(400)), "2 min read");
-  assert.equal(getReadingTime("palabra ".repeat(400), "es"), "2 min de lectura");
+  assert.equal(
+    getReadingTime("palabra ".repeat(400), "es"),
+    "2 min de lectura"
+  );
 
   const withCode = `---
 title: Demo
@@ -65,7 +70,11 @@ test("getPath skips _-prefixed dirs and slugifies nested subdirectories", () => 
     "/hello-world"
   );
   assert.equal(
-    getPath("en/_2026/draft-note", "src/data/blog/en/_2026/draft-note.md", false),
+    getPath(
+      "en/_2026/draft-note",
+      "src/data/blog/en/_2026/draft-note.md",
+      false
+    ),
     "/draft-note"
   );
   assert.equal(
@@ -76,9 +85,39 @@ test("getPath skips _-prefixed dirs and slugifies nested subdirectories", () => 
 
 test("postFilter hides drafts and scheduled future posts", () => {
   const entry = (overrides: Record<string, unknown>) =>
-    ({ data: { title: "t", description: "d", pubDatetime: new Date(0), ...overrides } }) as ContentEntry;
+    ({
+      data: {
+        title: "t",
+        description: "d",
+        pubDatetime: new Date(0),
+        ...overrides,
+      },
+    }) as ContentEntry;
 
   assert.equal(postFilter(entry({ draft: true })), false);
-  assert.equal(postFilter(entry({ pubDatetime: new Date(Date.now() + 86_400_000) })), false);
-  assert.equal(postFilter(entry({ pubDatetime: new Date(Date.now() - 86_400_000) })), true);
+  assert.equal(
+    postFilter(entry({ pubDatetime: new Date(Date.now() + 86_400_000) })),
+    false
+  );
+  assert.equal(
+    postFilter(entry({ pubDatetime: new Date(Date.now() - 86_400_000) })),
+    true
+  );
+});
+
+test("JSON-LD preserves text while escaping HTML delimiters", () => {
+  const data = { headline: "A < B", text: "中文" };
+  const output = serializeJsonLd(data);
+  assert.ok(!output.includes("<"));
+  assert.deepEqual(JSON.parse(output), data);
+});
+
+test("a publication becomes visible at its exact timestamp", () => {
+  const start = new Date("2030-09-18T12:00:00Z");
+  assert.equal(isPublished({ pubDatetime: start }, start.getTime() - 1), false);
+  assert.equal(isPublished({ pubDatetime: start }, start.getTime()), true);
+  assert.equal(
+    isPublished({ pubDatetime: start, draft: true }, start.getTime()),
+    false
+  );
 });

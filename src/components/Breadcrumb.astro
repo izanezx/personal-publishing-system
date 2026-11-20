@@ -1,6 +1,7 @@
 ---
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import { SITE } from "@/config";
+import { serializeJsonLd } from "@/utils/serializeJsonLd";
 import { buildBreadcrumbItems } from "@/utils/breadcrumbs";
 import { useTranslations } from "@/i18n/utils";
 
@@ -56,7 +57,7 @@ const breadcrumbSchema = {
   <script
     type="application/ld+json"
     is:inline
-    set:html={JSON.stringify(breadcrumbSchema)}
+    set:html={serializeJsonLd(breadcrumbSchema)}
   />
   <div
     class:list={[

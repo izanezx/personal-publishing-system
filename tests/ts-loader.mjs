@@ -14,7 +14,10 @@ const astroStubs = {
 registerHooks({
   resolve(specifier, context, nextResolve) {
     if (specifier in astroStubs) {
-      return { url: `data:text/javascript,${astroStubs[specifier]}`, shortCircuit: true };
+      return {
+        url: `data:text/javascript,${astroStubs[specifier]}`,
+        shortCircuit: true,
+      };
     }
 
     let resolvedPath = null;

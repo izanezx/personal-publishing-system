@@ -12,3 +12,7 @@ The import provides English and Spanish routes, archive and tag pages, galleries
 ## Reproduce
 
 Run `pnpm install --frozen-lockfile`, `pnpm test`, `pnpm lint`, `pnpm format:check` and `pnpm build`. The original six unit tests passed. Native lint, formatting and build failed with the compiler crash above. On this VM, use the WASM compiler when verifying the same source and record the compatibility path with the results.
+
+## Verified on the development VM
+
+The same-version WASM compiler completed Astro checks, formatting and a 109-page static build. Pagefind 1.6.0 also required an x86 emulator on this VM. It indexed 22 pages and 4,558 words in English and Spanish. Chromium loaded the home pages, an article, a gallery and RSS, and the keyboard search modal returned the expected PostgreSQL article. The compatibility commands and screenshot were kept outside the checkout.

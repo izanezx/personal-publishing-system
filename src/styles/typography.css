@@ -261,3 +261,38 @@
     }
   }
 }
+
+/* Keep wide data tables inside the reading column. */
+.table-scroll {
+  margin-block: 1rem;
+  overflow-x: auto;
+  max-inline-size: 100%;
+}
+.table-scroll table {
+  min-inline-size: 100%;
+}
+.table-scroll:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.table-striped tbody tr:nth-child(even) {
+  background: var(--muted);
+}
+.markdown-alert {
+  padding: 0.75rem 1rem;
+  margin-block: 1rem;
+  border-inline-start: 3px solid var(--accent);
+  background: var(--muted);
+  border-radius: 0.25rem;
+}
+.markdown-alert-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+.markdown-alert-title svg {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+}

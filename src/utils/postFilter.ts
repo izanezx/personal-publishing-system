@@ -1,13 +1,12 @@
-import { SITE } from "@/config";
 import type { ContentEntry } from "./contentEntry";
 
-const postFilter = ({ data }: ContentEntry) => {
-  if (data.draft) return false;
+export function isPublished(
+  data: Pick<ContentEntry["data"], "draft" | "pubDatetime">,
+  now = Date.now()
+) {
+  return !data.draft && new Date(data.pubDatetime).getTime() <= now;
+}
 
-  const pubTime = new Date(data.pubDatetime).getTime();
-  const isPublishTimePassed = Date.now() > pubTime - SITE.scheduledPostMargin;
-
-  return Boolean(import.meta.env?.DEV) || isPublishTimePassed;
-};
-
-export default postFilter;
+export default function postFilter({ data }: ContentEntry) {
+  return isPublished(data);
+}

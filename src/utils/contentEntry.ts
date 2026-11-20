@@ -23,3 +23,12 @@ export const getEntryPublishedMs = (entry: ContentEntry) => {
     "modDatetime" in entry.data ? entry.data.modDatetime : null;
   return new Date(modDatetime ?? entry.data.pubDatetime).getTime();
 };
+
+export function getEntryTransitionName(
+  entry: Pick<ContentEntry, "collection" | "id">
+) {
+  const id = Array.from(entry.id, character =>
+    character.codePointAt(0)!.toString(16)
+  ).join("-");
+  return `entry-${entry.collection}-${id}`;
+}

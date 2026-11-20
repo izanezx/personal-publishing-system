@@ -68,7 +68,7 @@ export const ui = {
     "terminal.badgeKeyHint": "Press 'C' or click to open interactive console",
     "terminal.title": "guest@devosfera: ~",
     "terminal.welcome":
-      "Welcome to Devosfera Shell v1.0. Type 'help' to see available commands.",
+      "Welcome to zanezx Shell v1.0. Type 'help' to see available commands.",
     "terminal.promptPlaceholder": "Type a command...",
     "terminal.helpHeader": "Available commands:",
     "terminal.helpRandom": "Pick and open a random article roulette",
@@ -240,7 +240,7 @@ export const ui = {
     "terminal.badgeKeyHint": "Presiona 'C' o haz clic para abrir la terminal",
     "terminal.title": "guest@devosfera: ~",
     "terminal.welcome":
-      "Bienvenido a la consola interactiva de Devosfera v1.0. Escribe 'help' para ver los comandos.",
+      "Bienvenido a la consola interactiva de zanezx v1.0. Escribe 'help' para ver los comandos.",
     "terminal.promptPlaceholder": "Escribe un comando...",
     "terminal.helpHeader": "Comandos disponibles:",
     "terminal.helpRandom": "Lanza la ruleta de artículos aleatorios",

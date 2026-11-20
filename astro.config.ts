@@ -1,5 +1,8 @@
 import { defineConfig, envField, fontProviders } from "astro/config";
 import mdx from "@astrojs/mdx";
+import { unified } from "@astrojs/markdown-remark";
+import rehypeCallouts from "rehype-callouts";
+import rehypeScrollableTables from "./src/utils/rehypeScrollableTables";
 import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
 import {
@@ -35,11 +38,15 @@ export default defineConfig({
     }),
     sitemap({
       filter: page =>
+        !/\/search\/?$/.test(page) &&
         (SITE.showArchives || !/\/archives\/?$/.test(page)) &&
         (SITE.showGalleries || !/\/galleries(\/|$)/.test(page)),
     }),
   ],
   markdown: {
+    processor: unified({
+      rehypePlugins: [rehypeCallouts, rehypeScrollableTables],
+    }),
     shikiConfig: {
       // For more themes, visit https://shiki.style/themes
       themes: { light: "min-light", dark: "github-dark-default" },

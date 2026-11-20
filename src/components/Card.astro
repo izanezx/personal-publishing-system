@@ -3,7 +3,11 @@ import type { CollectionEntry } from "astro:content";
 import type { ImageMetadata } from "astro";
 import { Image } from "astro:assets";
 import { slugifyStr } from "@/utils/slugify";
-import { getEntryPath, getGallerySlug } from "@/utils/contentEntry";
+import {
+  getEntryPath,
+  getGallerySlug,
+  getEntryTransitionName,
+} from "@/utils/contentEntry";
 import { getFirstGalleryImage } from "@/utils/gallery";
 import { getReadingTime } from "@/utils/readingTime";
 import Datetime from "./Datetime.astro";
@@ -39,7 +43,7 @@ const href = prefix + getEntryPath({ collection, id, filePath });
 const isGallery = collection === "galleries";
 const headingId = `${collection}-${slugifyStr(String(id))}-title`;
 const descriptionId = `${collection}-${slugifyStr(String(id))}-description`;
-const viewTransitionName = slugifyStr(String(title).replaceAll(".", "-"));
+const viewTransitionName = getEntryTransitionName({ collection, id });
 const readingTime = body ? getReadingTime(body, locale) : null;
 
 // Resolve cover image source

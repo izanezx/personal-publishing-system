@@ -8,9 +8,11 @@ import ShareLinks from "@/components/ShareLinks.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
 import GalleryEmbed from "@/components/GalleryEmbed.astro";
+import ResponsiveTable from "@/components/ResponsiveTable.astro";
 import TableOfContents from "@/components/TableOfContents.astro";
 import { getPath } from "@/utils/getPath";
 import { slugifyStr } from "@/utils/slugify";
+import { getEntryTransitionName } from "@/utils/contentEntry";
 import { getReadingTime } from "@/utils/readingTime";
 import IconClock from "@/assets/icons/IconClock.svg";
 import { SITE } from "@/config";
@@ -35,11 +37,21 @@ const {
   pubDatetime,
   modDatetime,
   tags,
+  canonicalURL,
+  hideToc,
+  hideEditPost,
+  timezone,
 } = post.data;
+
+const editUrl =
+  !hideEditPost && SITE.editPost.enabled && SITE.editPost.url && post.filePath
+    ? new URL(post.filePath, SITE.editPost.url).href
+    : undefined;
 
 const { Content, headings } = await render(post);
 const readingTime = post.body ? getReadingTime(post.body, locale) : null;
-const hasToc = headings.filter(h => h.depth > 1 && h.depth < 4).length > 0;
+const hasToc =
+  !hideToc && headings.filter(h => h.depth > 1 && h.depth < 4).length > 0;
 
 let ogImageUrl: string | undefined;
 
@@ -56,9 +68,7 @@ if (!ogImageUrl && SITE.dynamicOgImage) {
 }
 
 // Resolve OG image URL (or fallback to SITE.ogImage / default `og.png`)
-const ogImage = ogImageUrl
-  ? new URL(ogImageUrl, Astro.url.origin).href
-  : undefined;
+const ogImage = ogImageUrl ? new URL(ogImageUrl, SITE.website).href : undefined;
 
 const layoutProps = {
   title: `${title} | ${SITE.title}`,
@@ -67,6 +77,7 @@ const layoutProps = {
   pubDatetime,
   modDatetime,
   ogImage,
+  canonicalURL,
   scrollSmooth: true,
   tags,
 };
@@ -132,6 +143,8 @@ const recommendedPost = rawRecommendedPost
 ---
 
 <Layout {...layoutProps}>
+  <slot name="Head" slot="Head" />
+  <slot name="BodyEnd" slot="BodyEnd" />
   <div class="progress-container">
     <div class="progress-bar" id="reading-progress-bar"></div>
   </div>
@@ -153,7 +166,7 @@ const recommendedPost = rawRecommendedPost
       <div class="relative z-10 rounded-3xl border border-border/20 bg-muted/5 px-6 py-8 backdrop-blur-md sm:px-10 sm:py-12">
         <!-- Title -->
         <h1
-          transition:name={slugifyStr(title.replaceAll(".", "-"))}
+          transition:name={getEntryTransitionName(post)}
           class="post-title text-3xl leading-tight font-bold tracking-tight sm:text-4xl lg:text-[2.75rem]"
         >
           {title}
@@ -174,22 +187,23 @@ const recommendedPost = rawRecommendedPost
 
         <!-- Metadata row -->
         <div class="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm">
-          <!-- Author chip -->
-          <div class="inline-flex items-center gap-1.5 rounded-lg border border-border/25 bg-muted/10 px-2.5 py-1 backdrop-blur-sm">
-            <svg
-              class="size-3.5 text-accent/70"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            <span class="opacity-70">{author}</span>
-          </div>
+          {author && (
+            <div class="inline-flex items-center gap-1.5 rounded-lg border border-border/25 bg-muted/10 px-2.5 py-1 backdrop-blur-sm">
+              <svg
+                class="size-3.5 text-accent/70"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span class="opacity-70">{author}</span>
+            </div>
+          )}
 
           <!-- Date chip -->
           <div class="inline-flex items-center gap-1.5 rounded-lg border border-border/25 bg-muted/10 px-2.5 py-1 backdrop-blur-sm">
@@ -210,6 +224,7 @@ const recommendedPost = rawRecommendedPost
             <Datetime
               {pubDatetime}
               {modDatetime}
+              {timezone}
               size="sm"
               class="opacity-70 [&>svg]:hidden"
             />
@@ -310,7 +325,7 @@ const recommendedPost = rawRecommendedPost
           id="article"
           class="app-prose w-full max-w-none lg:max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
         >
-          <Content components={{ GalleryEmbed }} />
+          <Content components={{ GalleryEmbed, ResponsiveTable }} />
         </article>
         <aside class="sidebar-toc sticky top-24 hidden max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 lg:block">
           <TableOfContents headings={headings} />
@@ -324,7 +339,7 @@ const recommendedPost = rawRecommendedPost
         id="article"
         class="app-prose mt-8 w-full max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
       >
-        <Content components={{ GalleryEmbed }} />
+        <Content components={{ GalleryEmbed, ResponsiveTable }} />
       </article>
     )}
 
@@ -473,6 +488,12 @@ const recommendedPost = rawRecommendedPost
         </a>
       )}
     </div>
+    {editUrl && (
+      <p class="app-layout mt-6">
+        <a href={editUrl}>{SITE.editPost.text}</a>
+      </p>
+    )}
+    <slot name="PostEnd" />
   </main>
 
   <!-- Reading Mode Floating Controls -->

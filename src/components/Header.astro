@@ -12,7 +12,6 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
 import IconArchive from "@/assets/icons/IconArchive.svg";
 import IconGallery from "@/assets/icons/IconGallery.svg";
 import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
-import Logo from "@/assets/logo/devosfera.svg";
 import MobileMenu from "./MobileMenu.astro";
 import IntroAudioCompact from "./IntroAudioCompact.astro";
 import { SITE } from "@/config";
@@ -67,10 +66,10 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
         <!-- Logo -->
         <a
           href={locale === "es" ? "/es" : "/"}
-          aria-label={locale === "es" ? "Devosfera Inicio" : "Devosfera Home"}
+          aria-label={SITE.title}
           class="group relative z-20 flex shrink-0 items-center gap-2 text-xl font-bold tracking-tight sm:text-2xl"
         >
-          <Logo class="w-37.5 dark:invert" />
+          {SITE.title}
         </a>
 
         <!-- Center Audio Player -->

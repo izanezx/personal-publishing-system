@@ -40,35 +40,35 @@ In addition to `/galleries` and `/es/galleries`, gallery entries can participate
 
 ## Files involved
 
-| File | Role |
-| --- | --- |
-| `src/config.ts` | `showGalleries` + `showGalleriesInIndex` flags |
-| `src/content.config.ts` | `galleries` collection definition with Zod schema |
-| `src/components/AuroraHero.astro` | Reusable section hero banner on gallery index pages |
-| `src/components/GalleryCard.astro` | Card used in the gallery listing grid |
-| `src/components/GalleryEmbed.astro` | Component to embed galleries inside MDX posts |
-| `src/components/GalleryLightbox.astro` | Shared native `<dialog>` lightbox component with View Transitions cleanup |
-| `src/components/Card.astro` | Shared card for blog/gallery mixed feeds (adds gallery badge) |
-| `src/components/Header.astro` / `MobileMenu.astro` | Conditional nav links for `/galleries` and `/es/galleries` |
-| `src/assets/icons/IconGallery.svg` | Gallery icon used in header/cards/archive timeline |
-| `src/pages/galleries/index.astro` | English gallery listing `/galleries` |
-| `src/pages/galleries/[gallery].astro` | English gallery detail `/galleries/<slug>` |
-| `src/pages/es/galleries/index.astro` | Spanish gallery listing `/es/galleries` |
-| `src/pages/es/galleries/[gallery].astro` | Spanish gallery detail `/es/galleries/<slug>` |
-| `src/pages/index.astro` | Optional mixed feed on homepage (and `/es`) |
-| `src/pages/posts/index.astro` | Unified mixed post listing with inline Pagefind & tag filters |
-| `src/pages/archives/index.astro` | Optional mixed archive timeline |
-| `src/pages/tags/index.astro` & `src/pages/tags/[tag]/[...page].astro` | Optional mixed tag index & detail pagination |
-| `src/pages/rss.xml.ts` & `src/pages/es/rss.xml.ts` | Optional localized mixed RSS feeds |
-| `src/layouts/PostDetails.astro` | Registers `GalleryEmbed` as a global MDX component |
-| `src/utils/gallery.ts` | Centralized `allGalleryImages` glob, `getGalleryImages`, `getFirstGalleryImage`, and `filenameToAlt` |
-| `src/utils/staticPaths.ts` | Shared `buildGalleryStaticPaths(locale)` helper |
-| `src/utils/contentEntry.ts` | Shared typing, `getGallerySlug`, and URL helpers for blog/gallery entries |
-| `src/utils/getSortedPosts.ts` | Shared date sorting for mixed entries |
-| `src/utils/getUniqueTags.ts` | Shared tag extraction for mixed entries |
-| `src/utils/getPostsByTag.ts` | Shared tag filtering for mixed entries |
-| `src/utils/getPostsByGroupCondition.ts` | Shared archive grouping helper for mixed entries |
-| `src/data/galleries/{en,es}/` | Root directories for localized gallery content |
+| File                                                                  | Role                                                                                                 |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `src/config.ts`                                                       | `showGalleries` + `showGalleriesInIndex` flags                                                       |
+| `src/content.config.ts`                                               | `galleries` collection definition with Zod schema                                                    |
+| `src/components/AuroraHero.astro`                                     | Reusable section hero banner on gallery index pages                                                  |
+| `src/components/GalleryCard.astro`                                    | Card used in the gallery listing grid                                                                |
+| `src/components/GalleryEmbed.astro`                                   | Component to embed galleries inside MDX posts                                                        |
+| `src/components/GalleryLightbox.astro`                                | Shared native `<dialog>` lightbox component with View Transitions cleanup                            |
+| `src/components/Card.astro`                                           | Shared card for blog/gallery mixed feeds (adds gallery badge)                                        |
+| `src/components/Header.astro` / `MobileMenu.astro`                    | Conditional nav links for `/galleries` and `/es/galleries`                                           |
+| `src/assets/icons/IconGallery.svg`                                    | Gallery icon used in header/cards/archive timeline                                                   |
+| `src/pages/galleries/index.astro`                                     | English gallery listing `/galleries`                                                                 |
+| `src/pages/galleries/[gallery].astro`                                 | English gallery detail `/galleries/<slug>`                                                           |
+| `src/pages/es/galleries/index.astro`                                  | Spanish gallery listing `/es/galleries`                                                              |
+| `src/pages/es/galleries/[gallery].astro`                              | Spanish gallery detail `/es/galleries/<slug>`                                                        |
+| `src/pages/index.astro`                                               | Optional mixed feed on homepage (and `/es`)                                                          |
+| `src/pages/posts/index.astro`                                         | Unified mixed post listing with inline Pagefind & tag filters                                        |
+| `src/pages/archives/index.astro`                                      | Optional mixed archive timeline                                                                      |
+| `src/pages/tags/index.astro` & `src/pages/tags/[tag]/[...page].astro` | Optional mixed tag index & detail pagination                                                         |
+| `src/pages/rss.xml.ts` & `src/pages/es/rss.xml.ts`                    | Optional localized mixed RSS feeds                                                                   |
+| `src/layouts/PostDetails.astro`                                       | Registers `GalleryEmbed` as a global MDX component                                                   |
+| `src/utils/gallery.ts`                                                | Centralized `allGalleryImages` glob, `getGalleryImages`, `getFirstGalleryImage`, and `filenameToAlt` |
+| `src/utils/staticPaths.ts`                                            | Shared `buildGalleryStaticPaths(locale)` helper                                                      |
+| `src/utils/contentEntry.ts`                                           | Shared typing, `getGallerySlug`, and URL helpers for blog/gallery entries                            |
+| `src/utils/getSortedPosts.ts`                                         | Shared date sorting for mixed entries                                                                |
+| `src/utils/getUniqueTags.ts`                                          | Shared tag extraction for mixed entries                                                              |
+| `src/utils/getPostsByTag.ts`                                          | Shared tag filtering for mixed entries                                                               |
+| `src/utils/getPostsByGroupCondition.ts`                               | Shared archive grouping helper for mixed entries                                                     |
+| `src/data/galleries/{en,es}/`                                         | Root directories for localized gallery content                                                       |
 
 ---
 
@@ -105,12 +105,12 @@ src/data/galleries/
 
 ```yaml
 ---
-title: My Trip to Japan              # required — visible gallery name
-description: Travel photos...        # required — shown in the card and <meta description>
-pubDatetime: 2026-01-20T00:00:00Z    # required — publication date (ISO 8601)
-draft: false                         # optional — if true, not published (default: false)
-coverImage: ./01-tokyo.jpg           # optional — explicit cover image (see coverImage section)
-tags:                                # optional — array of tags (no #)
+title: My Trip to Japan # required — visible gallery name
+description: Travel photos... # required — shown in the card and <meta description>
+pubDatetime: 2026-01-20T00:00:00Z # required — publication date (ISO 8601)
+draft: false # optional — if true, not published (default: false)
+coverImage: ./01-tokyo.jpg # optional — explicit cover image (see coverImage section)
+tags: # optional — array of tags (no #)
   - japan
   - travel
 ---
@@ -219,8 +219,8 @@ In `src/config.ts`:
 ```ts
 export const SITE = {
   // ...
-  showGalleries: true,         // false → disables gallery section globally
-  showGalleriesInIndex: true,  // include galleries in mixed feeds (effective only when showGalleries=true)
+  showGalleries: true, // false → disables gallery section globally
+  showGalleriesInIndex: true, // include galleries in mixed feeds (effective only when showGalleries=true)
 };
 ```
 
@@ -273,23 +273,26 @@ The component is registered globally in `src/layouts/PostDetails.astro` by passi
 
 ### Props
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `slug` | `string` | — | **Required.** Folder name in `src/data/galleries/{locale}/` |
-| `limit` | `number` | `6` | Max images to show. `0` = all |
-| `showLink` | `boolean` | `true` | Show footer link to the full gallery |
-| `cols` | `2 \| 3 \| 4` | `3` | Number of grid columns |
+| Prop       | Type          | Default | Description                                                 |
+| ---------- | ------------- | ------- | ----------------------------------------------------------- |
+| `slug`     | `string`      | —       | **Required.** Folder name in `src/data/galleries/{locale}/` |
+| `limit`    | `number`      | `6`     | Max images to show. `0` = all                               |
+| `showLink` | `boolean`     | `true`  | Show footer link to the full gallery                        |
+| `cols`     | `2 \| 3 \| 4` | `3`     | Number of grid columns                                      |
 
 ### Usage examples in MDX
 
 ```mdx
 {/* Basic usage — first 6 photos, 3 columns */}
+
 <GalleryEmbed slug="my-trip" />
 
 {/* Only 4 photos in 2 columns, no footer link */}
+
 <GalleryEmbed slug="my-trip" limit={4} cols={2} showLink={false} />
 
 {/* Show all photos */}
+
 <GalleryEmbed slug="my-trip" limit={0} />
 ```
 
@@ -336,13 +339,13 @@ Both the gallery detail page (`[gallery].astro`) and `GalleryEmbed.astro` share 
 
 ### Behavior
 
-| Action | Result |
-| --- | --- |
-| Click on image | Opens the lightbox with that image |
-| `←` / `→` | Navigate between images |
-| `Esc` | Close the lightbox |
-| Click outside the image | Close the lightbox |
-| `‹` and `›` buttons | Edge-aware navigation (prev hidden at first image, next hidden at last) |
+| Action                  | Result                                                                  |
+| ----------------------- | ----------------------------------------------------------------------- |
+| Click on image          | Opens the lightbox with that image                                      |
+| `←` / `→`               | Navigate between images                                                 |
+| `Esc`                   | Close the lightbox                                                      |
+| Click outside the image | Close the lightbox                                                      |
+| `‹` and `›` buttons     | Edge-aware navigation (prev hidden at first image, next hidden at last) |
 
 ### Technical details
 
@@ -356,19 +359,19 @@ Both the gallery detail page (`[gallery].astro`) and `GalleryEmbed.astro` share 
 
 ### Listing grid (`/galleries`)
 
-| Viewport | Columns |
-| --- | --- |
-| `< 640px` | 1 |
-| `640px – 1023px` | 2 |
-| `≥ 1024px` | 3 |
+| Viewport         | Columns |
+| ---------------- | ------- |
+| `< 640px`        | 1       |
+| `640px – 1023px` | 2       |
+| `≥ 1024px`       | 3       |
 
 ### Detail grid (`/galleries/<slug>`)
 
-| Viewport | Columns |
-| --- | --- |
-| `< 640px` | 2 |
-| `640px – 1023px` | 3 |
-| `≥ 1024px` | 4 |
+| Viewport         | Columns |
+| ---------------- | ------- |
+| `< 640px`        | 2       |
+| `640px – 1023px` | 3       |
+| `≥ 1024px`       | 4       |
 
 Grid styles are scoped in `[gallery].astro`, card styles in `GalleryCard.astro`, lightbox styles in `GalleryLightbox.astro`, and index hero styles are shared via `AuroraHero.astro`.
 
