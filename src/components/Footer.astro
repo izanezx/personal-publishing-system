@@ -1,4 +1,5 @@
 ---
+import { localizedPath, resolveLocale } from "@/i18n/locales";
 import type { HTMLAttributes } from "astro/types";
 import { SOCIALS } from "@/constants";
 import LinkButton from "./LinkButton.astro";
@@ -8,7 +9,7 @@ import { useTranslations } from "@/i18n/utils";
 const currentYear = new Date().getFullYear();
 const socialHeadingId = "footer-social-heading";
 
-const locale = Astro.currentLocale || "en";
+const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 
 const socialLinks = SOCIALS.map(social => ({
@@ -37,9 +38,9 @@ const { noMarginTop = false, class: className, ...attrs } = Astro.props;
       <!-- Brand column -->
       <div class="flex flex-col items-center gap-3 sm:items-start">
         <a
-          href={locale === "es" ? "/es" : "/"}
+          href={localizedPath(locale, "/")}
           aria-label={
-            locale === "es"
+            locale === "zh-CN"
               ? `Ir al inicio de ${SITE.title}`
               : `Go to home of ${SITE.title}`
           }
@@ -48,6 +49,21 @@ const { noMarginTop = false, class: className, ...attrs } = Astro.props;
           {SITE.title}
         </a>
       </div>
+
+      <nav
+        class="flex flex-wrap gap-4 text-sm"
+        aria-label={locale === "en" ? "Publication links" : "出版链接"}
+      >
+        <a href={localizedPath(locale, "/notes")}>
+          {locale === "en" ? "Notes" : "笔记"}
+        </a>
+        <a href={localizedPath(locale, "/projects")}>
+          {locale === "en" ? "Projects" : "项目"}
+        </a>
+        <a href={`${localizedPath(locale, "/")}activity.xml`}>
+          {locale === "en" ? "Activity RSS" : "动态 RSS"}
+        </a>
+      </nav>
 
       <!-- Social links -->
       {socialLinks.length > 0 && (

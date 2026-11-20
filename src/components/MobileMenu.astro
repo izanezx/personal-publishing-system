@@ -1,15 +1,13 @@
 ---
+import { pageAlternates } from "@/i18n/locales";
+import { localizedPath, resolveLocale } from "@/i18n/locales";
 import IconMoon from "@/assets/icons/IconMoon.svg";
 import IconArchive from "@/assets/icons/IconArchive.svg";
 import IconGallery from "@/assets/icons/IconGallery.svg";
 import IconSearch from "@/assets/icons/IconSearch.svg";
 import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
 import { SITE } from "@/config";
-import {
-  useTranslations,
-  getTargetLanguageUrl,
-  isActive as checkRouteActive,
-} from "@/i18n/utils";
+import { useTranslations, isActive as checkRouteActive } from "@/i18n/utils";
 
 interface Props {
   currentPath: string;
@@ -17,17 +15,15 @@ interface Props {
 
 const { currentPath } = Astro.props;
 
-const locale = Astro.currentLocale || "en";
+const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
-const targetLocale = locale === "es" ? "en" : "es";
-const targetLanguageUrl = getTargetLanguageUrl(
+const targetLocale = locale === "zh-CN" ? "en" : "zh-CN";
+const targetLanguageUrl = pageAlternates(
   Astro.url.pathname,
-  targetLocale
-);
-const langToggleTitle =
-  locale === "es" ? "Switch to English" : "Cambiar a Español";
-const langToggleLabel =
-  locale === "es" ? "Switch to English" : "Cambiar a Español";
+  Astro.locals.entryAlternates
+)[targetLocale];
+const langToggleTitle = locale === "zh-CN" ? "Switch to English" : "切换到中文";
+const langToggleLabel = locale === "zh-CN" ? "Switch to English" : "切换到中文";
 
 const isActive = (path: string) => checkRouteActive(currentPath, path);
 ---
@@ -43,13 +39,11 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
         <!-- Primary navigation links -->
         <nav
           class="mobile-nav-links"
-          aria-label={
-            locale === "es" ? "Navegación principal" : "Main navigation"
-          }
+          aria-label={locale === "zh-CN" ? "主导航" : "Main navigation"}
         >
           <!-- Posts -->
           <a
-            href={locale === "es" ? "/es/posts" : "/posts"}
+            href={localizedPath(locale, "/posts")}
             class:list={["mobile-nav-link", { active: isActive("/posts") }]}
             style="--i:0"
           >
@@ -77,7 +71,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
 
           <!-- About -->
           <a
-            href={locale === "es" ? "/es/about" : "/about"}
+            href={localizedPath(locale, "/about")}
             class:list={["mobile-nav-link", { active: isActive("/about") }]}
             style="--i:1"
           >
@@ -105,7 +99,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
 
           <!-- Tags -->
           <a
-            href={locale === "es" ? "/es/tags" : "/tags"}
+            href={localizedPath(locale, "/tags")}
             class:list={["mobile-nav-link", { active: isActive("/tags") }]}
             style="--i:2"
           >
@@ -133,7 +127,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
 
           {SITE.showArchives && (
             <a
-              href={locale === "es" ? "/es/archives" : "/archives"}
+              href={localizedPath(locale, "/archives")}
               class:list={[
                 "mobile-nav-link",
                 { active: isActive("/archives") },
@@ -151,7 +145,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
           )}
           {SITE.showGalleries && (
             <a
-              href={locale === "es" ? "/es/galleries" : "/galleries"}
+              href={localizedPath(locale, "/galleries")}
               class:list={[
                 "mobile-nav-link",
                 { active: isActive("/galleries") },
@@ -174,7 +168,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
 
         <!-- Utilities section label -->
         <p class="mobile-section-label">
-          {locale === "es" ? "Herramientas" : "Tools"}
+          {locale === "zh-CN" ? "工具" : "Tools"}
         </p>
 
         <!-- Action row: Search -->
@@ -182,7 +176,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
           <button
             data-search-trigger
             class="mobile-action-btn"
-            title={locale === "es" ? "Buscar (⌘K)" : "Search (⌘K)"}
+            title={locale === "zh-CN" ? "搜索 (⌘K)" : "Search (⌘K)"}
             aria-label={t("nav.openSearch")}
           >
             <IconSearch class="size-4 shrink-0" />
@@ -196,37 +190,39 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
 
         <!-- Preferences section label -->
         <p class="mobile-section-label">
-          {locale === "es" ? "Preferencias" : "Preferences"}
+          {locale === "zh-CN" ? "偏好" : "Preferences"}
         </p>
 
         <!-- Preferences row: Lang + Theme -->
         <div class="mobile-prefs-row">
           <!-- Language toggle -->
-          <a
-            href={targetLanguageUrl}
-            class="mobile-pref-btn flex-1"
-            title={langToggleTitle}
-            aria-label={langToggleLabel}
-            data-lang-toggle={targetLocale}
-          >
-            <svg
-              class="size-4 shrink-0"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="1.8"
-              aria-hidden="true"
+          {targetLanguageUrl && (
+            <a
+              href={targetLanguageUrl}
+              class="mobile-pref-btn flex-1"
+              title={langToggleTitle}
+              aria-label={langToggleLabel}
+              data-lang-toggle={targetLocale}
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5c-.03.077-.07.154-.114.23-.9 1.54-2.11 3.05-3.535 4.5M6.412 9a14.95 14.95 0 003.535 4.5m0 0a14.973 14.973 0 01-3.298 3.19M6.412 9H3.9M15 9h-2.5"
-              ></path>
-            </svg>
-            <span class="font-firacode text-xs font-bold tracking-wider">
-              {locale === "es" ? "EN" : "ES"}
-            </span>
-          </a>
+              <svg
+                class="size-4 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5c-.03.077-.07.154-.114.23-.9 1.54-2.11 3.05-3.535 4.5M6.412 9a14.95 14.95 0 003.535 4.5m0 0a14.973 14.973 0 01-3.298 3.19M6.412 9H3.9M15 9h-2.5"
+                ></path>
+              </svg>
+              <span class="font-firacode text-xs font-bold tracking-wider">
+                {locale === "zh-CN" ? "EN" : "中文"}
+              </span>
+            </a>
+          )}
 
           {SITE.lightAndDarkMode && (
             <button
@@ -239,10 +235,10 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
               <IconMoon class="block size-4 shrink-0 dark:hidden" />
               <IconSunHigh class="hidden size-4 shrink-0 dark:block" />
               <span class="block dark:hidden">
-                {locale === "es" ? "Oscuro" : "Dark"}
+                {locale === "zh-CN" ? "深色" : "Dark"}
               </span>
               <span class="hidden dark:block">
-                {locale === "es" ? "Claro" : "Light"}
+                {locale === "zh-CN" ? "浅色" : "Light"}
               </span>
             </button>
           )}

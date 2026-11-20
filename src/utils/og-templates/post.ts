@@ -5,7 +5,6 @@ import loadOgFont from "../loadOgFont";
 
 export default async function postOgImage(post: CollectionEntry<"blog">) {
   const siteHostname = new URL(SITE.website).hostname;
-  const writtenBy = post.id.startsWith("es/") ? "Escrito por " : "Written by ";
 
   return satori(
     {
@@ -129,7 +128,6 @@ export default async function postOgImage(post: CollectionEntry<"blog">) {
                       color: "#cbd5e1",
                     },
                     children: [
-                      writtenBy,
                       {
                         type: "span",
                         props: {
@@ -138,7 +136,7 @@ export default async function postOgImage(post: CollectionEntry<"blog">) {
                             color: "white",
                             marginLeft: "8px",
                           },
-                          children: post.data.author,
+                          children: post.data.author || SITE.title,
                         },
                       },
                     ],

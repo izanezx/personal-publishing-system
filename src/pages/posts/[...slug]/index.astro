@@ -1,4 +1,5 @@
 ---
+import { contentLocale, resolveLocale } from "@/i18n/locales";
 import { type CollectionEntry, getCollection } from "astro:content";
 import PostDetails from "@/layouts/PostDetails.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
@@ -9,15 +10,16 @@ export interface Props {
   sortedPosts?: CollectionEntry<"blog">[];
 }
 
-export const getStaticPaths = () => buildPostStaticPaths("en");
+export const getStaticPaths = () => buildPostStaticPaths("zh-CN");
 
 const { post, sortedPosts: propsSortedPosts } = Astro.props;
 
 let sortedPosts = propsSortedPosts;
 if (!sortedPosts) {
-  const locale = Astro.currentLocale || "en";
-  const posts = await getCollection("blog", ({ id }) =>
-    id.startsWith(`${locale}/`)
+  const locale = resolveLocale(Astro.currentLocale);
+  const posts = await getCollection(
+    "blog",
+    ({ id }) => contentLocale(id) === locale
   );
   sortedPosts = getSortedPosts(posts) as CollectionEntry<"blog">[];
 }

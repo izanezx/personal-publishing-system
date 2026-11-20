@@ -24,11 +24,11 @@ test("slugifyStr normalizes diacritics, versions, punctuation, and unicode", () 
 
 test("getReadingTime strips frontmatter/code and formats by locale", () => {
   assert.equal(getReadingTime(""), "< 1 min read");
-  assert.equal(getReadingTime("", "es"), "< 1 min de lectura");
+  assert.equal(getReadingTime("", "zh-CN"), "不到 1 分钟");
   assert.equal(getReadingTime("word ".repeat(400)), "2 min read");
   assert.equal(
-    getReadingTime("palabra ".repeat(400), "es"),
-    "2 min de lectura"
+    getReadingTime("中文出版 ".repeat(400), "zh-CN", 200),
+    "4 分钟阅读"
   );
 
   const withCode = `---
@@ -44,19 +44,22 @@ Just a short \`inlineCode()\` paragraph here.`;
 });
 
 test("i18n helpers switch locale prefixes and match active routes", () => {
-  assert.equal(getTargetLanguageUrl("/", "es"), "/es");
-  assert.equal(getTargetLanguageUrl("/posts/hello", "es"), "/es/posts/hello");
-  assert.equal(getTargetLanguageUrl("/es", "en"), "/");
-  assert.equal(getTargetLanguageUrl("/es/posts/hello", "en"), "/posts/hello");
+  assert.equal(getTargetLanguageUrl("/", "en"), "/en/");
+  assert.equal(getTargetLanguageUrl("/posts/hello", "en"), "/en/posts/hello/");
+  assert.equal(getTargetLanguageUrl("/en", "zh-CN"), "/");
+  assert.equal(
+    getTargetLanguageUrl("/en/posts/hello", "zh-CN"),
+    "/posts/hello/"
+  );
 
-  assert.equal(isActive("/es/posts/my-article/", "/posts"), true);
+  assert.equal(isActive("/en/posts/my-article/", "/posts"), true);
   assert.equal(isActive("/archives/", "/posts"), false);
 });
 
 test("buildBreadcrumbItems translates segments and compacts pagination", () => {
   assert.deepEqual(buildBreadcrumbItems("/"), []);
-  assert.deepEqual(buildBreadcrumbItems("/es/posts/2", { locale: "es" }), [
-    { label: "Publicaciones #2", href: null },
+  assert.deepEqual(buildBreadcrumbItems("/posts/2", { locale: "zh-CN" }), [
+    { label: "文章 #2", href: null },
   ]);
   assert.deepEqual(buildBreadcrumbItems("/tags/astro-v7"), [
     { label: "Tags", href: "/tags/" },
@@ -78,7 +81,11 @@ test("getPath skips _-prefixed dirs and slugifies nested subdirectories", () => 
     "/draft-note"
   );
   assert.equal(
-    getPath("es/Web Dev/mi-post", "src/data/blog/es/Web Dev/mi-post.mdx", true),
+    getPath(
+      "zh-cn/Web Dev/mi-post",
+      "src/data/blog/zh-cn/Web Dev/mi-post.mdx",
+      true
+    ),
     "/posts/web-dev/mi-post"
   );
 });

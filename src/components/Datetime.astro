@@ -1,4 +1,5 @@
 ---
+import { resolveLocale } from "@/i18n/locales";
 import IconCalendar from "@/assets/icons/IconCalendar.svg";
 import { SITE } from "@/config";
 import { useTranslations } from "@/i18n/utils";
@@ -20,7 +21,7 @@ const {
 } = Astro.props;
 
 /* ========== Formatted Datetime ========== */
-const locale = Astro.currentLocale || SITE.lang || "en";
+const locale = resolveLocale(Astro.currentLocale);
 const resolvedTimezone = postTimezone || SITE.timezone;
 const t = useTranslations(locale);
 
@@ -47,7 +48,8 @@ const parts = new Intl.DateTimeFormat(locale, {
 const day = parts.find(p => p.type === "day")?.value ?? "";
 const month = parts.find(p => p.type === "month")?.value ?? "";
 const year = parts.find(p => p.type === "year")?.value ?? "";
-const date = `${day} ${month}, ${year}`;
+const date =
+  locale === "zh-CN" ? `${year}年${month}${day}日` : `${day} ${month}, ${year}`;
 
 const srDate = new Intl.DateTimeFormat(locale, {
   dateStyle: "long",

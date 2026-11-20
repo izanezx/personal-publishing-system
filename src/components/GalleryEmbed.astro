@@ -1,4 +1,5 @@
 ---
+import { contentLocale, localePrefix, resolveLocale } from "@/i18n/locales";
 /**
  * GalleryEmbed — renders an inline grid of a gallery inside an MDX post.
  *
@@ -14,6 +15,7 @@
 import { Image } from "astro:assets";
 import { getCollection } from "astro:content";
 import { getGalleryImages, type GalleryImage } from "@/utils/gallery";
+import postFilter from "@/utils/postFilter";
 import GalleryLightbox from "./GalleryLightbox.astro";
 
 type Props = {
@@ -25,39 +27,29 @@ type Props = {
 
 const { slug, limit = 6, showLink = true, cols = 3 } = Astro.props;
 
-const locale = Astro.currentLocale || "en";
-const prefix = locale === "es" ? "/es" : "";
+const locale = resolveLocale(Astro.currentLocale);
+const prefix = localePrefix(locale);
 
-// ── 1. Find the collection entry by slug ────────────────────────────
-// Find ALL entries (including drafts) so the embed works in preview;
-// the draft filter is applied by the author choosing not to publish the post.
-const allGalleries = await getCollection(
+const [entry] = await getCollection(
   "galleries",
-  ({ id }) =>
-    id.startsWith(`${locale}/`) || (locale === "en" && !id.startsWith("es/"))
+  gallery =>
+    contentLocale(gallery.id) === locale &&
+    gallery.data.slug === slug &&
+    postFilter(gallery)
 );
-const entry = allGalleries.find(g => {
-  // Normalize separators and strip extension to match purely the slug (excluding locale prefix)
-  const normalized = g.id
-    .replace(/\\/g, "/")
-    .replace(/^(?:en|es)\//, "")
-    .replace(/\/index\.(md|mdx)$/, "")
-    .replace(/\.(md|mdx)$/, "");
-  return normalized === slug;
-});
 
 // ── 2. Load images from folder ───────────────────────────────────────
-const folderImages: GalleryImage[] = getGalleryImages(
-  slug,
-  locale,
-  entry?.data.title ?? slug
-);
+const folderImages: GalleryImage[] = entry
+  ? getGalleryImages(slug, locale, entry.data.title)
+  : [];
 
 const visibleImages = limit > 0 ? folderImages.slice(0, limit) : folderImages;
 const remaining = folderImages.length - visibleImages.length;
 
 // Unique ID for the lightbox (allows multiple embeds on the same page)
-const lbId = `ge-lb-${slug}`;
+const ordinal = (Astro.locals.galleryEmbedCount ?? 0) + 1;
+Astro.locals.galleryEmbedCount = ordinal;
+const lbId = `ge-lb-${slug}-${ordinal}`;
 
 // CSS grid class according to requested columns
 const gridClass = {
@@ -69,17 +61,17 @@ const gridClass = {
 
 {!entry ? (
   <div class="ge-error">
-    {locale === "es" ? (
+    {locale === "zh-CN" ? (
       <>
-        ⚠️ Galería <code>{slug}</code> no encontrada. Verifica que{" "}
+        找不到图库 <code>{slug}</code>。请检查{" "}
         <code>
           src/data/galleries/{locale}/{slug}/index.md
         </code>{" "}
-        exista.
+        是否存在。
       </>
     ) : (
       <>
-        ⚠️ Gallery <code>{slug}</code> not found. Verify that{" "}
+        Gallery <code>{slug}</code> not found. Verify that{" "}
         <code>src/data/galleries/{slug}/index.md</code> exists.
       </>
     )}
@@ -145,8 +137,8 @@ const gridClass = {
       </ul>
     ) : (
       <p class="ge-empty">
-        {locale === "es"
-          ? "Esta galería aún no tiene imágenes."
+        {locale === "zh-CN"
+          ? "这个图库暂时没有图片。"
           : "This gallery doesn't have any images yet."}
       </p>
     )}
@@ -158,7 +150,7 @@ const gridClass = {
       )}
       {showLink && (
         <a href={`${prefix}/galleries/${slug}`} class="ge-link">
-          {locale === "es" ? "Ver galería completa" : "View full gallery"}
+          {locale === "zh-CN" ? "查看完整图库" : "View full gallery"}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="14"

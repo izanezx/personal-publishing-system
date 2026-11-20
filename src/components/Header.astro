@@ -1,4 +1,6 @@
 ---
+import { pageAlternates } from "@/i18n/locales";
+import { localizedPath, resolveLocale } from "@/i18n/locales";
 /**
  * Header.astro
  *
@@ -15,23 +17,20 @@ import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
 import MobileMenu from "./MobileMenu.astro";
 import IntroAudioCompact from "./IntroAudioCompact.astro";
 import { SITE } from "@/config";
-import {
-  useTranslations,
-  getTargetLanguageUrl,
-  isActive as checkRouteActive,
-} from "@/i18n/utils";
+import { useTranslations, isActive as checkRouteActive } from "@/i18n/utils";
 import "@/styles/header.css";
 
 const { pathname } = Astro.url;
 
-const locale = Astro.currentLocale || "en";
+const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
-const targetLocale = locale === "es" ? "en" : "es";
-const targetLanguageUrl = getTargetLanguageUrl(pathname, targetLocale);
-const langToggleTitle =
-  locale === "es" ? "Switch to English" : "Cambiar a Español";
-const langToggleLabel =
-  locale === "es" ? "Switch to English" : "Cambiar a Español";
+const targetLocale = locale === "zh-CN" ? "en" : "zh-CN";
+const targetLanguageUrl = pageAlternates(
+  pathname,
+  Astro.locals.entryAlternates
+)[targetLocale];
+const langToggleTitle = locale === "zh-CN" ? "Switch to English" : "切换到中文";
+const langToggleLabel = locale === "zh-CN" ? "Switch to English" : "切换到中文";
 
 // Remove trailing slash from current pathname if exists
 const currentPath =
@@ -65,7 +64,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
       >
         <!-- Logo -->
         <a
-          href={locale === "es" ? "/es" : "/"}
+          href={localizedPath(locale, "/")}
           aria-label={SITE.title}
           class="group relative z-20 flex shrink-0 items-center gap-2 text-xl font-bold tracking-tight sm:text-2xl"
         >
@@ -88,37 +87,39 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
         <!-- Nav area -->
         <nav id="nav-menu" class="flex shrink-0 items-center gap-1.5 lg:gap-1">
           <!-- Mobile language switcher chip (visible only on screens < 1024px) -->
-          <a
-            href={targetLanguageUrl}
-            class="nav-lang-chip lg:hidden!"
-            title={langToggleTitle}
-            aria-label={langToggleLabel}
-            data-lang-toggle={targetLocale}
-          >
-            <svg
-              class="nav-lang-chip-icon size-3.5 shrink-0"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="1.8"
-              aria-hidden="true"
+          {targetLanguageUrl && (
+            <a
+              href={targetLanguageUrl}
+              class="nav-lang-chip lg:hidden!"
+              title={langToggleTitle}
+              aria-label={langToggleLabel}
+              data-lang-toggle={targetLocale}
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5c-.03.077-.07.154-.114.23-.9 1.54-2.11 3.05-3.535 4.5M6.412 9a14.95 14.95 0 003.535 4.5m0 0a14.973 14.973 0 01-3.298 3.19M6.412 9H3.9M15 9h-2.5"
-              ></path>
-            </svg>
-            <span class="nav-lang-chip-label">
-              {targetLocale.toUpperCase()}
-            </span>
-          </a>
+              <svg
+                class="nav-lang-chip-icon size-3.5 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5c-.03.077-.07.154-.114.23-.9 1.54-2.11 3.05-3.535 4.5M6.412 9a14.95 14.95 0 003.535 4.5m0 0a14.973 14.973 0 01-3.298 3.19M6.412 9H3.9M15 9h-2.5"
+                ></path>
+              </svg>
+              <span class="nav-lang-chip-label">
+                {targetLocale.toUpperCase()}
+              </span>
+            </a>
+          )}
 
           <!-- Mobile search button (visible only on screens < 1024px) -->
           <button
             data-search-trigger
             class="nav-icon-btn lg:hidden!"
-            title={locale === "es" ? "Buscar" : "Search"}
+            title={locale === "zh-CN" ? "搜索" : "Search"}
             aria-label={t("nav.openSearch")}
           >
             <IconSearch class="size-4.5" />
@@ -146,7 +147,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
             <!-- Primary nav: Posts · About -->
             <li>
               <a
-                href={locale === "es" ? "/es/posts" : "/posts"}
+                href={localizedPath(locale, "/posts")}
                 class:list={["nav-link", { "nav-active": isActive("/posts") }]}
               >
                 {t("nav.posts")}
@@ -154,7 +155,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
             </li>
             <li>
               <a
-                href={locale === "es" ? "/es/about" : "/about"}
+                href={localizedPath(locale, "/about")}
                 class:list={["nav-link", { "nav-active": isActive("/about") }]}
               >
                 {t("nav.about")}
@@ -171,7 +172,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
               <button
                 data-search-trigger
                 class="nav-search-btn"
-                title={locale === "es" ? "Buscar (⌘K)" : "Search (⌘K)"}
+                title={locale === "zh-CN" ? "搜索 (⌘K)" : "Search (⌘K)"}
                 aria-label={t("nav.openSearch")}
                 aria-keyshortcuts="Meta+K"
               >
@@ -187,31 +188,33 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
 
             <!-- Language switcher chip -->
             <li class="flex items-center">
-              <a
-                href={targetLanguageUrl}
-                class="nav-lang-chip"
-                title={langToggleTitle}
-                aria-label={langToggleLabel}
-                data-lang-toggle={targetLocale}
-              >
-                <svg
-                  class="nav-lang-chip-icon size-3.5 shrink-0"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  aria-hidden="true"
+              {targetLanguageUrl && (
+                <a
+                  href={targetLanguageUrl}
+                  class="nav-lang-chip"
+                  title={langToggleTitle}
+                  aria-label={langToggleLabel}
+                  data-lang-toggle={targetLocale}
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5c-.03.077-.07.154-.114.23-.9 1.54-2.11 3.05-3.535 4.5M6.412 9a14.95 14.95 0 003.535 4.5m0 0a14.973 14.973 0 01-3.298 3.19M6.412 9H3.9M15 9h-2.5"
-                  ></path>
-                </svg>
-                <span class="nav-lang-chip-label">
-                  {targetLocale.toUpperCase()}
-                </span>
-              </a>
+                  <svg
+                    class="nav-lang-chip-icon size-3.5 shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5c-.03.077-.07.154-.114.23-.9 1.54-2.11 3.05-3.535 4.5M6.412 9a14.95 14.95 0 003.535 4.5m0 0a14.973 14.973 0 01-3.298 3.19M6.412 9H3.9M15 9h-2.5"
+                    ></path>
+                  </svg>
+                  <span class="nav-lang-chip-label">
+                    {targetLocale.toUpperCase()}
+                  </span>
+                </a>
+              )}
             </li>
 
             <!-- Separator -->
@@ -224,8 +227,8 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
               <button
                 id="more-btn"
                 class="nav-icon-btn relative"
-                title={locale === "es" ? "Más opciones" : "More options"}
-                aria-label={locale === "es" ? "Más opciones" : "More options"}
+                title={locale === "zh-CN" ? "更多选项" : "More options"}
+                aria-label={locale === "zh-CN" ? "更多选项" : "More options"}
                 aria-haspopup="true"
                 aria-expanded="false"
               >
@@ -247,16 +250,16 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
                 id="more-popover"
                 class="more-popover hidden"
                 role="dialog"
-                aria-label={locale === "es" ? "Más opciones" : "More options"}
+                aria-label={locale === "zh-CN" ? "更多选项" : "More options"}
               >
                 <!-- Section: Explore -->
                 <div class="popover-section">
                   <p class="popover-section-label">
-                    {locale === "es" ? "Explorar" : "Explore"}
+                    {locale === "zh-CN" ? "浏览" : "Explore"}
                   </p>
                   <div class="popover-links">
                     <a
-                      href={locale === "es" ? "/es/tags" : "/tags"}
+                      href={localizedPath(locale, "/tags")}
                       class:list={[
                         "popover-link",
                         { "popover-link-active": isActive("/tags") },
@@ -281,7 +284,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
                     </a>
                     {SITE.showArchives && (
                       <a
-                        href={locale === "es" ? "/es/archives" : "/archives"}
+                        href={localizedPath(locale, "/archives")}
                         class:list={[
                           "popover-link",
                           { "popover-link-active": isActive("/archives") },
@@ -293,7 +296,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
                     )}
                     {SITE.showGalleries && (
                       <a
-                        href={locale === "es" ? "/es/galleries" : "/galleries"}
+                        href={localizedPath(locale, "/galleries")}
                         class:list={[
                           "popover-link",
                           { "popover-link-active": isActive("/galleries") },
@@ -314,7 +317,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
                     <!-- Section: Preferences -->
                     <div class="popover-section">
                       <p class="popover-section-label">
-                        {locale === "es" ? "Preferencias" : "Preferences"}
+                        {locale === "zh-CN" ? "偏好" : "Preferences"}
                       </p>
                       <div class="popover-links">
                         <!-- Theme toggle row -->
@@ -334,7 +337,7 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
                                 d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 7a5 5 0 110 10A5 5 0 0112 7z"
                               />
                             </svg>
-                            {locale === "es" ? "Tema" : "Theme"}
+                            {locale === "zh-CN" ? "主题" : "Theme"}
                           </div>
                           <button
                             id="theme-btn"
@@ -345,11 +348,11 @@ const isActive = (path: string) => checkRouteActive(currentPath, path);
                           >
                             <span class="theme-pill-option block dark:hidden">
                               <IconMoon class="size-3" />
-                              {locale === "es" ? "Oscuro" : "Dark"}
+                              {locale === "zh-CN" ? "深色" : "Dark"}
                             </span>
                             <span class="theme-pill-option hidden dark:flex">
                               <IconSunHigh class="size-3" />
-                              {locale === "es" ? "Claro" : "Light"}
+                              {locale === "zh-CN" ? "浅色" : "Light"}
                             </span>
                           </button>
                         </div>

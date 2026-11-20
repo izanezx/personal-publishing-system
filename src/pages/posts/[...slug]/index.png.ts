@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { getCollection, type CollectionEntry } from "astro:content";
-import { getPath } from "@/utils/getPath";
+import { contentLocale } from "@/i18n/locales";
 import { generateOgImageForPost } from "@/utils/generateOgImages";
 import postFilter from "@/utils/postFilter";
 import { SITE } from "@/config";
@@ -10,17 +10,16 @@ export async function getStaticPaths() {
     return [];
   }
 
-  const posts = await getCollection("blog").then(p =>
-    p.filter(
-      post =>
-        postFilter(post) &&
-        !post.data.ogImage &&
-        (post.id.startsWith("en/") || !post.id.startsWith("es/"))
-    )
+  const posts = await getCollection(
+    "blog",
+    post =>
+      postFilter(post) &&
+      !post.data.ogImage &&
+      contentLocale(post.id) === "zh-CN"
   );
 
   return posts.map(post => ({
-    params: { slug: getPath(post.id, post.filePath, false) },
+    params: { slug: post.data.slug },
     props: post,
   }));
 }

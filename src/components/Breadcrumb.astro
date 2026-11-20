@@ -1,4 +1,5 @@
 ---
+import { localePrefix, resolveLocale } from "@/i18n/locales";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import { SITE } from "@/config";
 import { serializeJsonLd } from "@/utils/serializeJsonLd";
@@ -11,7 +12,7 @@ type Props = {
 
 const { withBackButton = false } = Astro.props as Props;
 
-const locale = Astro.currentLocale || SITE.lang || "en";
+const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 
 const breadcrumbs = buildBreadcrumbItems(Astro.url.pathname, {
@@ -20,8 +21,8 @@ const breadcrumbs = buildBreadcrumbItems(Astro.url.pathname, {
 });
 
 const currentPageLabel =
-  breadcrumbs.at(-1)?.label ?? (locale === "es" ? "Inicio" : "Home");
-const prefix = locale === "es" ? "/es" : "";
+  breadcrumbs.at(-1)?.label ?? (locale === "zh-CN" ? "首页" : "Home");
+const prefix = localePrefix(locale);
 
 // Compile JSON-LD BreadcrumbList Schema for SEO
 const breadcrumbSchema = {
@@ -31,7 +32,7 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       position: 1,
-      name: locale === "es" ? "Inicio" : "Home",
+      name: locale === "zh-CN" ? "首页" : "Home",
       item: new URL(prefix || "/", SITE.website).toString(),
     },
     ...breadcrumbs.map((item, index) => ({
@@ -48,7 +49,7 @@ const breadcrumbSchema = {
   class:list={["app-layout mt-6 mb-2", { "overflow-hidden": withBackButton }]}
   aria-label={
     withBackButton
-      ? locale === "es"
+      ? locale === "zh-CN"
         ? "Navegación contextual"
         : "Contextual navigation"
       : "breadcrumb"
@@ -71,7 +72,7 @@ const breadcrumbSchema = {
         href={prefix || "/"}
         class="breadcrumb-bar back-btn group shrink-0 gap-2! text-foreground/90 transition-colors duration-200 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background font-firacode text-sm"
         aria-label={
-          locale === "es"
+          locale === "zh-CN"
             ? `Volver a la página anterior. Contexto actual: ${currentPageLabel}`
             : `Go back to the previous page. Current context: ${currentPageLabel}`
         }
@@ -99,12 +100,12 @@ const breadcrumbSchema = {
             "breadcrumb-home",
             { "breadcrumb-link-soft": withBackButton },
           ]}
-          aria-label={locale === "es" ? "Inicio" : "Home"}
-          title={locale === "es" ? "Inicio" : "Home"}
+          aria-label={locale === "zh-CN" ? "首页" : "Home"}
+          title={locale === "zh-CN" ? "首页" : "Home"}
         >
           <span aria-hidden="true">~</span>
           <span class="visually-hidden">
-            {locale === "es" ? "Inicio" : "Home"}
+            {locale === "zh-CN" ? "首页" : "Home"}
           </span>
         </a>
       </li>
@@ -312,7 +313,7 @@ const breadcrumbSchema = {
 
   function getDefaultBackUrl() {
     const pathname = window.location.pathname;
-    return pathname === "/es" || pathname.startsWith("/es/") ? "/es" : "/";
+    return pathname === "/en" || pathname.startsWith("/en/") ? "/en" : "/";
   }
 
   function toSafeBackPath(rawBackUrl: string | null, fallbackUrl: string) {

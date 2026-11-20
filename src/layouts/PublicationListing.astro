@@ -1,0 +1,35 @@
+---
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Card from "@/components/Card.astro";
+import Layout from "@/layouts/Layout.astro";
+import { resolveLocale } from "@/i18n/locales";
+import { getPublicationFeed } from "@/utils/publishing";
+type Props = { kind: "note" | "project" };
+const { kind } = Astro.props;
+const locale = resolveLocale(Astro.currentLocale);
+const title =
+  kind === "note"
+    ? locale === "en"
+      ? "Notes"
+      : "笔记"
+    : locale === "en"
+      ? "Projects"
+      : "项目";
+const entries = (await getPublicationFeed(locale)).filter(
+  entry => entry.collection === "blog" && entry.data.kind === kind
+);
+---
+
+<Layout title={title}>
+  <Header />
+  <main id="main-content" class="app-layout py-12">
+    <h1 class="text-3xl font-bold">{title}</h1>
+    <ul>
+      {entries.map(entry => (
+        <Card {...entry} />
+      ))}
+    </ul>
+  </main>
+  <Footer />
+</Layout>

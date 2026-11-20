@@ -1,4 +1,5 @@
 ---
+import { contentLocale, resolveLocale } from "@/i18n/locales";
 import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
@@ -14,11 +15,10 @@ import { slugifyStr } from "@/utils/slugify";
 import { SITE } from "@/config";
 import { useTranslations } from "@/i18n/utils";
 
-const locale = Astro.currentLocale || "en";
+const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 
-const isMatchingLocale = (id: string) =>
-  id.startsWith(`${locale}/`) || (locale === "en" && !id.startsWith("es/"));
+const isMatchingLocale = (id: string) => contentLocale(id) === locale;
 
 const [blogPosts, galleryPosts] = await Promise.all([
   getCollection(

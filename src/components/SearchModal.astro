@@ -1,4 +1,5 @@
 ---
+import { localizedPath, resolveLocale } from "@/i18n/locales";
 /**
  * SearchModal — A floating, interactive modal for site-wide searching.
  * Utilizes Pagefind for fast, static indexing and searching capabilities.
@@ -7,7 +8,7 @@
 import "@pagefind/default-ui/css/ui.css";
 import { useTranslations } from "@/i18n/utils";
 
-const locale = Astro.currentLocale || "en";
+const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 ---
 
@@ -86,6 +87,15 @@ const t = useTranslations(locale);
       </button>
     </div>
 
+    <div class="mb-3 px-5 text-end">
+      <a
+        class="text-sm underline"
+        href={localizedPath(locale, "/search")}
+        data-search-page
+      >
+        {t("search.title")}
+      </a>
+    </div>
     <!-- Search body -->
     <div class="search-modal-body">
       <div
@@ -287,6 +297,14 @@ const t = useTranslations(locale);
             () => {
               // Ensure we check value to toggle empty state
               emptyState.style.display = input.value.trim() ? "none" : "";
+              const link =
+                modal!.querySelector<HTMLAnchorElement>("[data-search-page]");
+              if (link) {
+                const url = new URL(link.href);
+                if (input.value.trim()) url.searchParams.set("q", input.value);
+                else url.searchParams.delete("q");
+                link.href = url.href;
+              }
             },
             { signal }
           );

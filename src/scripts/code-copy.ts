@@ -7,7 +7,7 @@
 
 export function addHeadingLinks() {
   const headings = Array.from(
-    document.querySelectorAll<HTMLElement>("h2, h3, h4, h5, h6")
+    document.querySelectorAll<HTMLElement>("#article :is(h2,h3,h4,h5,h6)[id]")
   );
   for (const heading of headings) {
     if (heading.querySelector(".heading-link")) continue;
@@ -28,9 +28,10 @@ export function addHeadingLinks() {
 }
 
 export function attachCopyButtons() {
-  const copyButtonLabel = "Copy";
+  const isChinese = document.documentElement.lang.startsWith("zh");
+  const copyButtonLabel = isChinese ? "复制" : "Copy";
   const codeBlocks = Array.from(
-    document.querySelectorAll<HTMLPreElement>("pre")
+    document.querySelectorAll<HTMLPreElement>("#article pre")
   );
   const unattachedCodeBlocks = codeBlocks.filter(
     cb => !cb.querySelector(".copy-code")
@@ -51,7 +52,7 @@ export function attachCopyButtons() {
 
     const copyButton = document.createElement("button");
     copyButton.className = `copy-code absolute end-3 ${topClasses[i]} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium cursor-pointer`;
-    copyButton.innerHTML = copyButtonLabel;
+    copyButton.textContent = copyButtonLabel;
     codeBlock.setAttribute("tabindex", "0");
     codeBlock.appendChild(copyButton);
 
@@ -62,9 +63,13 @@ export function attachCopyButtons() {
       const code = codeBlock.querySelector("code");
       const text = code?.innerText;
 
-      await navigator.clipboard.writeText(text ?? "");
+      try {
+        await navigator.clipboard.writeText(text ?? "");
+        copyButton.textContent = isChinese ? "已复制" : "Copied";
+      } catch {
+        copyButton.textContent = isChinese ? "复制失败" : "Copy failed";
+      }
 
-      copyButton.innerText = "Copied";
       setTimeout(() => {
         copyButton.innerText = copyButtonLabel;
       }, 700);

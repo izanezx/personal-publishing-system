@@ -7,6 +7,8 @@ export function isPublished(
   return !data.draft && new Date(data.pubDatetime).getTime() <= now;
 }
 
+const buildTime = Date.now();
+
 export default function postFilter({ data }: ContentEntry) {
-  return isPublished(data);
+  return isPublished(data, buildTime);
 }

@@ -1,38 +1,27 @@
 import rss from "@astrojs/rss";
-import { getCollection } from "astro:content";
-import { getEntryPath } from "@/utils/contentEntry";
-import getSortedPosts from "@/utils/getSortedPosts";
+import { localizedPath, type Locale } from "@/i18n/locales";
+import { getEntryPath, getEntryPublishedMs } from "@/utils/contentEntry";
+import { getEntryActivityMs, getPublicationFeed } from "@/utils/publishing";
 import { SITE } from "@/config";
-import { useTranslations } from "@/i18n/utils";
 
-export async function generateLocaleRss(locale: "en" | "es") {
-  const t = useTranslations(locale);
-  const prefix = locale === "es" ? "/es" : "";
-  const isMatchingLocale = (id: string) =>
-    id.startsWith(`${locale}/`) || (locale === "en" && !id.startsWith("es/"));
-
-  const [blogPosts, galleryPosts] = await Promise.all([
-    getCollection("blog", ({ id }) => isMatchingLocale(id)),
-    SITE.showGalleries && SITE.showGalleriesInIndex
-      ? getCollection("galleries", ({ id }) => isMatchingLocale(id))
-      : Promise.resolve([]),
-  ]);
-  const sortedPosts = getSortedPosts([...blogPosts, ...galleryPosts]);
+export async function generateLocaleRss(
+  locale: Locale,
+  sort: "published" | "activity" = "published"
+) {
+  const entries = await getPublicationFeed(locale, sort);
+  const timestamp =
+    sort === "activity" ? getEntryActivityMs : getEntryPublishedMs;
   return rss({
     title: SITE.title,
-    description: locale === "es" ? t("index.heroDesc") : SITE.desc,
+    description: SITE.desc || SITE.title,
     site: SITE.website,
-    items: sortedPosts.map(entry => ({
-      link: `${prefix}${getEntryPath(entry)}`,
+    items: entries.map(entry => ({
+      link: localizedPath(locale, getEntryPath(entry)),
       title: entry.data.title,
       description: entry.data.description,
-      pubDate: new Date(
-        "modDatetime" in entry.data && entry.data.modDatetime
-          ? entry.data.modDatetime
-          : entry.data.pubDatetime
-      ),
+      pubDate: new Date(timestamp(entry)),
     })),
   });
 }
 
-export const GET = () => generateLocaleRss("en");
+export const GET = () => generateLocaleRss("zh-CN");

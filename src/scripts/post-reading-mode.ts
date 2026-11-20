@@ -19,13 +19,11 @@ const SCALE_CLASSES = [
   "font-scale-8",
 ];
 
-let keydownCleanup: ((e: KeyboardEvent) => void) | null = null;
+let listeners: AbortController | undefined;
 
 export function cleanupReadingMode() {
-  if (keydownCleanup) {
-    window.removeEventListener("keydown", keydownCleanup);
-    keydownCleanup = null;
-  }
+  listeners?.abort();
+  listeners = undefined;
   if (typeof document !== "undefined" && document.body) {
     document.body.classList.remove(
       "reading-mode-active",
@@ -48,6 +46,8 @@ export function initReadingMode() {
   const exitBtn = document.getElementById("reading-exit-btn");
 
   if (!readModeBtn || !controlsPill) return;
+  listeners = new AbortController();
+  const { signal } = listeners;
 
   const SCALE_LABELS = [
     "80%",
@@ -139,36 +139,52 @@ export function initReadingMode() {
     }
   }
 
-  readModeBtn.addEventListener("click", toggleReadingMode);
-  exitBtn?.addEventListener("click", toggleReadingMode);
+  readModeBtn.addEventListener("click", toggleReadingMode, { signal });
+  exitBtn?.addEventListener("click", toggleReadingMode, { signal });
 
-  fontSansBtn?.addEventListener("click", () => {
-    activeFont = "sans";
-    localStorage.setItem("reading-mode-font", activeFont);
-    applyFontPreferences();
-  });
+  fontSansBtn?.addEventListener(
+    "click",
+    () => {
+      activeFont = "sans";
+      localStorage.setItem("reading-mode-font", activeFont);
+      applyFontPreferences();
+    },
+    { signal }
+  );
 
-  fontSerifBtn?.addEventListener("click", () => {
-    activeFont = "serif";
-    localStorage.setItem("reading-mode-font", activeFont);
-    applyFontPreferences();
-  });
+  fontSerifBtn?.addEventListener(
+    "click",
+    () => {
+      activeFont = "serif";
+      localStorage.setItem("reading-mode-font", activeFont);
+      applyFontPreferences();
+    },
+    { signal }
+  );
 
-  sizeDecBtn?.addEventListener("click", () => {
-    if (activeScaleIndex > 0) {
-      activeScaleIndex--;
-      localStorage.setItem("reading-mode-scale", activeScaleIndex.toString());
-      applyScalePreferences();
-    }
-  });
+  sizeDecBtn?.addEventListener(
+    "click",
+    () => {
+      if (activeScaleIndex > 0) {
+        activeScaleIndex--;
+        localStorage.setItem("reading-mode-scale", activeScaleIndex.toString());
+        applyScalePreferences();
+      }
+    },
+    { signal }
+  );
 
-  sizeIncBtn?.addEventListener("click", () => {
-    if (activeScaleIndex < SCALE_CLASSES.length - 1) {
-      activeScaleIndex++;
-      localStorage.setItem("reading-mode-scale", activeScaleIndex.toString());
-      applyScalePreferences();
-    }
-  });
+  sizeIncBtn?.addEventListener(
+    "click",
+    () => {
+      if (activeScaleIndex < SCALE_CLASSES.length - 1) {
+        activeScaleIndex++;
+        localStorage.setItem("reading-mode-scale", activeScaleIndex.toString());
+        applyScalePreferences();
+      }
+    },
+    { signal }
+  );
 
   function handleKeyDown(e: KeyboardEvent) {
     const activeEl = document.activeElement;
@@ -195,6 +211,5 @@ export function initReadingMode() {
     }
   }
 
-  keydownCleanup = handleKeyDown;
-  window.addEventListener("keydown", handleKeyDown);
+  window.addEventListener("keydown", handleKeyDown, { signal });
 }

@@ -1,4 +1,5 @@
 ---
+import { contentLocale, localePrefix, resolveLocale } from "@/i18n/locales";
 import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
@@ -17,12 +18,11 @@ if (!SITE.showArchives) {
 }
 
 import { useTranslations } from "@/i18n/utils";
-const locale = Astro.currentLocale || "en";
+const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
-const prefix = locale === "es" ? "/es" : "";
+const prefix = localePrefix(locale);
 
-const isMatchingLocale = (id: string) =>
-  id.startsWith(`${locale}/`) || (locale === "en" && !id.startsWith("es/"));
+const isMatchingLocale = (id: string) => contentLocale(id) === locale;
 
 const [blogPosts, galleryPosts] = await Promise.all([
   getCollection("blog", ({ id }) => isMatchingLocale(id)),
@@ -32,40 +32,27 @@ const [blogPosts, galleryPosts] = await Promise.all([
 ]);
 const posts = getSortedPosts([...blogPosts, ...galleryPosts]);
 
-const monthsEN = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-const monthsES = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre",
-];
-const months = locale === "es" ? monthsES : monthsEN;
+const months = Array.from({ length: 12 }, (_, i) =>
+  new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" }).format(
+    new Date(Date.UTC(2000, i, 1))
+  )
+);
+const archiveDate = new Intl.DateTimeFormat("en", {
+  timeZone: SITE.timezone,
+  year: "numeric",
+  month: "numeric",
+});
+const datePart = (date: Date, type: "year" | "month") =>
+  Number(
+    archiveDate.formatToParts(date).find(part => part.type === type)?.value
+  );
 
 const totalPosts = posts.length;
 
 const yearGroups = Object.entries(
-  getPostsByGroupCondition(posts, post => post.data.pubDatetime.getFullYear())
+  getPostsByGroupCondition(posts, post =>
+    datePart(post.data.pubDatetime, "year")
+  )
 ).sort(([a], [b]) => Number(b) - Number(a));
 
 let postIndex = 0;
@@ -96,9 +83,8 @@ let postIndex = 0;
     <div class="timeline">
       {yearGroups.map(([year, yearPosts]) => {
         const monthGroups = Object.entries(
-          getPostsByGroupCondition(
-            yearPosts,
-            post => post.data.pubDatetime.getMonth() + 1
+          getPostsByGroupCondition(yearPosts, post =>
+            datePart(post.data.pubDatetime, "month")
           )
         ).sort(([a], [b]) => Number(b) - Number(a));
 

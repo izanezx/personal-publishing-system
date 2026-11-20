@@ -26,11 +26,13 @@ export function getReadingTime(
     .replace(/\s+/g, " ") // collapse whitespace
     .trim();
 
-  const wordCount = plainText.split(" ").filter(Boolean).length;
+  const isChinese = locale.toLowerCase().startsWith("zh");
+  const wordCount = isChinese
+    ? Array.from(
+        new Intl.Segmenter("zh-CN", { granularity: "word" }).segment(plainText)
+      ).filter(segment => segment.isWordLike).length
+    : plainText.split(" ").filter(Boolean).length;
   const minutes = Math.ceil(wordCount / wordsPerMinute);
-
-  if (locale === "es") {
-    return minutes < 1 ? "< 1 min de lectura" : `${minutes} min de lectura`;
-  }
+  if (isChinese) return minutes < 1 ? "不到 1 分钟" : `${minutes} 分钟阅读`;
   return minutes < 1 ? "< 1 min read" : `${minutes} min read`;
 }

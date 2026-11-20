@@ -1,11 +1,11 @@
 ---
-import { Font } from "astro:assets";
+import { resolveLocale } from "@/i18n/locales";
 import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { SITE } from "@/config";
 import { serializeJsonLd } from "@/utils/serializeJsonLd";
 import SearchModal from "@/components/SearchModal.astro";
-import { getTargetLanguageUrl } from "@/i18n/utils";
+import { languages, pageAlternates } from "@/i18n/locales";
 import "@/styles/global.css";
 
 type Props = {
@@ -42,7 +42,7 @@ const {
   tags,
 } = Astro.props;
 
-const locale = Astro.currentLocale || SITE.lang || "en";
+const locale = resolveLocale(Astro.currentLocale);
 
 // Always build canonical from SITE.website (production URL), never localhost.
 // Normalize trailing slash: always include it for consistency.
@@ -51,15 +51,11 @@ const canonicalURL =
   canonicalURLProp ??
   new URL(rawPath === "" ? "/" : `${rawPath}/`, SITE.website);
 
-const enUrl = new URL(
-  getTargetLanguageUrl(Astro.url.pathname, "en"),
-  Astro.site ?? SITE.website
+const alternates = pageAlternates(
+  Astro.url.pathname,
+  Astro.locals.entryAlternates
 );
-const esUrl = new URL(
-  getTargetLanguageUrl(Astro.url.pathname, "es"),
-  Astro.site ?? SITE.website
-);
-
+const siteOrigin = Astro.site ?? SITE.website;
 const socialImageURL = ogImage && new URL(ogImage, SITE.website);
 
 // Whether this page is a blog post (has a publish date)
@@ -89,7 +85,7 @@ const finalStructuredData =
           },
         }),
       }
-    : rawPath === "" || rawPath === "/es"
+    : rawPath === "" || rawPath === "/en"
       ? {
           "@context": "https://schema.org",
           "@type": "WebSite",
@@ -110,39 +106,30 @@ const showGrain = SITE.backdropEffects.grain;
   class={`${scrollSmooth ? "scroll-smooth" : ""}`}
 >
   <head>
-    <script is:inline>
-      try {
-        if (window.location.pathname === "/") {
-          const preferredLang = localStorage.getItem("preferred-lang");
-          if (preferredLang === "es") {
-            window.location.replace("/es");
-          }
-        }
-      } catch {}
-    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="theme-color" content="" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonicalURL} />
-    <link rel="alternate" hreflang="en" href={enUrl} />
-    <link rel="alternate" hreflang="es" href={esUrl} />
-    <link rel="alternate" hreflang="x-default" href={enUrl} />
+    {Object.keys(alternates).length > 1 &&
+      Object.keys(languages).map(lang => {
+        const href = alternates[lang as keyof typeof languages];
+        return (
+          href && (
+            <link
+              rel="alternate"
+              hreflang={lang}
+              href={new URL(href, siteOrigin)}
+            />
+          )
+        );
+      })}
     {noindex && <meta name="robots" content="noindex, follow" />}
     <meta name="generator" content={Astro.generator} />
 
     <!-- Relational Pagination Links -->
     {prev && <link rel="prev" href={prev} />}
     {next && <link rel="next" href={next} />}
-
-    <!-- Load Fonts -->
-    <!-- Only preload the primary body font. Others load async to avoid bandwidth contention. -->
-    <Font
-      cssVariable="--font-wotfard"
-      preload={[{ subset: "latin", weight: 400, style: "normal" }]}
-    />
-    <Font cssVariable="--font-sriracha" />
-    <Font cssVariable="--font-firacode" />
 
     <!-- General Meta Tags -->
     <title>{title}</title>
@@ -153,10 +140,9 @@ const showGrain = SITE.backdropEffects.grain;
     <!-- Open Graph / Facebook -->
     <meta property="og:site_name" content={SITE.title} />
     <meta property="og:type" content={isArticle ? "article" : "website"} />
-    <meta property="og:locale" content={locale === "es" ? "es_ES" : "en_US"} />
     <meta
-      property="og:locale:alternate"
-      content={locale === "es" ? "en_US" : "es_ES"}
+      property="og:locale"
+      content={locale === "zh-CN" ? "zh_CN" : "en_US"}
     />
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
@@ -205,7 +191,7 @@ const showGrain = SITE.backdropEffects.grain;
       rel="alternate"
       type="application/rss+xml"
       title={SITE.title}
-      href={new URL(locale === "es" ? "es/rss.xml" : "rss.xml", Astro.site)}
+      href={new URL(locale === "en" ? "en/rss.xml" : "rss.xml", siteOrigin)}
     />
 
     {
@@ -456,51 +442,21 @@ const showGrain = SITE.backdropEffects.grain;
 </script>}
 
 <script>
-  let langCleanup: AbortController | null = null;
-
   document.addEventListener("astro:page-load", () => {
-    if (langCleanup) langCleanup.abort();
-    langCleanup = new AbortController();
-    const { signal } = langCleanup;
-
     const pathname = window.location.pathname;
 
     // 1. Track listing / home routes for contextual `cd ..` back navigation
     const isDetailRoute =
-      /^(\/es)?\/posts\/(?!\d+\/?$)[^/]+/.test(pathname) ||
-      /^(\/es)?\/galleries\/[^/]+/.test(pathname);
+      /^(\/en)?\/posts\/(?!\d+\/?$)[^/]+/.test(pathname) ||
+      /^(\/en)?\/galleries\/[^/]+/.test(pathname);
     if (
       !isDetailRoute &&
       pathname !== "/404" &&
       pathname !== "/404.html" &&
       !pathname.startsWith("/search") &&
-      !pathname.startsWith("/es/search")
+      !pathname.startsWith("/en/search")
     ) {
       sessionStorage.setItem("backUrl", pathname + window.location.search);
     }
-
-    // 2. Auto-save preference based on path (except root /)
-    if (pathname !== "/") {
-      if (pathname.startsWith("/es/") || pathname === "/es") {
-        localStorage.setItem("preferred-lang", "es");
-      } else {
-        localStorage.setItem("preferred-lang", "en");
-      }
-    }
-
-    // 3. Track language switcher button clicks
-    document.addEventListener(
-      "click",
-      e => {
-        const toggle = (e.target as HTMLElement).closest("[data-lang-toggle]");
-        if (toggle) {
-          const targetLang = toggle.getAttribute("data-lang-toggle");
-          if (targetLang) {
-            localStorage.setItem("preferred-lang", targetLang);
-          }
-        }
-      },
-      { signal }
-    );
   });
 </script>

@@ -1,4 +1,4 @@
-import { defineConfig, envField, fontProviders } from "astro/config";
+import { defineConfig, envField } from "astro/config";
 import mdx from "@astrojs/mdx";
 import { unified } from "@astrojs/markdown-remark";
 import rehypeCallouts from "rehype-callouts";
@@ -22,8 +22,8 @@ export default defineConfig({
   // the whole UI was designed around.
   compressHTML: true,
   i18n: {
-    defaultLocale: "en",
-    locales: ["en", "es"],
+    defaultLocale: "zh-CN",
+    locales: ["zh-CN", "en"],
     routing: {
       prefixDefaultLocale: false,
     },
@@ -109,46 +109,4 @@ export default defineConfig({
       }),
     },
   },
-
-  fonts: [
-    {
-      name: "Wotfard",
-      cssVariable: "--font-wotfard",
-      fallbacks: ["sans-serif"],
-      provider: fontProviders.local(),
-      options: {
-        variants: [
-          {
-            src: ["./src/assets/fonts/wotfard.woff2"],
-          },
-        ],
-      },
-    },
-    {
-      name: "Sriracha",
-      cssVariable: "--font-sriracha",
-      fallbacks: ["cursive"],
-      provider: fontProviders.local(),
-      options: {
-        variants: [
-          {
-            src: ["./src/assets/fonts/sriracha.woff2"],
-          },
-        ],
-      },
-    },
-    {
-      name: "Fira Code",
-      cssVariable: "--font-firacode",
-      fallbacks: ["monospace"],
-      provider: fontProviders.local(),
-      options: {
-        variants: [
-          {
-            src: ["./src/assets/fonts/firacode.woff2"],
-          },
-        ],
-      },
-    },
-  ],
 });

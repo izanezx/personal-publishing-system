@@ -37,12 +37,14 @@ export function getGalleryImages(
   locale?: string,
   fallbackTitle = ""
 ): GalleryImage[] {
-  const cleanSlug = slug.replace(/^(en|es)\//, "");
+  const cleanSlug = slug.replace(/^(en|zh-cn)\//, "");
   return Object.entries(allGalleryImages)
     .filter(([path]) => {
       const isMatch =
         (locale &&
-          path.startsWith(`/src/data/galleries/${locale}/${cleanSlug}/`)) ||
+          path.startsWith(
+            `/src/data/galleries/${locale.toLowerCase()}/${cleanSlug}/`
+          )) ||
         path.startsWith(`/src/data/galleries/${cleanSlug}/`) ||
         path.startsWith(`/src/data/galleries/${slug}/`);
       return (

@@ -6,10 +6,22 @@ import { SITE } from "@/config";
 export const BLOG_PATH = "src/data/blog";
 export const GALLERY_PATH = "src/data/galleries";
 
+// Astro's glob loader otherwise uses frontmatter slug as the internal ID.
+const fileId = ({ entry }: { entry: string }) =>
+  entry.replaceAll("\\", "/").replace(/\.mdx?$/, "");
+
 const blog = defineCollection({
-  loader: glob({ pattern: "**/[^_]*.{md,mdx}", base: `./${BLOG_PATH}` }),
+  loader: glob({
+    pattern: "**/[^_]*.{md,mdx}",
+    base: `./${BLOG_PATH}`,
+    generateId: fileId,
+  }),
   schema: ({ image }) =>
     z.object({
+      uid: z.string().trim().min(1),
+      slug: z.string().regex(/^[\p{L}\p{N}]+(?:[-][\p{L}\p{N}]+)*$/u),
+      translationKey: z.string().trim().min(1).optional(),
+      kind: z.enum(["article", "note", "project"]).default("article"),
       author: z.string().default(SITE.author),
       pubDatetime: z.date(),
       modDatetime: z.date().optional().nullable(),
@@ -41,9 +53,16 @@ const blog = defineCollection({
 });
 
 const galleries = defineCollection({
-  loader: glob({ pattern: "**/index.{md,mdx}", base: `./${GALLERY_PATH}` }),
+  loader: glob({
+    pattern: "**/index.{md,mdx}",
+    base: `./${GALLERY_PATH}`,
+    generateId: fileId,
+  }),
   schema: ({ image }) =>
     z.object({
+      uid: z.string().trim().min(1),
+      slug: z.string().regex(/^[\p{L}\p{N}]+(?:[-][\p{L}\p{N}]+)*$/u),
+      translationKey: z.string().trim().min(1).optional(),
       title: z.string(),
       description: z.string(),
       pubDatetime: z.date(),

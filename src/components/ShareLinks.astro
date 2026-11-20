@@ -1,4 +1,5 @@
 ---
+import { resolveLocale } from "@/i18n/locales";
 /**
  * ShareLinks — Renders social media share buttons for the current page (e.g. inside a post).
  * Retrieves the available platforms from the SHARE_LINKS constant in `constants.ts`.
@@ -13,7 +14,7 @@ interface Props {
 }
 
 const { isSidebar = false } = Astro.props;
-const locale = Astro.currentLocale || "en";
+const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 const URL = Astro.url;
 ---

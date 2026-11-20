@@ -150,8 +150,8 @@ export function initReadingPosition() {
       const resumeBtnText = mainEl?.getAttribute("data-resume-btn") || "Resume";
 
       const lang = document.documentElement.lang || "en";
-      const orText = lang === "es" ? "o" : "or";
-      const dismissLabel = lang === "es" ? "Descartar" : "Dismiss";
+      const orText = lang === "zh-CN" ? "o" : "or";
+      const dismissLabel = lang === "zh-CN" ? "忽略" : "Dismiss";
 
       toast = document.createElement("div");
       toast.className =

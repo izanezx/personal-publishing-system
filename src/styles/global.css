@@ -25,9 +25,9 @@ html[data-theme="dark"] {
 }
 
 @theme inline {
-  --font-app: var(--font-wotfard);
-  --font-sriracha: var(--font-sriracha);
-  --font-firacode: var(--font-firacode);
+  --font-app: system-ui, sans-serif;
+  --font-sriracha: ui-serif, Georgia, serif;
+  --font-firacode: ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-accent: var(--accent);

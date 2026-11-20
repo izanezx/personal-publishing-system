@@ -1,4 +1,5 @@
 ---
+import { contentLocale, localePrefix, resolveLocale } from "@/i18n/locales";
 import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
@@ -14,14 +15,14 @@ import { SOCIALS } from "@/constants";
 import IntroAudio from "@/components/IntroAudio.astro";
 import { useTranslations } from "@/i18n/utils";
 
-const locale = Astro.currentLocale || "en";
+const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
-const prefix = locale === "es" ? "/es" : "";
+const prefix = localePrefix(locale);
 
 const [blogPosts, galleryPosts] = await Promise.all([
-  getCollection("blog", ({ id }) => id.startsWith(`${locale}/`)),
+  getCollection("blog", ({ id }) => contentLocale(id) === locale),
   SITE.showGalleries && SITE.showGalleriesInIndex
-    ? getCollection("galleries", ({ id }) => id.startsWith(`${locale}/`))
+    ? getCollection("galleries", ({ id }) => contentLocale(id) === locale)
     : Promise.resolve([]),
 ]);
 const posts = [...blogPosts, ...galleryPosts];

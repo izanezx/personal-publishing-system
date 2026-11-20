@@ -1,4 +1,4 @@
 ---
-title: "About"
 layout: ../layouts/AboutLayout.astro
+title: "关于"
 ---

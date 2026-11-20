@@ -1,6 +1,8 @@
 ---
+import { localePrefix, resolveLocale } from "@/i18n/locales";
 import { Image } from "astro:assets";
 import Layout from "@/layouts/Layout.astro";
+import { getEntryAlternates } from "@/utils/publishing";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
@@ -13,15 +15,16 @@ import { getGalleryImages, type GalleryImage } from "@/utils/gallery";
 import { buildGalleryStaticPaths } from "@/utils/staticPaths";
 import GalleryLightbox from "@/components/GalleryLightbox.astro";
 
-export const getStaticPaths = () => buildGalleryStaticPaths("en");
+export const getStaticPaths = () => buildGalleryStaticPaths("zh-CN");
 
 const { entry } = Astro.props;
+Astro.locals.entryAlternates = await getEntryAlternates(entry);
 const { gallery: slug } = Astro.params;
 const { title, description, pubDatetime, coverImage, tags } = entry.data;
 
-const locale = Astro.currentLocale || "en";
+const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
-const prefix = locale === "es" ? "/es" : "";
+const prefix = localePrefix(locale);
 
 const images: GalleryImage[] = getGalleryImages(slug, locale, title);
 
@@ -31,9 +34,9 @@ const hasCoverInFolder = coverImage
   : false;
 
 const coverImageSrc = coverImage
-  ? new URL(coverImage.src, Astro.url.origin).href
+  ? new URL(coverImage.src, SITE.website).href
   : images.length > 0
-    ? new URL(images[0].src.src, Astro.url.origin).href
+    ? new URL(images[0].src.src, SITE.website).href
     : undefined;
 
 // Build Schema.org ImageGallery Structured Data
@@ -44,11 +47,15 @@ const gallerySchema = {
   description: description,
   url: new URL(Astro.url.pathname, SITE.website).toString(),
   ...(coverImageSrc && { image: coverImageSrc }),
-  creator: {
-    "@type": "Person",
-    name: SITE.author,
-    ...(SITE.profile && { url: SITE.profile }),
-  },
+  ...(SITE.author
+    ? {
+        creator: {
+          "@type": "Person",
+          name: SITE.author,
+          ...(SITE.profile && { url: SITE.profile }),
+        },
+      }
+    : {}),
   numberOfItems: images.length,
 };
 ---

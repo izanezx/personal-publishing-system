@@ -278,20 +278,20 @@
 .table-striped tbody tr:nth-child(even) {
   background: var(--muted);
 }
-.markdown-alert {
+.callout {
   padding: 0.75rem 1rem;
   margin-block: 1rem;
   border-inline-start: 3px solid var(--accent);
   background: var(--muted);
   border-radius: 0.25rem;
 }
-.markdown-alert-title {
+.callout-title {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
 }
-.markdown-alert-title svg {
+.callout-title svg {
   width: 1em;
   height: 1em;
   fill: currentColor;
