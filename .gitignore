@@ -30,3 +30,8 @@ pnpm-debug.log*
 
 public/pagefind
 .vercel
+
+# Downloaded workstation skills and browser reports
+.agents/skills/
+playwright-report/
+test-results/
