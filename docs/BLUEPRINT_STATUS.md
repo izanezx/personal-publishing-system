@@ -32,14 +32,14 @@ The MIT provenance notices must remain while the derived code is distributed.
 
 ## Stage status
 
-| Stage                             | Status                                                     | Assessment                                                                                                                                                                                     |
-| --------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| S0 baseline                       | Complete                                                   | Exact source, toolchain, native limitation and compatibility build are recorded. Reference remotes were intentionally removed after the clean history reset; fixed revisions remain documented |
-| S1 safety and automation          | Local implementation complete; hosted verification pending | Indexing policy, JSON-LD escaping, publication filtering, portable Pagefind, CI, candidate promotion and dependency security remediation pass locally. A hosted Cloudflare candidate remains   |
-| S2 AstroPaper features            | Complete                                                   | Callouts, responsive tables, extension slots, article controls, stable transitions, safe JSON-LD, search links and URL helpers are implemented and tested                                      |
-| S3 bilingual content architecture | Complete                                                   | Locale registry, translation resolution, stable publication identity, unified feed, Garden relations, CJK reading time and bilingual output are implemented                                    |
-| S4 independent release foundation | Local development complete; release pending                | Browser tests, performance checks, release drill and documentation exist. Stable `v0.1.0`, approved content and production deployment are pending                                              |
-| S5 AstroWind                      | Accepted for `v0.1.0`                                      | Bento, Timeline, Tabs and Gallery shelf patterns exist as project-owned implementations with local data, accessibility coverage and tests. Further AstroWind scope remains post-release        |
+| Stage                             | Status                          | Assessment                                                                                                                                                                                                                                      |
+| --------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S0 baseline                       | Complete                        | Exact source, toolchain, native limitation and compatibility build are recorded. Reference remotes were intentionally removed after the clean history reset; fixed revisions remain documented                                                  |
+| S1 safety and automation          | Complete                        | Indexing policy, JSON-LD escaping, publication filtering, portable Pagefind, CI, candidate promotion and dependency security remediation pass locally. The non-indexable Cloudflare preview and production apex route are deployed and verified |
+| S2 AstroPaper features            | Complete                        | Callouts, responsive tables, extension slots, article controls, stable transitions, safe JSON-LD, search links and URL helpers are implemented and tested                                                                                       |
+| S3 bilingual content architecture | Complete                        | Locale registry, translation resolution, stable publication identity, unified feed, Garden relations, CJK reading time and bilingual output are implemented                                                                                     |
+| S4 independent release foundation | Hosted; stable approval pending | Browser tests, performance checks, release drill and documentation exist. The production apex route is active. Stable `v0.1.0` and final owner-approved content remain pending                                                                  |
+| S5 AstroWind                      | Accepted for `v0.1.0`           | Bento, Timeline, Tabs and Gallery shelf patterns exist as project-owned implementations with local data, accessibility coverage and tests. Further AstroWind scope remains post-release                                                         |
 
 ## AstroPaper decision status
 
@@ -60,8 +60,9 @@ The MIT provenance notices must remain while the derived code is distributed.
 
 All six source-level P0 items are addressed: preview indexing, demo data
 separation, i18n centralization, content adapters and queries, unified
-publication filtering, and safe SEO output. The real production response and
-domain remain release checks rather than code work.
+publication filtering, and safe SEO output. Hosted preview indexing, the
+production apex route, canonical URLs, feeds, search and 404 responses are
+verified.
 
 The dependency security gate is remediated in
 [SECURITY_AUDIT.md](SECURITY_AUDIT.md). The branch updates Astro, Sharp, Satori
@@ -99,7 +100,7 @@ redirects, and the blueprint's main test matrix are implemented.
 | Devosfera reader, search, gallery and theme regression | Complete in local and CI coverage                                                                               |
 | Markdown/MDX publishing features                       | Complete                                                                                                        |
 | Chinese/English SEO, OG, search, RSS and Sitemap       | Complete for static output                                                                                      |
-| CI, E2E, backup and rollback                           | Complete locally, including zero-audit gating; production deployment and hosted HTTP verification pending       |
+| CI, E2E, backup and rollback                           | Complete, including zero-audit gating, hosted preview and production HTTP verification                          |
 | Content adapter, unified feed and relationship layer   | Complete                                                                                                        |
 | Long-term maintenance process                          | Documents and pinned Skills exist; public repository governance and Dependabot version-update resumption remain |
 
@@ -119,10 +120,10 @@ redirects, and the blueprint's main test matrix are implemented.
 
 ### Release and hosting
 
-- Authorize the Cloudflare account and create appropriately scoped secrets.
-- Run and verify a hosted preview.
-- Bind `zanezx.com`, verify DNS, HTTPS, production headers, canonical URLs,
-  feeds and the Worker version.
+- Decide whether automated GitHub Actions Cloudflare deployment should use a
+  repository API Token; interactive Wrangler device login currently handles
+  manual deployment.
+- Approve the first public indexing date.
 - Create the stable `v0.1.0` tag only after owner approval.
 
 ### Owner-provided content
@@ -143,7 +144,7 @@ redirects, and the blueprint's main test matrix are implemented.
 
 The current code is independently maintainable and does not follow upstream Git
 histories. The S0-S5 engineering foundation, security remediation, public
-template governance and reproducible agent workflow are implemented. The full
-publication blueprint is not fully delivered until the hosted preview,
-production domain verification, stable release approval and final owner content
-are complete.
+template governance, reproducible agent workflow, hosted preview and
+production apex deployment are implemented. The full publication blueprint is
+not fully delivered until final owner content, the first public indexing date
+and stable release approval are complete.
