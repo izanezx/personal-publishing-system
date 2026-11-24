@@ -20,7 +20,7 @@ A long-lived publishing system built from the Devosfera reading experience, enha
 <img src="docs/assets/readme-home.png" alt="Chinese home page of the Personal Publishing System" />
 
 > [!NOTE]
-> The current site is deployed at `https://zanezx.com/`. The display name `zanezx`, public biography and launch content remain pending approval before the stable `v0.1.0` release.
+> The current candidate is deployed at `https://zanezx.com/` with `noindex, nofollow` until launch approval. The display name `zanezx`, public biography and launch content remain pending before the stable `v0.1.0` release.
 
 ## Features
 

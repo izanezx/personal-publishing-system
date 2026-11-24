@@ -62,4 +62,5 @@ dependency remediation is complete and documented in
 [SECURITY_AUDIT.md](SECURITY_AUDIT.md). The non-indexable hosted preview and the
 production `zanezx.com` route are verified. The remaining stable-release gates
 are final owner content, approval of the first public indexing date and owner
-approval of `v0.1.0`.
+approval of `v0.1.0`. The apex domain currently remains non-indexable while
+those decisions are pending.

@@ -62,7 +62,8 @@ All six source-level P0 items are addressed: preview indexing, demo data
 separation, i18n centralization, content adapters and queries, unified
 publication filtering, and safe SEO output. Hosted preview indexing, the
 production apex route, canonical URLs, feeds, search and 404 responses are
-verified.
+verified. The production apex currently returns `noindex, nofollow` while
+sample content awaits owner approval.
 
 The dependency security gate is remediated in
 [SECURITY_AUDIT.md](SECURITY_AUDIT.md). The branch updates Astro, Sharp, Satori
