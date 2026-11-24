@@ -1,0 +1,11 @@
+---
+import type { CollectionEntry } from "astro:content";
+import type { Locale } from "@/i18n/locales";
+
+export interface Props {
+  post: CollectionEntry<"blog">;
+  locale: Locale;
+}
+---
+
+{/* Use Astro.props.post.data.kind for additions specific to a publication type. */}

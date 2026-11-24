@@ -1,0 +1,36 @@
+---
+interface Props {
+  title: string;
+  entries: { title: string; path: string; date: Date }[];
+  locale: string;
+  timezone: string;
+}
+const { title, entries, locale, timezone } = Astro.props;
+const format = new Intl.DateTimeFormat(locale, {
+  dateStyle: "medium",
+  timeZone: timezone,
+});
+---
+
+{entries.length > 0 && (
+  <section aria-labelledby="recent-activity-heading" class="my-12">
+    <h2 id="recent-activity-heading" class="mb-5 text-2xl font-bold">
+      {title}
+    </h2>
+    <ol class="space-y-4 border-s border-border/50 ps-5">
+      {entries.map(entry => (
+        <li class="relative space-y-1 before:absolute before:-start-6 before:top-2 before:size-2 before:rounded-full before:bg-accent">
+          <time
+            class="block text-sm text-foreground/70"
+            datetime={entry.date.toISOString()}
+          >
+            {format.format(entry.date)}
+          </time>
+          <a href={entry.path} class="font-medium hover:text-accent">
+            {entry.title}
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+)}

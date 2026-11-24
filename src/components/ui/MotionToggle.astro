@@ -1,0 +1,55 @@
+---
+import { resolveLocale } from "@/i18n/locales";
+const english = resolveLocale(Astro.currentLocale) === "en";
+---
+
+<publishing-motion class="contents">
+  <button type="button" aria-pressed="false" class="text-sm underline">
+    {english ? "Reduce motion" : "减少动效"}
+  </button>
+</publishing-motion>
+<script>
+  class PublishingMotion extends HTMLElement {
+    #events?: AbortController;
+
+    connectedCallback() {
+      const button = this.querySelector("button");
+      if (!button || this.#events) return;
+      this.#events = new AbortController();
+      const key = "publishing-reduced-motion";
+      const root = document.documentElement;
+      const sync = () =>
+        button.setAttribute(
+          "aria-pressed",
+          String(root.dataset.motion === "reduced")
+        );
+      try {
+        if (localStorage.getItem(key) === "true")
+          root.dataset.motion = "reduced";
+      } catch {}
+      sync();
+      button.addEventListener(
+        "click",
+        () => {
+          const reduced = root.dataset.motion !== "reduced";
+          if (reduced) root.dataset.motion = "reduced";
+          else delete root.dataset.motion;
+          try {
+            localStorage.setItem(key, String(reduced));
+          } catch {}
+          sync();
+        },
+        { signal: this.#events.signal }
+      );
+    }
+
+    disconnectedCallback() {
+      this.#events?.abort();
+      this.#events = undefined;
+    }
+  }
+
+  if (!customElements.get("publishing-motion")) {
+    customElements.define("publishing-motion", PublishingMotion);
+  }
+</script>

@@ -1,0 +1,22 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import { SITE } from "@/config";
+import { withBase } from "@/lib/site-paths";
+---
+
+<Layout title={`404 | ${SITE.title}`} noindex>
+  <Header />
+  <main
+    id="main-content"
+    class="app-layout flex flex-1 flex-col items-center justify-center gap-4 py-20"
+  >
+    <h1 class="text-7xl font-bold">404</h1>
+    <p>页面未找到 · Page not found</p>
+    <a href={withBase("/")} class="underline">
+      返回首页 · Home
+    </a>
+  </main>
+  <Footer />
+</Layout>

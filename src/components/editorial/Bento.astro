@@ -1,0 +1,23 @@
+---
+interface Props {
+  title: string;
+  entries: { title: string; href: string; description: string }[];
+}
+const { title, entries } = Astro.props;
+---
+
+<section aria-labelledby="publishing-index-heading" class="my-12">
+  <h2 id="publishing-index-heading" class="mb-5 text-2xl font-bold">
+    {title}
+  </h2>
+  <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    {entries.map(entry => (
+      <li class="rounded-lg border border-border/40 p-5 first:sm:col-span-2 last:lg:col-span-2">
+        <a href={entry.href} class="text-lg font-semibold hover:text-accent">
+          {entry.title}
+        </a>
+        <p class="mt-2 text-sm text-foreground/75">{entry.description}</p>
+      </li>
+    ))}
+  </ul>
+</section>

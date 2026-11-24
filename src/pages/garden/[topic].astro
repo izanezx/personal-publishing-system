@@ -1,0 +1,8 @@
+---
+import Garden from "@/layouts/Garden.astro";
+import { topics } from "@/lib/content/topics";
+export const getStaticPaths = () =>
+  Object.keys(topics).map(topic => ({ params: { topic } }));
+---
+
+<Garden topic={Astro.params.topic} />

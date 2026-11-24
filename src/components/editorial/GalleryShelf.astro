@@ -1,0 +1,36 @@
+---
+import type { CollectionEntry } from "astro:content";
+import GalleryCard from "@/components/GalleryCard.astro";
+interface Props {
+  title: string;
+  galleries: CollectionEntry<"galleries">[];
+  href: string;
+  linkLabel: string;
+}
+const { title, galleries, href, linkLabel } = Astro.props;
+---
+
+{galleries.length > 0 && (
+  <section aria-labelledby="visual-notes-heading" class="my-12">
+    <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+      <h2 id="visual-notes-heading" class="text-2xl font-bold">
+        {title}
+      </h2>
+      <a href={href} class="text-sm underline">
+        {linkLabel}
+      </a>
+    </div>
+    <ul class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {galleries.map(gallery => (
+        <li>
+          <GalleryCard
+            gallery={gallery}
+            slug={gallery.data.slug}
+            fallbackImage={gallery.data.media[0]?.src}
+            imageCount={gallery.data.media.length}
+          />
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

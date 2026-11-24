@@ -1,0 +1,183 @@
+---
+import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
+import { SITE } from "@/config";
+import { withBase, withoutBase } from "@/lib/site-paths";
+import { localePrefix } from "@/i18n/locales";
+import { serializeJsonLd } from "@/utils/serializeJsonLd";
+import { languages, pageAlternates, resolveLocale } from "@/i18n/locales";
+
+type Props = {
+  title?: string;
+  author?: string;
+  profile?: string;
+  description?: string;
+  ogImage?: string;
+  canonicalURL?: string;
+  pubDatetime?: Date;
+  modDatetime?: Date | null;
+  prev?: string;
+  next?: string;
+  structuredData?: Record<string, unknown>;
+  tags?: string[];
+  noindex?: boolean;
+};
+
+const {
+  title = SITE.title,
+  author = SITE.author,
+  profile = SITE.profile,
+  description = SITE.desc,
+  ogImage = SITE.ogImage ? withBase(`/${SITE.ogImage}`) : undefined,
+  canonicalURL: canonicalURLProp,
+  pubDatetime,
+  modDatetime,
+  prev,
+  next,
+  structuredData: structuredDataProp,
+  noindex = false,
+  tags,
+} = Astro.props;
+
+const locale = resolveLocale(Astro.currentLocale);
+
+// Always build canonical from SITE.website (production URL), never localhost.
+// Normalize trailing slash: always include it for consistency.
+const rawPath = withoutBase(Astro.url.pathname).replace(/\/$/, "");
+const canonicalURL =
+  canonicalURLProp ?? new URL(withBase(`${rawPath}/`), SITE.website);
+
+const alternates = pageAlternates(
+  Astro.url.pathname,
+  Astro.locals.entryAlternates
+);
+const siteOrigin = Astro.site ?? SITE.website;
+const socialImageURL = ogImage && new URL(ogImage, SITE.website);
+
+// Whether this page is a blog post (has a publish date)
+const isArticle = Boolean(pubDatetime);
+
+const finalStructuredData =
+  structuredDataProp ??
+  (isArticle
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": canonicalURL.toString(),
+        },
+        headline: title,
+        description,
+        ...(socialImageURL && { image: socialImageURL.href }),
+        url: canonicalURL.toString(),
+        datePublished: pubDatetime!.toISOString(),
+        ...(modDatetime && { dateModified: modDatetime.toISOString() }),
+        ...(author && {
+          author: {
+            "@type": "Person",
+            name: author,
+            ...(profile && { url: profile }),
+          },
+        }),
+      }
+    : rawPath === "" || rawPath === "/en"
+      ? {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: SITE.title,
+          url: new URL(withBase("/"), siteOrigin).href,
+          ...(description && { description }),
+        }
+      : null);
+---
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width" />
+<meta name="theme-color" content="" />
+<link rel="icon" type="image/svg+xml" href={withBase("/favicon.svg")} />
+<link rel="canonical" href={canonicalURL} />
+{Object.keys(alternates).length > 1 &&
+  Object.keys(languages).map(lang => {
+    const href = alternates[lang as keyof typeof languages];
+    return (
+      href && (
+        <link
+          rel="alternate"
+          hreflang={lang}
+          href={new URL(href, siteOrigin)}
+        />
+      )
+    );
+  })}
+{noindex && <meta name="robots" content="noindex, follow" />}
+<meta name="generator" content={Astro.generator} />
+
+<!-- Relational Pagination Links -->
+{prev && <link rel="prev" href={prev} />}
+{next && <link rel="next" href={next} />}
+
+<!-- General Meta Tags -->
+<title>{title}</title>
+{description && <meta name="description" content={description} />}
+{author && <meta name="author" content={author} />}
+<link rel="sitemap" href={withBase("/sitemap-index.xml")} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:site_name" content={SITE.title} />
+<meta property="og:type" content={isArticle ? "article" : "website"} />
+<meta property="og:locale" content={locale === "zh-CN" ? "zh_CN" : "en_US"} />
+<meta property="og:title" content={title} />
+{description && <meta property="og:description" content={description} />}
+<meta property="og:url" content={canonicalURL} />
+{socialImageURL && <meta property="og:image" content={socialImageURL} />}
+
+<!-- Article Published/Modified time -->
+{pubDatetime && (
+  <meta property="article:published_time" content={pubDatetime.toISOString()} />
+)}
+{modDatetime && (
+  <meta property="article:modified_time" content={modDatetime.toISOString()} />
+)}
+{isArticle &&
+  tags &&
+  tags.map(tag => <meta property="article:tag" content={tag} />)}
+
+<!-- Twitter -->
+<meta
+  name="twitter:card"
+  content={socialImageURL ? "summary_large_image" : "summary"}
+/>
+<meta name="twitter:url" content={canonicalURL} />
+<meta name="twitter:title" content={title} />
+{description && <meta name="twitter:description" content={description} />}
+{socialImageURL && <meta name="twitter:image" content={socialImageURL} />}
+
+<!-- Google JSON-LD Structured data -->
+{finalStructuredData && (
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={serializeJsonLd(finalStructuredData)}
+  />
+)}
+
+<!-- Enable RSS feed auto-discovery  -->
+<!-- https://docs.astro.build/en/recipes/rss/#enabling-rss-feed-auto-discovery -->
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title={SITE.title}
+  href={new URL(`${localePrefix(locale)}/rss.xml`, siteOrigin)}
+/>
+
+{
+  // If PUBLIC_GOOGLE_SITE_VERIFICATION is set in the environment variable,
+  // include google-site-verification tag in the heading
+  // Learn more: https://support.google.com/webmasters/answer/9008080#meta_tag_verification&zippy=%2Chtml-tag
+  PUBLIC_GOOGLE_SITE_VERIFICATION && (
+    <meta
+      name="google-site-verification"
+      content={PUBLIC_GOOGLE_SITE_VERIFICATION}
+    />
+  )
+}

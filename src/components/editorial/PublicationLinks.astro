@@ -1,0 +1,52 @@
+---
+import type { ContentEntry } from "@/utils/contentEntry";
+import { getPublicationRelations } from "@/lib/content/queries";
+import { resolveLocale } from "@/i18n/locales";
+interface Props {
+  entry: ContentEntry;
+}
+const { entry } = Astro.props;
+const en = resolveLocale(Astro.currentLocale) === "en";
+const { outgoing, incoming } = await getPublicationRelations(entry);
+---
+
+{(outgoing.length > 0 || incoming.length > 0) && (
+  <aside
+    aria-label={en ? "Publication relationships" : "内容关联"}
+    class="my-8 grid gap-6 rounded-lg border border-border/40 p-5 sm:grid-cols-2"
+  >
+    {outgoing.length > 0 && (
+      <section>
+        <h2 class="font-semibold">{en ? "Related material" : "相关阅读"}</h2>
+        <ul class="mt-2 space-y-2">
+          {outgoing.map(({ kind, target }) => (
+            <li>
+              {kind === "evolvedFrom" && (
+                <span class="text-foreground/70">
+                  {en ? "Evolved from " : "源自 "}
+                </span>
+              )}
+              <a class="underline" href={target.path}>
+                {target.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+    {incoming.length > 0 && (
+      <section>
+        <h2 class="font-semibold">{en ? "Backlinks" : "反向链接"}</h2>
+        <ul class="mt-2 space-y-2">
+          {incoming.map(item => (
+            <li>
+              <a class="underline" href={item.path}>
+                {item.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </aside>
+)}

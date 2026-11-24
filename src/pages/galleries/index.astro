@@ -1,0 +1,88 @@
+---
+import { withBase } from "@/lib/site-paths";
+import { resolveLocale } from "@/i18n/locales";
+import { getPublicEntries } from "@/lib/content/queries";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import AuroraHero from "@/components/AuroraHero.astro";
+import GalleryCard from "@/components/GalleryCard.astro";
+import { SITE } from "@/config";
+import { useTranslations } from "@/i18n/utils";
+
+if (!SITE.showGalleries) {
+  return Astro.redirect(withBase("/404"));
+}
+
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+
+const rawGalleries = await getPublicEntries("galleries", locale);
+
+const galleries = rawGalleries
+  .sort(
+    (a, b) =>
+      new Date(b.data.pubDatetime).getTime() -
+      new Date(a.data.pubDatetime).getTime()
+  )
+  .map(gallery => {
+    const slug = gallery.data.slug;
+    const folderImages = gallery.data.media;
+    return {
+      gallery,
+      slug,
+      fallbackImage: folderImages[0]?.src,
+      imageCount: folderImages.length,
+    };
+  });
+---
+
+<Layout title={`${t("nav.galleries")} | ${SITE.title}`}>
+  <Header />
+  <Breadcrumb />
+  <main id="main-content" class="app-layout pb-12">
+    <!-- Hero -->
+    <AuroraHero
+      title={t("nav.galleries")}
+      description={t("galleries.desc")}
+      class="mb-10"
+    >
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <span class="hero-badge">
+          {galleries.length}
+          {galleries.length === 1
+            ? t("galleries.count")
+            : t("galleries.counts")}
+        </span>
+      </div>
+    </AuroraHero>
+
+    <!-- Gallery grid -->
+    {galleries.length === 0 ? (
+      <p class="mt-12 text-center text-foreground/50 italic">
+        {t("galleries.empty")}
+      </p>
+    ) : (
+      <ul
+        class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+        role="list"
+      >
+        {galleries.map(
+          ({ gallery, slug, fallbackImage, imageCount }, index) => (
+            <li>
+              <GalleryCard
+                gallery={gallery}
+                slug={slug}
+                fallbackImage={fallbackImage}
+                imageCount={imageCount}
+                loading={index < 3 ? "eager" : "lazy"}
+              />
+            </li>
+          )
+        )}
+      </ul>
+    )}
+  </main>
+  <Footer />
+</Layout>

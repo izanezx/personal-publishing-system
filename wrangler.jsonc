@@ -1,0 +1,24 @@
+{
+  "$schema": "https://workers.cloudflare.com/wrangler/config-schema.json",
+  "name": "personal-publishing-system",
+  "compatibility_date": "2026-11-20",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "force-trailing-slash",
+  },
+  "env": {
+    "preview": {
+      "name": "personal-publishing-system-preview",
+      "workers_dev": true,
+      "preview_urls": false,
+      "assets": {
+        "directory": "./dist",
+        "not_found_handling": "404-page",
+        "html_handling": "force-trailing-slash",
+      },
+    },
+  },
+}

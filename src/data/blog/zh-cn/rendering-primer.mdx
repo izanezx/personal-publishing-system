@@ -1,0 +1,33 @@
+---
+uid: zh-rendering-primer
+slug: rendering-primer
+translationKey: rendering-primer
+title: "静态渲染与局部交互"
+description: "用可切换的 HTML 示例对照静态内容和浏览器增强。"
+pubDatetime: 2026-01-11T09:00:00Z
+topics: ["research", "web-platform"]
+stage: budding
+tags: ["Web"]
+---
+
+## 页面先呈现内容
+
+静态生成的文章在脚本尚未运行时已经可读。下面两个示例对照初始 HTML 和局部增强。
+
+<Tabs
+  id="rendering-example"
+  label="渲染示例"
+  tabs={[
+    { id: "html", label: "初始 HTML" },
+    { id: "browser", label: "浏览器增强" },
+  ]}
+>
+  <div slot="html">
+    <code>&lt;article&gt;内容随页面返回&lt;/article&gt;</code>
+  </div>
+  <div slot="browser">浏览器只增强需要交互的组件，正文无需等待脚本。</div>
+</Tabs>
+
+## 如何检查
+
+在浏览器中关闭 JavaScript 后刷新。两个示例和文章正文仍可阅读。

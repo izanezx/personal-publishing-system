@@ -1,0 +1,47 @@
+---
+uid: en-rendering-primer
+slug: rendering-primer
+translationKey: rendering-primer
+title: "Static rendering and local interaction"
+description: "Compare static content with a small browser enhancement."
+pubDatetime: 2026-01-11T09:00:00Z
+topics: ["research", "web-platform"]
+stage: budding
+tags: ["web"]
+---
+
+## Start with the content
+
+The static article is readable before its scripts run. Compare the initial HTML with the enhanced view.
+
+<Tabs
+  id="rendering-example"
+  label="Rendering examples"
+  tabs={[
+    { id: "html", label: "Initial HTML" },
+    { id: "browser", label: "Browser enhancement" },
+  ]}
+>
+  <div slot="html">
+    <code>&lt;article&gt;Content arrives with the page&lt;/article&gt;</code>
+  </div>
+  <div slot="browser">
+    The browser enhances the interactive component. The article is available
+    without waiting for JavaScript.
+  </div>
+</Tabs>
+
+## Verify the result
+
+Disable JavaScript and reload. Both examples and the article stay readable.
+
+## Compare the outputs
+
+<ResponsiveTable label="Static and enhanced output" variant="striped">
+
+| Stage               | Result            |
+| ------------------- | ----------------- |
+| Static rendering    | Readable HTML     |
+| Browser enhancement | Keyboard controls |
+
+</ResponsiveTable>

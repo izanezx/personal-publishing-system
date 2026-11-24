@@ -1,0 +1,292 @@
+---
+import { resolveLocale } from "@/i18n/locales";
+import { ClientRouter } from "astro:transitions";
+import { SITE } from "@/config";
+import type { ComponentProps } from "astro/types";
+import SeoHead from "@/components/common/SeoHead.astro";
+import SearchModal from "@/components/SearchModal.astro";
+import Head from "@/extensions/Head.astro";
+import BodyEnd from "@/extensions/BodyEnd.astro";
+import "@/styles/global.css";
+
+type Props = ComponentProps<typeof SeoHead> & { scrollSmooth?: boolean };
+const { scrollSmooth = false, ...seo } = Astro.props;
+const locale = resolveLocale(Astro.currentLocale);
+
+const showCursorGlow = SITE.backdropEffects.cursorGlow;
+const showGrain = SITE.backdropEffects.grain;
+---
+
+<!doctype html>
+<html
+  dir={SITE.dir}
+  lang={locale}
+  class={`${scrollSmooth ? "scroll-smooth" : ""}`}
+>
+  <head>
+    <SeoHead {...seo} />
+    <Head locale={locale} />
+    <slot name="Head" />
+    <ClientRouter />
+    <script is:inline>
+      try {
+        if (localStorage.getItem("publishing-reduced-motion") === "true") {
+          document.documentElement.dataset.motion = "reduced";
+        }
+      } catch {}
+    </script>
+
+    <!-- Minimal inline script to prevent FOUC - sets theme immediately -->
+    <script is:inline>
+      (function () {
+        const initialColorScheme = ""; // "light" | "dark"
+        const currentTheme = localStorage.getItem("theme");
+
+        function getPreferTheme() {
+          if (currentTheme) return currentTheme;
+          if (initialColorScheme) return initialColorScheme;
+          return window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        }
+
+        const themeValue = getPreferTheme();
+
+        // Set theme immediately to prevent flash
+        document.firstElementChild?.setAttribute("data-theme", themeValue);
+
+        // Export minimal API for external script
+        window.theme = {
+          themeValue: themeValue,
+          getTheme: () => window.theme.themeValue,
+          setTheme: val => {
+            window.theme.themeValue = val;
+          },
+        };
+      })();
+    </script>
+
+    <!-- Self-healing deployment asset sync: auto-reloads if a stale chunk/stylesheet 404s after a new deploy -->
+    <script is:inline>
+      (function () {
+        window.addEventListener(
+          "error",
+          function (e) {
+            const target = e.target;
+            if (!target) return;
+            const isStylesheet =
+              target.tagName === "LINK" && target.rel === "stylesheet";
+            const isScript = target.tagName === "SCRIPT";
+            if (isStylesheet || isScript) {
+              const url = target.href || target.src || "";
+              if (url.includes("/_astro/")) {
+                const reloadKey =
+                  "astro_chunk_reload_" +
+                  encodeURIComponent(window.location.pathname);
+                if (!sessionStorage.getItem(reloadKey)) {
+                  sessionStorage.setItem(reloadKey, "1");
+                  window.location.reload();
+                }
+              }
+            }
+          },
+          true
+        );
+
+        document.addEventListener("astro:page-load", function () {
+          const reloadKey =
+            "astro_chunk_reload_" +
+            encodeURIComponent(window.location.pathname);
+          sessionStorage.removeItem(reloadKey);
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- Global decorative backdrop (grid, glow, cursor glow, noise) -->
+    <div
+      class="site-backdrop pointer-events-none"
+      aria-hidden="true"
+      transition:persist
+    >
+      <div class="site-grid"></div>
+      {showCursorGlow && <div class="site-cursor-glow"></div>}
+      {showGrain && <div class="site-grain"></div>}
+    </div>
+
+    <slot />
+
+    <SearchModal />
+
+    <!-- Load full theme logic -->
+    <script src="../scripts/theme.ts"></script>
+    <!-- Smart prefetch for slow connections -->
+    <script src="../scripts/smart-prefetch.ts"></script>
+    <BodyEnd locale={locale} />
+    <slot name="BodyEnd" />
+  </body>
+</html>
+
+<style>
+  .site-backdrop {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      black 40%,
+      rgba(0, 0, 0, 0.3) 70%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      black 40%,
+      rgba(0, 0, 0, 0.3) 70%,
+      transparent 100%
+    );
+  }
+
+  .site-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--accent) 1px, transparent 1px),
+      linear-gradient(90deg, var(--accent) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.035;
+    mask-image: radial-gradient(
+      ellipse 100% 60% at 50% 0%,
+      black 15%,
+      transparent 100%
+    );
+    -webkit-mask-image: radial-gradient(
+      ellipse 100% 60% at 50% 0%,
+      black 15%,
+      transparent 100%
+    );
+  }
+
+  .site-cursor-glow {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 800px;
+    height: 800px;
+    margin-left: -400px;
+    margin-top: -400px;
+    transform: translate(var(--site-cx, 50vw), var(--site-cy, 50vh))
+      translateZ(0);
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--accent) 8%, transparent) 0%,
+      color-mix(in oklab, var(--accent) 3%, transparent) 40%,
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    contain: paint;
+  }
+
+  .site-cursor-glow.active {
+    opacity: 1;
+    will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-cursor-glow {
+      transition: none;
+    }
+  }
+
+  .site-grain {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.4' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix type='matrix' values='0.5 0 0 0 0 0 0.5 0 0 0 0 0 0.5 0 0 0 0 0 1 0' in='noise'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 240px 240px;
+    opacity: 0.09;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    contain: paint;
+  }
+</style>
+
+{showCursorGlow && <script>
+  let cursorCleanup: AbortController | null = null;
+
+  document.addEventListener("astro:page-load", () => {
+    // Cleanup previous listeners
+    if (cursorCleanup) cursorCleanup.abort();
+    cursorCleanup = new AbortController();
+    const { signal } = cursorCleanup;
+
+    // Skip on touch devices and respect reduced-motion preference.
+    if (
+      window.matchMedia("(pointer: coarse), (prefers-reduced-motion: reduce)")
+        .matches
+    ) {
+      return;
+    }
+
+    if (document.documentElement.dataset.motion === "reduced") return;
+    const cursorGlow = document.querySelector<HTMLElement>(".site-cursor-glow");
+    let ticking = false;
+    let isActive = false;
+
+    if (!cursorGlow) return;
+
+    document.addEventListener(
+      "mousemove",
+      (e: MouseEvent) => {
+        if (ticking) return;
+
+        ticking = true;
+        window.requestAnimationFrame(() => {
+          cursorGlow.style.setProperty("--site-cx", `${e.clientX}px`);
+          cursorGlow.style.setProperty("--site-cy", `${e.clientY}px`);
+          if (!isActive) {
+            cursorGlow.classList.add("active");
+            isActive = true;
+          }
+          ticking = false;
+        });
+      },
+      { signal, passive: true }
+    );
+
+    document.addEventListener(
+      "mouseleave",
+      () => {
+        if (!isActive) return;
+        cursorGlow.classList.remove("active");
+        isActive = false;
+      },
+      { signal }
+    );
+  });
+</script>}
+
+<script>
+  import { unlocalizedPath } from "@/i18n/locales";
+
+  document.addEventListener("astro:page-load", () => {
+    const pathname = unlocalizedPath(window.location.pathname);
+
+    // 1. Track listing / home routes for contextual `cd ..` back navigation
+    const isDetailRoute =
+      /^\/posts\/(?!\d+\/?$)[^/]+/.test(pathname) ||
+      /^\/galleries\/[^/]+/.test(pathname);
+    if (
+      !isDetailRoute &&
+      pathname !== "/404" &&
+      pathname !== "/404.html" &&
+      pathname !== "/search"
+    ) {
+      sessionStorage.setItem("backUrl", location.pathname + location.search);
+    }
+  });
+</script>

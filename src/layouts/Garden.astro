@@ -1,0 +1,96 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import { localizedPath, resolveLocale } from "@/i18n/locales";
+import { adaptPublication, getPublicationFeed } from "@/lib/content/queries";
+import { maturityStages } from "@/lib/content/model";
+import { topics, topicLabel } from "@/lib/content/topics";
+
+interface Props {
+  topic?: string;
+}
+const { topic } = Astro.props;
+const locale = resolveLocale(Astro.currentLocale);
+const en = locale === "en";
+const title =
+  (topic && topicLabel(topic, locale)) || (en ? "Garden" : "知识花园");
+const total = (await getPublicationFeed(locale)).map(adaptPublication);
+const entries = total.filter(entry =>
+  topic ? entry.topics.includes(topic) : entry.topics.length > 0
+);
+const names = {
+  seedling: en ? "Seedlings" : "萌芽",
+  budding: en ? "In progress" : "生长中",
+  evergreen: en ? "Evergreen" : "常青",
+};
+---
+
+<Layout
+  title={title}
+  description={
+    en
+      ? "Explore publications by topic and maturity."
+      : "按主题和成熟度浏览内容。"
+  }
+>
+  <Header />
+  <main id="main-content" class="app-layout py-12">
+    <h1 class="text-4xl font-bold">{title}</h1>
+    <nav class="my-6" aria-label={en ? "Garden topics" : "花园主题"}>
+      <ul class="flex flex-wrap gap-2">
+        <li>
+          <a
+            class="inline-block rounded-md border border-border/40 px-3 py-2"
+            aria-current={!topic ? "page" : undefined}
+            href={localizedPath(locale, "/garden")}
+          >
+            {en ? "All topics" : "全部主题"}
+          </a>
+        </li>
+        {Object.keys(topics).map(id => (
+          <li>
+            <a
+              class="inline-block rounded-md border border-border/40 px-3 py-2"
+              aria-current={id === topic ? "page" : undefined}
+              href={localizedPath(locale, `/garden/${id}`)}
+            >
+              {topicLabel(id, locale)} (
+              {total.filter(entry => entry.topics.includes(id)).length})
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    {entries.length === 0 && (
+      <p class="text-foreground/70">
+        {en ? "No publications in this language yet." : "此主题暂无中文内容。"}
+      </p>
+    )}
+    {maturityStages.map(stage => {
+      const visible = entries.filter(entry => entry.stage === stage);
+      return (
+        visible.length > 0 && (
+          <section class="my-10" aria-labelledby={`stage-${stage}`}>
+            <h2 id={`stage-${stage}`} class="mb-4 text-xl font-semibold">
+              {names[stage]}
+            </h2>
+            <ul class="grid gap-3 sm:grid-cols-2">
+              {visible.map(entry => (
+                <li class="rounded-lg border border-border/40 px-4 py-3">
+                  <a class="font-semibold underline" href={entry.path}>
+                    {entry.title}
+                  </a>
+                  <p class="mt-2 text-sm text-foreground/75">
+                    {entry.description}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      );
+    })}
+  </main>
+  <Footer />
+</Layout>

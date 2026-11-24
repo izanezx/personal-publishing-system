@@ -1,0 +1,64 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import { useTranslations } from "@/i18n/utils";
+import "@pagefind/default-ui/css/ui.css";
+const t = useTranslations(Astro.currentLocale);
+---
+
+<Layout title={t("search.title")} noindex>
+  <Header />
+  <main id="main-content" class="app-layout py-10">
+    <h1 class="mb-6 text-3xl font-bold">{t("search.title")}</h1>
+    <div id="linked-search" data-placeholder={t("search.placeholder")}></div>
+    <noscript>{t("search.desc")}</noscript>
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  import { withBase } from "@/lib/site-paths";
+
+  let cleanup: AbortController | undefined;
+
+  async function mountSearch() {
+    cleanup?.abort();
+    cleanup = new AbortController();
+    const { signal } = cleanup;
+    const container = document.getElementById("linked-search");
+    if (!container) return;
+    // @ts-expect-error Pagefind's UI package does not ship declarations.
+    const { PagefindUI } = await import("@pagefind/default-ui");
+    if (signal.aborted || !container.isConnected) return;
+
+    container.replaceChildren();
+    const ui = new PagefindUI({
+      element: "#linked-search",
+      showImages: false,
+      bundlePath: withBase("/pagefind/"),
+      pagefindOptions: { baseUrl: withBase("/") },
+      translations: { placeholder: container.dataset.placeholder },
+    });
+    const input = container.querySelector<HTMLInputElement>("input");
+    const readQuery = () => new URL(location.href).searchParams.get("q") ?? "";
+    const syncInput = () => {
+      const query = readQuery();
+      if (input && input.value !== query) ui.triggerSearch(query);
+    };
+    syncInput();
+    window.addEventListener("popstate", syncInput, { signal });
+    input?.addEventListener(
+      "input",
+      () => {
+        const url = new URL(location.href);
+        if (input.value.trim()) url.searchParams.set("q", input.value);
+        else url.searchParams.delete("q");
+        history.replaceState(history.state, "", url);
+      },
+      { signal }
+    );
+  }
+
+  document.addEventListener("astro:page-load", mountSearch);
+</script>

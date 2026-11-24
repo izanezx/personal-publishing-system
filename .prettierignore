@@ -1,0 +1,7 @@
+dist/
+.astro/
+.agents/
+pnpm-lock.yaml
+public/pagefind/
+playwright-report/
+test-results/

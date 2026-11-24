@@ -1,0 +1,129 @@
+---
+interface Props {
+  id: string;
+  label: string;
+  tabs: { id: string; label: string }[];
+}
+const { id, label, tabs } = Astro.props;
+const panels = await Promise.all(tabs.map(tab => Astro.slots.render(tab.id)));
+---
+
+<publishing-tabs>
+  <div class="tab-list" role="tablist" aria-label={label} hidden>
+    {tabs.map((tab, index) => (
+      <button
+        type="button"
+        role="tab"
+        id={`${id}-tab-${tab.id}`}
+        aria-controls={`${id}-panel-${tab.id}`}
+        aria-selected={index === 0}
+      >
+        {tab.label}
+      </button>
+    ))}
+  </div>
+  {tabs.map((tab, index) => (
+    <section
+      aria-labelledby={`${id}-heading-${tab.id}`}
+      id={`${id}-panel-${tab.id}`}
+      class="tab-panel"
+      data-tab-panel
+    >
+      <h3 id={`${id}-heading-${tab.id}`} data-panel-heading>
+        {tab.label}
+      </h3>
+      <Fragment set:html={panels[index]} />
+    </section>
+  ))}
+</publishing-tabs>
+
+<script>
+  class PublishingTabs extends HTMLElement {
+    #listeners?: AbortController;
+
+    connectedCallback() {
+      if (this.#listeners) return;
+      const list = this.querySelector<HTMLElement>(":scope > .tab-list");
+      const tabs = [
+        ...(list?.querySelectorAll<HTMLButtonElement>("button") ?? []),
+      ];
+      const panels = [
+        ...this.querySelectorAll<HTMLElement>(":scope > [data-tab-panel]"),
+      ];
+      if (!list || !tabs.length || tabs.length !== panels.length) return;
+      this.#listeners = new AbortController();
+      const { signal } = this.#listeners;
+      const select = (active: number, focus = false) => {
+        tabs.forEach((tab, index) => {
+          tab.tabIndex = index === active ? 0 : -1;
+          tab.setAttribute("aria-selected", String(index === active));
+          panels[index].hidden = index !== active;
+        });
+        if (focus) tabs[active].focus();
+      };
+
+      tabs.forEach((tab, index) => {
+        panels[index].setAttribute("role", "tabpanel");
+        panels[index].setAttribute("aria-labelledby", tab.id);
+        panels[index].tabIndex = 0;
+        const heading = panels[index].querySelector<HTMLElement>(
+          "[data-panel-heading]"
+        );
+        if (heading) heading.hidden = true;
+        tab.addEventListener("click", () => select(index), { signal });
+        tab.addEventListener(
+          "keydown",
+          event => {
+            const active = {
+              ArrowRight: (index + 1) % tabs.length,
+              ArrowLeft: (index - 1 + tabs.length) % tabs.length,
+              Home: 0,
+              End: tabs.length - 1,
+            }[event.key];
+            if (active === undefined) return;
+            event.preventDefault();
+            select(active, true);
+          },
+          { signal }
+        );
+      });
+      select(0);
+      list.hidden = false;
+    }
+
+    disconnectedCallback() {
+      this.#listeners?.abort();
+      this.#listeners = undefined;
+    }
+  }
+
+  if (!customElements.get("publishing-tabs")) {
+    customElements.define("publishing-tabs", PublishingTabs);
+  }
+</script>
+
+<style>
+  publishing-tabs {
+    display: block;
+    margin-block: 1.75rem;
+  }
+  .tab-list {
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .tab-list:not([hidden]) {
+    display: flex;
+  }
+  button {
+    padding: 0.55rem 0.85rem;
+  }
+  button[aria-selected="true"] {
+    border-bottom: 2px solid var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .tab-panel {
+    padding-block: 0.5rem;
+  }
+</style>

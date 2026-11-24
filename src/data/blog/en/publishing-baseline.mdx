@@ -1,0 +1,40 @@
+---
+uid: en-publishing-baseline
+slug: publishing-baseline
+translationKey: publishing-baseline
+title: "Personal publishing baseline"
+description: "A public fixture for MDX, search, and language links."
+pubDatetime: 2026-01-10T10:00:00Z
+featured: true
+tags: ["publishing"]
+topics: ["publishing", "web-platform"]
+stage: evergreen
+relationships:
+  - kind: related
+    uid: en-publishing-project
+previousSlugs: ["publishing-guide"]
+---
+
+## Publishing
+
+This fixture verifies static publication, English search, and the language switcher.
+
+> [!TIP]
+> The same callout syntax should work in MDX.
+
+| Step    | Check                     |
+| ------- | ------------------------- |
+| Publish | Build the static output   |
+| Search  | Find the correct language |
+
+## Gallery
+
+<GalleryEmbed slug="color-study" limit={1} />
+
+<GalleryEmbed slug="color-study" limit={1} />
+
+## Working example
+
+```ts
+const language = "en";
+```
