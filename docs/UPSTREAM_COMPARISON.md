@@ -111,20 +111,17 @@ automated test suite at `v7.2.0`. The current project has 14 unit tests,
 and rollback drill. The latest `main` CI run at the time of this audit passed.
 
 Dependabot version PRs are intentionally paused until regular maintenance
-begins so the first repository history contains only project-owned work.
-Security alerts remain active and are a release blocker: the repository had 38
-open alerts when this status was reviewed. Dependency remediation must precede
-the stable release even though version-update pull requests remain paused.
+begins so the first repository history contains only project-owned work. The
+security graph was remediated independently: direct updates, patched
+transitive ranges and zero-finding `pnpm audit` are recorded in
+[SECURITY_AUDIT.md](SECURITY_AUDIT.md).
 
 ## Findings that need an explicit project decision
 
-1. The project sequence says AstroWind should follow a stable `v0.1.0`, but
-   selected AstroWind component ideas are already implemented in S5. They
-   should either be accepted as pre-release experiments or treated as
-   replaceable references before `v0.1.0`.
-2. The repository currently has MIT licensing and third-party notices, but it
-   is private. The public open-source release still requires an explicit
-   visibility change and final content, media and asset rights review.
+1. Bento, Timeline, Tabs and Gallery are accepted as a narrow, project-owned S5
+   scope for `v0.1.0`. Broader AstroWind integration remains post-release.
+2. The repository is public and marked as a GitHub Public template. Final
+   launch content, media and asset rights still require owner approval.
 3. The product specification previously described Devosfera typography. The
    implementation uses system fonts and only uses the bundled CJK font for Open
    Graph rendering.

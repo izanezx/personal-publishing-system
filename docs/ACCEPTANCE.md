@@ -15,7 +15,7 @@ project. Upstream commits, issues and pull requests remain read-only references.
 | S1 · PR-01     | Brand defaults and separate production and preview robots controls. Real HTTP responses verified against a local Wrangler asset server                                 |
 | S1 · PR-02     | Escaped JSON-LD. Draft and future content excluded from HTML, OG, RSS, Sitemap and search                                                                              |
 | S1 · PR-03     | Portable Pagefind post-build indexing for the current static artifact. Native Linux and Windows evidence exists for the earlier candidate                              |
-| S1 · PR-04     | CI, Dependabot and gated Cloudflare workflow. Production verifies the exact preview commit and artifact checksum                                                       |
+| S1 · PR-04     | CI, Dependabot and gated Cloudflare workflow. Production verifies the exact preview commit and artifact checksum. Zero known dependency advisories pass `pnpm audit`   |
 | S2 · PR-05     | Markdown and MDX callouts and narrow-screen tables, including a separately rendered MDX ResponsiveTable                                                                |
 | S2 · PR-06     | Project-wide Head, BodyEnd and PostEnd extensions. PostEnd receives the content entry and locale for per-type additions                                                |
 | S2 · PR-07     | Article canonical, TOC and edit switches, timezone validation, typed defaults and stable transition IDs                                                                |
@@ -47,16 +47,18 @@ project. Upstream commits, issues and pull requests remain read-only references.
   checks HTTP responses and verifies the restored backup hash and the restored
   site's response. The root build emits 56 HTML pages and Pagefind indexes 10
   public entries across both languages.
+- `pnpm security:audit` reports zero high, medium or low advisory nodes after
+  the dependency remediation in [SECURITY_AUDIT.md](SECURITY_AUDIT.md).
+- All eight local Open Graph PNGs were regenerated at 1200 × 630 after the
+  Sharp and Satori upgrades.
 
 See the [baseline and performance comparison](../BASELINE.md) for the archived
 screenshot, resource sizes and measurement method. The local candidate uses
 synthetic content and is tagged locally as `v0.1.0-rc.1`. The new candidate
 CI, hosted preview, owner-approved content, production domain and
 `v0.1.0` release are tracked in the [release handoff](RELEASE.md).
-The original project issues remain
-the review records for these steps.
-
-This local acceptance record does not close the supply-chain gate. GitHub
-reported 38 open Dependabot alerts (23 high, 10 medium and 5 low) at the
-2026-11-24 audit. A security branch must update the affected packages and pass
-the full release checklist before creating `v0.1.0`.
+The original project issues remain the review records for these steps. The
+dependency remediation is complete and documented in
+[SECURITY_AUDIT.md](SECURITY_AUDIT.md). The remaining stable-release gates are
+the Cloudflare hosted preview, production domain verification, final owner
+content and owner approval.

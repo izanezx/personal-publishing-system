@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Resolved the dependency security release gate, added a high-severity audit
+  check to CI, and verified the updated Sharp and Satori Open Graph output.
+- Vendored 35 project Skills with a content-hashed lockfile and documented the
+  MCP matrix and documented fallbacks.
+- Added the public-template README, owner content checklist and current
+  repository governance.
 - Completed the independent-history and downstream-governance audit, while
   retaining the required upstream MIT provenance.
 - Recorded the open dependency security gate that must be resolved before the

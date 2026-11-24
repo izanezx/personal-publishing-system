@@ -14,4 +14,11 @@ The SIL Open Font License is included in
 The active site uses system UI fonts. The original Wotfard fonts, streaming
 audio, demonstration biographies, galleries and stock material are excluded
 from the current site assets. The color samples and publication fixtures are
-synthetic. Downloaded workstation Agent skills remain installed locally.
+synthetic.
+
+Project Agent skills are vendored under `.agents/skills/`. Their exact upstream
+repositories, paths and commit revisions are recorded in `skills-lock.json`;
+license and notice files are retained inside each Skill directory. Known
+upstream sources include mattpocock/skills, astrolicious/agent-skills,
+addyosmani/web-quality-skills, delineas/astro-framework-agents, openai/skills
+and cloudflare/skills.

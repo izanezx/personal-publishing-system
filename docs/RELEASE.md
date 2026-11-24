@@ -10,11 +10,10 @@ Run `pnpm install --frozen-lockfile`, `pnpm test`, `pnpm lint`,
 restore a verified backup. This rehearsal uses the same preview policy as
 the release workflow and uses loopback HTTP without a Cloudflare account.
 
-Before a release candidate is approved, review GitHub Dependabot alerts and
-`pnpm audit`. Resolve security advisories or record an owner-approved,
-time-bounded exception with reachability evidence. A count of open high or
-critical alerts blocks the stable release even while ordinary dependency
-version updates are paused.
+Before a release candidate is approved, run `pnpm security:audit` and confirm
+the merged GitHub dependency graph has no open high or critical alerts. The
+current remediation and evidence are recorded in
+[SECURITY_AUDIT.md](SECURITY_AUDIT.md).
 
 The following Bash commands verify subpath hosting and restore the root build.
 
@@ -63,8 +62,9 @@ Pagefind binary under QEMU, outside the repository.
 
 ## Launch inputs
 
-- [ ] Resolve all open high and critical dependency security alerts, or attach
-      an owner-approved exception with reachability evidence.
+- [x] Resolve the dependency security alerts and add an audit gate to CI.
+- [x] Vendor and content-pin project Skills; verify them in CI.
+- [x] Make the repository public and mark it as a GitHub Public template.
 - [ ] Approve public content. The current Markdown, MDX and color gallery
       fixtures verify the workflow.
 - [ ] Confirm the display name `zanezx` or give the final name.
