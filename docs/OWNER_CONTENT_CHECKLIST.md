@@ -57,11 +57,11 @@ Verified on 2026-11-24:
 
 ## Domain and publication
 
-- [ ] Confirm `https://zanezx.com/` as the production canonical origin.
-- [ ] Confirm the Cloudflare account and approve the preview Worker.
+- [x] Confirm `https://zanezx.com/` as the production canonical origin.
+- [x] Confirm the Cloudflare account and approve the preview Worker.
 - [ ] Approve the exact preview commit and artifact for production.
-- [ ] Approve DNS binding of `zanezx.com`.
-- [ ] Confirm `www.zanezx.com` behavior: redirect, alias or no binding.
+- [x] Bind the root `zanezx.com` Worker Route.
+- [x] Keep only the apex domain; no `www.zanezx.com` binding.
 - [ ] Approve the first public indexing date.
 - [ ] Create the stable `v0.1.0` tag only after the preceding approvals.
 

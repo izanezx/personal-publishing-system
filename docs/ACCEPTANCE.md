@@ -59,6 +59,7 @@ CI, hosted preview, owner-approved content, production domain and
 `v0.1.0` release are tracked in the [release handoff](RELEASE.md).
 The original project issues remain the review records for these steps. The
 dependency remediation is complete and documented in
-[SECURITY_AUDIT.md](SECURITY_AUDIT.md). The remaining stable-release gates are
-the Cloudflare hosted preview, production domain verification, final owner
-content and owner approval.
+[SECURITY_AUDIT.md](SECURITY_AUDIT.md). The non-indexable hosted preview and the
+production `zanezx.com` route are verified. The remaining stable-release gates
+are final owner content, approval of the first public indexing date and owner
+approval of `v0.1.0`.

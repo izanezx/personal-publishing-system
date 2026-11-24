@@ -51,11 +51,12 @@ Pagefind binary under QEMU, outside the repository.
 4. The owner approves the content, domain configuration and candidate run.
    Run the workflow on main with `target=production`, the successful
    `preview_run` and `owner_approved=true`.
-5. The owner checks existing services on `zanezx.com` in the Cloudflare
-   dashboard and binds the production Worker. Verify HTTPS, the canonical
-   hostname, production indexing, RSS, sitemap and the same reader flows.
-   Record commit SHA, artifact checksum and Worker version, then create
-   the owner's first release, `v0.1.0`.
+5. Production configuration owns one explicit trigger: the
+   `zanezx.com/*` Worker Route for the apex record. `www.zanezx.com` is
+   intentionally unbound. Verify HTTPS, the canonical hostname, production
+   indexing, RSS, sitemap and the same reader flows. Record commit SHA,
+   artifact checksum and Worker version, then create the owner's first
+   release, `v0.1.0`.
 6. For a failed first release, restore the prior hostname configuration.
    For later regressions, roll back to the previous verified Worker version
    and create a corrective PR.

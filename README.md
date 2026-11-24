@@ -20,7 +20,7 @@ A long-lived publishing system built from the Devosfera reading experience, enha
 <img src="docs/assets/readme-home.png" alt="Chinese home page of the Personal Publishing System" />
 
 > [!NOTE]
-> The current site configuration is a production-ready engineering candidate. The display name `zanezx` is temporary, the public biography and launch content are pending, and `zanezx.com` has not yet been bound to a production Cloudflare Worker.
+> The current site is deployed at `https://zanezx.com/`. The display name `zanezx`, public biography and launch content remain pending approval before the stable `v0.1.0` release.
 
 ## Features
 
