@@ -47,7 +47,7 @@
     {
       "name": "cloudflare-deploy",
       "vendorPath": ".agents/skills/cloudflare-deploy",
-      "sha256": "17f60031b4e15153401ce26eb635b4be51cb05fd0a114e601ae835aec2080756",
+      "sha256": "0c948fcd242bc9ed94893ed5848ac15b0e555876a657438fbd0376c691c976a2",
       "source": {
         "repository": "openai/skills",
         "path": "skills/.curated/cloudflare-deploy",
@@ -97,7 +97,7 @@
     {
       "name": "gh-fix-ci",
       "vendorPath": ".agents/skills/gh-fix-ci",
-      "sha256": "cfd48b5727ca3e6fd4906fa5c472739a73301c99f5b4dc30b1589cfdc6cd1a0e",
+      "sha256": "992a578e55162e52bfa3f9fcbb769afe56f6343fb59bbeaa9c5bc0eecd871d20",
       "source": {
         "repository": "openai/skills",
         "path": "skills/.curated/gh-fix-ci",
@@ -177,7 +177,7 @@
     {
       "name": "playwright",
       "vendorPath": ".agents/skills/playwright",
-      "sha256": "2b1315e0e6c865783aaf7fb8d5455920a4bdc4e46511ed2ad78584e3d553cbf0",
+      "sha256": "45d9d31998716652ab6c4c4101de8a24c19f5fe30a20eacde6b3ba890180ccca",
       "source": {
         "repository": "openai/skills",
         "path": "skills/.curated/playwright",

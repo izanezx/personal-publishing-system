@@ -23,9 +23,14 @@ function hashSkill(directory) {
   const hash = createHash("sha256");
   for (const file of filesBelow(directory)) {
     const relativePath = relative(directory, file).split(sep).join("/");
+    const content = readFileSync(file);
+    const normalizedContent = Buffer.from(
+      content.toString("latin1").replace(/\r\n/g, "\n"),
+      "latin1"
+    );
     hash.update(relativePath);
     hash.update("\0");
-    hash.update(readFileSync(file));
+    hash.update(normalizedContent);
     hash.update("\0");
   }
   return hash.digest("hex");
