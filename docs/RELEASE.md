@@ -10,6 +10,12 @@ Run `pnpm install --frozen-lockfile`, `pnpm test`, `pnpm lint`,
 restore a verified backup. This rehearsal uses the same preview policy as
 the release workflow and uses loopback HTTP without a Cloudflare account.
 
+Before a release candidate is approved, review GitHub Dependabot alerts and
+`pnpm audit`. Resolve security advisories or record an owner-approved,
+time-bounded exception with reachability evidence. A count of open high or
+critical alerts blocks the stable release even while ordinary dependency
+version updates are paused.
+
 The following Bash commands verify subpath hosting and restore the root build.
 
 ```bash
@@ -57,6 +63,8 @@ Pagefind binary under QEMU, outside the repository.
 
 ## Launch inputs
 
+- [ ] Resolve all open high and critical dependency security alerts, or attach
+      an owner-approved exception with reachability evidence.
 - [ ] Approve public content. The current Markdown, MDX and color gallery
       fixtures verify the workflow.
 - [ ] Confirm the display name `zanezx` or give the final name.

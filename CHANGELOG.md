@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Completed the independent-history and downstream-governance audit, while
+  retaining the required upstream MIT provenance.
+- Recorded the open dependency security gate that must be resolved before the
+  stable `v0.1.0` release.
 - Imported the Devosfera baseline and retained its browsing and reading features.
 - Added independent brand configuration, exact publication filters, portable
   search indexing, CI and Cloudflare candidate promotion.

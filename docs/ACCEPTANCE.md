@@ -55,3 +55,8 @@ CI, hosted preview, owner-approved content, production domain and
 `v0.1.0` release are tracked in the [release handoff](RELEASE.md).
 The original project issues remain
 the review records for these steps.
+
+This local acceptance record does not close the supply-chain gate. GitHub
+reported 38 open Dependabot alerts (23 high, 10 medium and 5 low) at the
+2026-11-24 audit. A security branch must update the affected packages and pass
+the full release checklist before creating `v0.1.0`.

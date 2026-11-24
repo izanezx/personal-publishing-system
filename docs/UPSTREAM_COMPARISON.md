@@ -112,7 +112,9 @@ and rollback drill. The latest `main` CI run at the time of this audit passed.
 
 Dependabot version PRs are intentionally paused until regular maintenance
 begins so the first repository history contains only project-owned work.
-Security and dependency review remain a release-gate checklist item.
+Security alerts remain active and are a release blocker: the repository had 38
+open alerts when this status was reviewed. Dependency remediation must precede
+the stable release even though version-update pull requests remain paused.
 
 ## Findings that need an explicit project decision
 

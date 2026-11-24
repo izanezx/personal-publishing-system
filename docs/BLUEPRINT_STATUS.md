@@ -32,14 +32,14 @@ The MIT provenance notices must remain while the derived code is distributed.
 
 ## Stage status
 
-| Stage                             | Status                                      | Assessment                                                                                                                                                                                     |
-| --------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| S0 baseline                       | Complete                                    | Exact source, toolchain, native limitation and compatibility build are recorded. Reference remotes were intentionally removed after the clean history reset; fixed revisions remain documented |
-| S1 safety and automation          | Complete for local implementation           | Indexing policy, JSON-LD escaping, publication filtering, portable Pagefind, CI and candidate promotion code exist. A hosted Cloudflare candidate has not run                                  |
-| S2 AstroPaper features            | Complete                                    | Callouts, responsive tables, extension slots, article controls, stable transitions, safe JSON-LD, search links and URL helpers are implemented and tested                                      |
-| S3 bilingual content architecture | Complete                                    | Locale registry, translation resolution, stable publication identity, unified feed, Garden relations, CJK reading time and bilingual output are implemented                                    |
-| S4 independent release foundation | Local development complete; release pending | Browser tests, performance checks, release drill and documentation exist. Stable `v0.1.0`, approved content and production deployment are pending                                              |
-| S5 AstroWind                      | Partially implemented ahead of sequence     | Bento, Timeline, Tabs and Gallery shelf patterns exist as local implementations. They must be accepted as pre-release experiments or reconsidered before the stable release                    |
+| Stage                             | Status                                           | Assessment                                                                                                                                                                                     |
+| --------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S0 baseline                       | Complete                                         | Exact source, toolchain, native limitation and compatibility build are recorded. Reference remotes were intentionally removed after the clean history reset; fixed revisions remain documented |
+| S1 safety and automation          | Local implementation complete; release gate open | Indexing policy, JSON-LD escaping, publication filtering, portable Pagefind, CI and candidate promotion code exist. Dependency security remediation and a hosted Cloudflare candidate remain   |
+| S2 AstroPaper features            | Complete                                         | Callouts, responsive tables, extension slots, article controls, stable transitions, safe JSON-LD, search links and URL helpers are implemented and tested                                      |
+| S3 bilingual content architecture | Complete                                         | Locale registry, translation resolution, stable publication identity, unified feed, Garden relations, CJK reading time and bilingual output are implemented                                    |
+| S4 independent release foundation | Local development complete; release pending      | Browser tests, performance checks, release drill and documentation exist. Stable `v0.1.0`, approved content and production deployment are pending                                              |
+| S5 AstroWind                      | Partially implemented ahead of sequence          | Bento, Timeline, Tabs and Gallery shelf patterns exist as local implementations. They must be accepted as pre-release experiments or reconsidered before the stable release                    |
 
 ## AstroPaper decision status
 
@@ -62,6 +62,22 @@ All six source-level P0 items are addressed: preview indexing, demo data
 separation, i18n centralization, content adapters and queries, unified
 publication filtering, and safe SEO output. The real production response and
 domain remain release checks rather than code work.
+
+The dependency supply chain is a separate open P0 release gate. GitHub reports
+38 open Dependabot alerts: 23 high, 10 medium and 5 low. `pnpm audit` reports
+34 unique advisory nodes using the same severity split except for 20 high, 9
+moderate and 5 low; GitHub counts alerts per affected manifest and graph path.
+Every alert currently has a patched version available. The most consequential
+direct updates are `sharp` 0.34.5 to 0.35.5 and `satori` 0.26.0 to at least
+0.33.5. The remaining patched transitive ranges include `brace-expansion`,
+`fast-uri`, `fast-xml-parser`, `fflate`, `minimatch`, `nanoid`, `postcss`,
+`postcss-selector-parser`, `source-map-js` and `zod`.
+
+This must be fixed before `v0.1.0`. Use a dedicated security branch, update the
+runtime image and Open Graph packages first, then resolve transitive ranges
+through the lockfile. Run unit, lint, format, root and subpath builds, browser,
+release and performance checks, inspect generated OG images, and record the
+remaining audit output before merging.
 
 ### P1
 
@@ -91,7 +107,7 @@ redirects, and the blueprint's main test matrix are implemented.
 | Devosfera reader, search, gallery and theme regression | Complete in local and CI coverage                                                                                    |
 | Markdown/MDX publishing features                       | Complete                                                                                                             |
 | Chinese/English SEO, OG, search, RSS and Sitemap       | Complete for static output                                                                                           |
-| CI, E2E, backup and rollback                           | Complete locally; production deployment and HTTP verification pending                                                |
+| CI, E2E, backup and rollback                           | Complete locally; dependency remediation, production deployment and HTTP verification pending                        |
 | Content adapter, unified feed and relationship layer   | Complete                                                                                                             |
 | Long-term maintenance process                          | Documents exist; issue cleanup, dependency-update resumption, security policy operation and branch protection remain |
 
@@ -99,6 +115,9 @@ redirects, and the blueprint's main test matrix are implemented.
 
 ### Code and project maintenance
 
+- Remediate the 38 open dependency security alerts and prove the resulting
+  lockfile with the full release checklist before marking the supply chain
+  gate complete.
 - Decide whether the S5 AstroWind implementations stay in the `v0.1.0`
   candidate or are deferred until after the stable release.
 - Decide whether About/Now need page-level canonical and OG overrides.
@@ -135,6 +154,7 @@ redirects, and the blueprint's main test matrix are implemented.
 
 The current code is independently maintainable and can stop following upstream
 Git histories now. The S0-S4 engineering foundation and S5 experiments are
-locally complete, but the full blueprint is not fully delivered until hosted
-preview, production verification, stable release approval, final owner content
-and repository governance are completed.
+locally implemented, but the full blueprint is not fully delivered until
+dependency security remediation, hosted preview, production verification,
+stable release approval, final owner content and repository governance are
+completed.
