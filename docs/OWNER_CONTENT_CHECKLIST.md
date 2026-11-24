@@ -1,5 +1,7 @@
 # Owner content and launch checklist
 
+[中文版本](OWNER_CONTENT_CHECKLIST.zh-CN.md)
+
 This checklist separates technical readiness from publication approval. Items
 remain open until the repository owner supplies or approves the real material.
 
