@@ -68,8 +68,8 @@ The dependency security gate is remediated in
 and affected lint packages, pins patched transitive ranges, and passes a full
 frozen install, root and subpath builds, unit and browser tests, Open Graph
 inspection, and the release and rollback drill. `pnpm audit` reports zero
-vulnerabilities. GitHub's alert count is rechecked after the branch merges to
-the repository's dependency graph.
+vulnerabilities. GitHub's merged dependency graph also reports zero open
+Dependabot alerts.
 
 ### P1
 
@@ -107,8 +107,7 @@ redirects, and the blueprint's main test matrix are implemented.
 
 ### Code and project maintenance
 
-- Recheck the merged dependency graph and confirm GitHub reports zero open
-  Dependabot alerts.
+- The merged dependency graph reports zero open Dependabot alerts.
 - Keep Bento, Timeline, Tabs and Gallery as the accepted narrow S5 scope for
   `v0.1.0`; defer broader AstroWind integration until after the stable release.
 - Decide whether About/Now need page-level canonical and OG overrides.
