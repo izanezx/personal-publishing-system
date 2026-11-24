@@ -127,14 +127,14 @@ slug: publishing-baseline
 previousSlugs: []
 translationKey: publishing-baseline
 pubDatetime: 2026-01-10T09:00:00+08:00
-kind: essay
+kind: article
 topics: [publishing]
-maturity: evergreen
+stage: evergreen
 ```
 
 When a public URL changes, append the old slug to `previousSlugs` so the static host can emit a permanent redirect. Draft and future content is excluded from routes, feeds, sitemap and search.
 
-Read [docs/PRODUCT.md](docs/PRODUCT.md) for the route and publishing contract, [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries, and [GALLERIES.md](GALLERIES.md) for media metadata and alt text.
+Read the [Chinese publishing guide](docs/PUBLISHING.zh-CN.md), [docs/PRODUCT.md](docs/PRODUCT.md), [ARCHITECTURE.md](ARCHITECTURE.md), and [GALLERIES.md](GALLERIES.md) for the complete content, maintenance and media rules.
 
 ## Commands
 
