@@ -57,8 +57,9 @@ The updated lockfile passed:
   rollback rehearsal.
 - ESLint and Prettier checks.
 
-The GitHub alert count is rechecked against the merged `main` dependency graph
-before Issue #25 is closed. CI runs `pnpm security:audit` on Linux and Windows.
+The merged `main` dependency graph reports zero open Dependabot alerts. CI runs
+`pnpm security:audit` on Linux and Windows. Issue #25 is closed with the
+remediation and verification evidence.
 
 ## Developer VM compatibility
 

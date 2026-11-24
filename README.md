@@ -9,7 +9,7 @@
 [![Node 24](https://img.shields.io/badge/Node.js-24-5FA04E?logo=nodedotjs&logoColor=white)](.node-version)
 [![Astro 7](https://img.shields.io/badge/Astro-7-BC52EE?logo=astro&logoColor=white)](package.json)
 [![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white)](wrangler.jsonc)
-[![GitHub template](https://img.shields.io/badge/GitHub-Public_template-181717?logo=github)](https://github.com/izanezx/personal-publishing-system)
+[![GitHub template](https://img.shields.io/badge/GitHub-Public%20template-181717?logo=github)](https://github.com/izanezx/personal-publishing-system)
 
 A long-lived publishing system built from the Devosfera reading experience, enhanced with selected AstroPaper engineering practices, and maintained independently from both upstream projects.
 

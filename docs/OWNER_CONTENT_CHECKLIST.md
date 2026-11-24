@@ -3,6 +3,19 @@
 This checklist separates technical readiness from publication approval. Items
 remain open until the repository owner supplies or approves the real material.
 
+## Repository setup completed
+
+Verified on 2026-11-24:
+
+- The repository is public and enabled as a GitHub Public template.
+- The description, `https://zanezx.com` homepage and initial topics are set.
+- Dependabot alerts and automated security updates are enabled.
+- Private vulnerability reporting and secret scanning push protection are
+  enabled.
+- `main` requires the Linux and Windows CI jobs, current branches, linear
+  history and resolved conversations; force pushes and deletion are blocked.
+- All 35 project Skills are tracked and pass `pnpm skills:check`.
+
 ## Identity and brand
 
 - [ ] Confirm the final public display name, currently `zanezx`.
@@ -54,12 +67,14 @@ remain open until the repository owner supplies or approves the real material.
 
 ## Repository governance
 
-- [ ] Keep the repository public or explicitly change its visibility.
-- [ ] Keep **Public template** enabled.
-- [ ] Confirm the repository description and topics.
+- [x] Keep the repository public.
+- [x] Enable GitHub **Public template**.
+- [x] Set the initial repository description, homepage and topics.
+- [ ] Confirm the initial repository description and topics before launch.
 - [ ] Confirm whether derivative users must replace the brand before deployment.
-- [ ] Enable and test GitHub private vulnerability reporting.
-- [ ] Keep Dependabot alerts, security updates and pinned CI enabled.
+- [x] Enable GitHub private vulnerability reporting.
+- [ ] Submit a non-destructive test report through the private security form.
+- [x] Enable Dependabot alerts, automated security updates and pinned CI.
 
 ## How to edit later
 
