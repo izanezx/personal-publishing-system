@@ -19,6 +19,8 @@
 - [ ] I have read the [Contributing Guide](../CONTRIBUTING.md) and `AGENTS.md`
 - [ ] I have added the necessary documentation (if appropriate)
 - [ ] I recorded adapted upstream behavior in `UPSTREAM_IMPORTS.md` (if appropriate)
+- [ ] I updated `skills-lock.json` for any Skill change and ran `pnpm skills:check`
+- [ ] I ran `pnpm security:audit`
 - [ ] I ran the relevant unit, browser and content checks
 - [ ] I verified that no secrets or private launch content are included
 - [ ] Breaking Change (fix or feature that would cause existing functionality to not work as expected)

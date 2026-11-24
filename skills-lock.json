@@ -1,0 +1,358 @@
+{
+  "version": 1,
+  "policy": "vendored",
+  "verifiedAt": "2026-11-24",
+  "note": "The repository commit and per-skill SHA-256 pin every vendored skill. Every imported skill also records the exact upstream repository, path, and commit used at import time.",
+  "skills": [
+    {
+      "name": "accessibility",
+      "vendorPath": ".agents/skills/accessibility",
+      "sha256": "f387a7b57fc814ac7c9238fceb6527d37f39b12d0ec9a0a50a1cdf5ec4c44582",
+      "source": {
+        "repository": "addyosmani/web-quality-skills",
+        "path": "skills/accessibility",
+        "revision": "afa8da942115f2961fdbfa80807ea0b232ff6c00"
+      }
+    },
+    {
+      "name": "ask-matt",
+      "vendorPath": ".agents/skills/ask-matt",
+      "sha256": "ce8b389aa1fd97b2bff8078ff4a21659796c76d30388fdad0c6d918d26b50460",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/ask-matt",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "astro",
+      "vendorPath": ".agents/skills/astro",
+      "sha256": "801f055e3b64f7ec863acd0e1792a28f7913ad997dba5c46f5b96f5ed3f81062",
+      "source": {
+        "repository": "astrolicious/agent-skills",
+        "path": "skills/astro",
+        "revision": "cb4839f3794189ebf35c55d3ba5d3876dff7acf0"
+      }
+    },
+    {
+      "name": "astro-framework",
+      "vendorPath": ".agents/skills/astro-framework",
+      "sha256": "c12d5b7c13fe01c35861f784644ac1d80df5a4238d0126b2f363bfe1632e357e",
+      "source": {
+        "repository": "delineas/astro-framework-agents",
+        "path": "skills/astro-framework",
+        "revision": "3e32c91cc433424e162472b81afaa5e9324669bb"
+      }
+    },
+    {
+      "name": "cloudflare-deploy",
+      "vendorPath": ".agents/skills/cloudflare-deploy",
+      "sha256": "0c948fcd242bc9ed94893ed5848ac15b0e555876a657438fbd0376c691c976a2",
+      "source": {
+        "repository": "openai/skills",
+        "path": "skills/.curated/cloudflare-deploy",
+        "revision": "49f948faa9258a0c61caceaf225e179651397431"
+      }
+    },
+    {
+      "name": "code-review",
+      "vendorPath": ".agents/skills/code-review",
+      "sha256": "38152bccfb5cae7f4b04dde075876865336d0f05af73bc7d38d8cbbce86ff1e7",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/code-review",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "codebase-design",
+      "vendorPath": ".agents/skills/codebase-design",
+      "sha256": "9801d1bda0042afa0d43cae7f196450f888346a27992cbf2ad89bfb61d404acd",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/codebase-design",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "diagnosing-bugs",
+      "vendorPath": ".agents/skills/diagnosing-bugs",
+      "sha256": "1d3bcc1db6a3017f35c061a6242ad704a37c93fc150a881c1955281f5706d652",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/diagnosing-bugs",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "domain-modeling",
+      "vendorPath": ".agents/skills/domain-modeling",
+      "sha256": "035e1778cbbfdc34e0d4e871dd6b8be888b2814f936f4e9ae2512194d9a47126",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/domain-modeling",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "gh-fix-ci",
+      "vendorPath": ".agents/skills/gh-fix-ci",
+      "sha256": "992a578e55162e52bfa3f9fcbb769afe56f6343fb59bbeaa9c5bc0eecd871d20",
+      "source": {
+        "repository": "openai/skills",
+        "path": "skills/.curated/gh-fix-ci",
+        "revision": "49f948faa9258a0c61caceaf225e179651397431"
+      }
+    },
+    {
+      "name": "grill-me",
+      "vendorPath": ".agents/skills/grill-me",
+      "sha256": "9d63d7e0b0ad41a7dbb3d0a41a305605f12ce9e156e7c2e0da48c72859f50fdb",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/productivity/grill-me",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "grill-with-docs",
+      "vendorPath": ".agents/skills/grill-with-docs",
+      "sha256": "20f7e3ff0ee89b431bb007afcf1ec086265909c148b5ac9fbaabb4d9bf7b1a28",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/grill-with-docs",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "grilling",
+      "vendorPath": ".agents/skills/grilling",
+      "sha256": "770277acc451f2663e04e747eb5d2666e0d0c760da7e61dd86046b7c4f589c72",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/productivity/grilling",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "handoff",
+      "vendorPath": ".agents/skills/handoff",
+      "sha256": "2bf4727cdec9d02202f3b001190fc027b6e609f8aed0052b73da45f994df8273",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/productivity/handoff",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "implement",
+      "vendorPath": ".agents/skills/implement",
+      "sha256": "f1eb6eee57944f7627cfe7497bcfe70f67c142223205be4ceee2393bc493de8a",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/implement",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "implement-spec",
+      "vendorPath": ".agents/skills/implement-spec",
+      "sha256": "dc5c609597431b6f78de4b2f2389a5b4de0f41af152eb09cff7f0cec14a045eb",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/implement-spec",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "improve-codebase-architecture",
+      "vendorPath": ".agents/skills/improve-codebase-architecture",
+      "sha256": "fe70d1820b9712f464e286eda76c0bc31973dd3266f9236a218542c2c3a1396d",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/improve-codebase-architecture",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "playwright",
+      "vendorPath": ".agents/skills/playwright",
+      "sha256": "45d9d31998716652ab6c4c4101de8a24c19f5fe30a20eacde6b3ba890180ccca",
+      "source": {
+        "repository": "openai/skills",
+        "path": "skills/.curated/playwright",
+        "revision": "49f948faa9258a0c61caceaf225e179651397431"
+      }
+    },
+    {
+      "name": "pr",
+      "vendorPath": ".agents/skills/pr",
+      "sha256": "8bf3a54645ab00cdba69e49e70e62c27c87c0caca13b159e0caa7f4e98a780fa",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/pr",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "prototype",
+      "vendorPath": ".agents/skills/prototype",
+      "sha256": "2579639102f01808841019507eb21125a5a37cac6cff19a3aeaf4c07cc50d04f",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/prototype",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "research",
+      "vendorPath": ".agents/skills/research",
+      "sha256": "b23ce31b6147aee283d6ccb00655acb29193ca2a1ff8106d2cf755234fcf3c2d",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/research",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "retro",
+      "vendorPath": ".agents/skills/retro",
+      "sha256": "3137ff87cd6bee3c86907aa72d348ac9f10f0394867d2a5cc464b1056ea0cbdc",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/retro",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "seo",
+      "vendorPath": ".agents/skills/seo",
+      "sha256": "996fbe1e6160d1788c941577159b673ef082f0fb64a2e9c48fb6ae9f467397a1",
+      "source": {
+        "repository": "addyosmani/web-quality-skills",
+        "path": "skills/seo",
+        "revision": "afa8da942115f2961fdbfa80807ea0b232ff6c00"
+      }
+    },
+    {
+      "name": "setup-matt-pocock-skills",
+      "vendorPath": ".agents/skills/setup-matt-pocock-skills",
+      "sha256": "6312ce23a1cb52f547d7ef68c428c0ea7b912fe97e1f3295fa0ab581ce110721",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/setup-matt-pocock-skills",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "tdd",
+      "vendorPath": ".agents/skills/tdd",
+      "sha256": "2bad16f26168acea6368e868eaaf6a783eceb07560412841d472c5922111965f",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/tdd",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "teach",
+      "vendorPath": ".agents/skills/teach",
+      "sha256": "31b4dbce881e3aae9a2e106fb326c4adb3f9ed637a70507b3f01d98cfa553992",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/productivity/teach",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "to-questionnaire",
+      "vendorPath": ".agents/skills/to-questionnaire",
+      "sha256": "c68e2bcee68347b393e9d681a610d3e168fdefb12e702631553a7ccfa0cd4977",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/productivity/to-questionnaire",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "to-spec",
+      "vendorPath": ".agents/skills/to-spec",
+      "sha256": "dc6ec476acaf09dc98150fda66bc99765c360da089c6053a6a67f0ceac2f366a",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/to-spec",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "to-tickets",
+      "vendorPath": ".agents/skills/to-tickets",
+      "sha256": "0ffe2a0fdb5501c9db5d817b3858770c7d4dba2440af819b739e829bfb0c8e32",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/to-tickets",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "triage",
+      "vendorPath": ".agents/skills/triage",
+      "sha256": "4aeb7338f86b427bebe557ff8ec023c05a2c87b1a55d398d4e801fe196bfb012",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/triage",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "wait-what",
+      "vendorPath": ".agents/skills/wait-what",
+      "sha256": "195ce2948f41826d514fdd6c876ed7a65a8f159197c97c0c1471e5e851ad3561",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/productivity/wait-what",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "wayfinder",
+      "vendorPath": ".agents/skills/wayfinder",
+      "sha256": "5b24d3c4918c4e5a0d65c8f0a19461059615f342b4309b9470fb1f1e1772888a",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/wayfinder",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "web-perf",
+      "vendorPath": ".agents/skills/web-perf",
+      "sha256": "fa6b523b9c188347c9a6b9fb612e96a5da44c8423f80878eba818d71cca939f5",
+      "source": {
+        "repository": "cloudflare/skills",
+        "path": "skills/web-perf",
+        "revision": "5108325ecceabc899c761e07aa617b09c02445ee"
+      }
+    },
+    {
+      "name": "wizard",
+      "vendorPath": ".agents/skills/wizard",
+      "sha256": "9aa38dfce1de14e6619d4625a03ea47a5561cbb585ecb38d468244d8adacdfb3",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/engineering/wizard",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "writing-for-agents",
+      "vendorPath": ".agents/skills/writing-for-agents",
+      "sha256": "05f4c7f0e63113bb3ca8498ff9de89925b7d690beed51ee48e2a24641a6e90dd",
+      "source": {
+        "repository": "mattpocock/skills",
+        "path": "skills/productivity/writing-for-agents",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    }
+  ]
+}

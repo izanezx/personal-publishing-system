@@ -1,4 +1,10 @@
-import { readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { normalizeSiteBase } from "../src/lib/site-paths.ts";
@@ -9,10 +15,18 @@ const wrapper = fileURLToPath(
   new URL("../node_modules/pagefind/lib/runner/bin.cjs", import.meta.url)
 );
 
-renameSync(
-  new URL("../dist/permalink-redirects.txt", import.meta.url),
-  new URL("../dist/_redirects", import.meta.url)
+const redirectSource = new URL(
+  "../dist/permalink-redirects.txt",
+  import.meta.url
 );
+const redirectTarget = new URL("../dist/_redirects", import.meta.url);
+if (existsSync(redirectSource)) {
+  renameSync(redirectSource, redirectTarget);
+} else if (!existsSync(redirectTarget)) {
+  throw new Error(
+    "Build output is missing both dist/permalink-redirects.txt and dist/_redirects"
+  );
+}
 const base = normalizeSiteBase(process.env.SITE_BASE_PATH);
 if (base) {
   const path = new URL("../dist/_headers", import.meta.url);

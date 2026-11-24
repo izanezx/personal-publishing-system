@@ -4,7 +4,11 @@
 
 ## 项目 Skills
 
-项目 skills 位于 `.agents/skills/`。按下表为当前任务选择对应的 skill。采用其中的通用做法时，保留本项目已确认的架构、发布和验收要求。
+项目 skills 位于 `.agents/skills/`，并随仓库提交。`skills-lock.json`
+记录每个 Skill 的内容哈希；修改 Skill 后运行 `pnpm skills:lock` 和
+`pnpm skills:check`。按下表为当前任务选择对应的 skill。采用其中的通用做法时，
+保留本项目已确认的架构、发布和验收要求。完整来源与 MCP 矩阵见
+[Agent 环境说明](docs/AGENT_ENVIRONMENT.md)。
 
 | 工作                 | 主要 skill                                                                     | 在本项目中的应用                                                                                                                                                         |
 | -------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -30,7 +34,8 @@ Issue 和 PR 使用 `izanezx/personal-publishing-system`，沿用 S0–S5 和 PR
 负责共享页面能力。给文章或图库改 slug 时记录 `previousSlugs`；移动文件时
 保留 UID、slug 和语言。组件变更应覆盖移动端、键盘、减少动效和内容无脚本可读性。
 
-使用锁定的 Node 和 pnpm。提交前运行 `pnpm test`、`pnpm lint`、
-`pnpm format:check`、`pnpm build`、`pnpm test:e2e` 和
+使用锁定的 Node 和 pnpm。提交前运行 `pnpm security:audit`、
+`pnpm skills:check`、`pnpm test`、`pnpm lint`、`pnpm format:check`、
+`pnpm build`、`pnpm test:e2e` 和
 `pnpm test:release`。URL、SEO 或搜索改动再运行子路径验收；
 命令见 [发布说明](docs/RELEASE.md)。
