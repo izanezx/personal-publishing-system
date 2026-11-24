@@ -4,19 +4,23 @@
 
 ## Types of changes
 
-<!-- What types of changes does your code introduce to AstroPaper? Put an `x` in the boxes that apply -->
+<!-- What types of changes does your code introduce to the Personal Publishing System? Put an `x` in the boxes that apply. -->
 
 - [ ] Bug Fix (non-breaking change which fixes an issue)
 - [ ] New Feature (non-breaking change which adds functionality)
 - [ ] Documentation Update (if none of the other choices apply)
+- [ ] Infrastructure or release workflow
 - [ ] Others (any other types not listed above)
 
 ## Checklist
 
 <!-- Please follow this checklist and put an x in each of the boxes, like this: [x]. You can also fill these out after creating the PR. This is simply a reminder of what we are going to look for before merging your code. -->
 
-- [ ] I have read the [Contributing Guide](https://github.com/0xdres/astro-devosfera/blob/main/.github/CONTRIBUTING.md)
+- [ ] I have read the [Contributing Guide](../CONTRIBUTING.md) and `AGENTS.md`
 - [ ] I have added the necessary documentation (if appropriate)
+- [ ] I recorded adapted upstream behavior in `UPSTREAM_IMPORTS.md` (if appropriate)
+- [ ] I ran the relevant unit, browser and content checks
+- [ ] I verified that no secrets or private launch content are included
 - [ ] Breaking Change (fix or feature that would cause existing functionality to not work as expected)
 
 ## Further comments

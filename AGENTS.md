@@ -1,6 +1,6 @@
 # Personal Publishing System
 
-以 Devosfera 为基础维护独立的 Astro 个人出版系统。中文使用根路径，英文使用 /en/。沿用原有阅读体验，使用 pnpm 锁文件与 Astro 静态输出，部署到 Cloudflare Workers Static Assets。具体框架和工具版本以导入后的项目清单和锁文件为准。
+维护独立的 Personal Publishing System。Devosfera `bba247e2` 是 MIT 许可的初始源码来源，AstroPaper `v7.2.0` 是选择性工程参考；本项目不依赖上游 Git 历史，也不合并上游分支。中文使用根路径，英文使用 /en/。沿用原有阅读体验，使用 pnpm 锁文件与 Astro 静态输出，部署到 Cloudflare Workers Static Assets。具体框架和工具版本以项目清单和锁文件为准。
 
 ## 项目 Skills
 

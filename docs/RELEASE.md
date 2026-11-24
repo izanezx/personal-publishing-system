@@ -62,5 +62,6 @@ Pagefind binary under QEMU, outside the repository.
 - [ ] Confirm the display name `zanezx` or give the final name.
 - [ ] Add author credit, bilingual descriptions and chosen public links.
 - [ ] Provide licensed logo or media assets if wanted.
+- [ ] Publish a private conduct and security reporting contact.
 - [ ] Confirm the production hostname binding and first release.
 - [ ] Re-enable Dependabot version updates when regular maintenance begins.

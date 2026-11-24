@@ -1,6 +1,6 @@
 ---
 name: "\U0001F41E Bug report"
-about: Report a bug or unexpected behavior in AstroPaper
+about: Report a bug or unexpected behavior in the Personal Publishing System
 title: "[BUG]: "
 labels: bug
 assignees: ""
@@ -16,6 +16,12 @@ Steps to reproduce the behavior:
 2. Click on '....'
 3. Scroll down to '....'
 4. See error
+
+**Environment**
+
+- Route and language:
+- Browser or runtime:
+- Theme, viewport and reduced-motion setting:
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
