@@ -31,13 +31,14 @@ Visible outgoing links and backlinks connect those records by UID.
 
 ## Reading and presentation
 
-The site uses Devosfera's typography, layout widths, color variables and
-light/dark modes. The home index uses a responsive grid, the activity stream
-uses an ordered timeline, and the gallery shelf reuses gallery cards.
-Articles use the existing prose style and reading preferences. The motion
-preference persists locally and honors the system's reduced-motion setting.
-Interactive demonstrations use Astro components inside MDX. Both tabs'
-contents remain readable when scripting is unavailable.
+The site retains Devosfera's layout widths, color variables and light/dark
+modes. Reader typography currently uses system font stacks; the bundled Noto
+Sans CJK asset is used for Open Graph rendering. The home index uses a
+responsive grid, the activity stream uses an ordered timeline, and the gallery
+shelf reuses gallery cards. Articles use the existing prose style and reading
+preferences. The motion preference persists locally and honors the system's
+reduced-motion setting. Interactive demonstrations use Astro components inside
+MDX. Both tabs' contents remain readable when scripting is unavailable.
 
 The technical comparison in the original conversation recorded a shared
 logic prototype with two collection adapters and 14 automated checks.
