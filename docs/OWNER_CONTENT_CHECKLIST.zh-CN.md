@@ -15,6 +15,8 @@
   禁止强推和删除。
 - 35 个项目 Skills 已全部纳入 Git，并通过 `pnpm skills:check`。
 - `zanezx.com/*` 生产 Worker Route 已绑定；`www.zanezx.com` 不绑定。
+- 在首次公开索引日期获得批准前，根域名 Worker 返回
+  `X-Robots-Tag: noindex, nofollow`。
 
 ## 身份与品牌
 

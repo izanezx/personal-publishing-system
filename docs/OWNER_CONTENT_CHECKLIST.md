@@ -17,6 +17,8 @@ Verified on 2026-11-24:
 - `main` requires the Linux and Windows CI jobs, current branches, linear
   history and resolved conversations; force pushes and deletion are blocked.
 - All 35 project Skills are tracked and pass `pnpm skills:check`.
+- The apex Worker currently returns `X-Robots-Tag: noindex, nofollow` until the
+  first public indexing date is approved.
 
 ## Identity and brand
 
