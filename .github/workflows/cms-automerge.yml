@@ -103,6 +103,28 @@ jobs:
             --squash \
             --delete-branch \
             --match-head-commit "$MERGE_SHA"
+      - name: Deploy after the CMS pull request merges
+        if: steps.stage.outputs.ready == 'true'
+        run: |
+          for attempt in $(seq 1 120); do
+            state="$(
+              gh pr view "$PR_NUMBER" --json state --jq '.state'
+            )"
+            if [ "$state" = "MERGED" ]; then
+              gh workflow run deploy.yml \
+                --ref main \
+                --field "reason=CMS publication PR #$PR_NUMBER merged"
+              exit 0
+            fi
+            if [ "$state" = "CLOSED" ]; then
+              echo "CMS pull request #$PR_NUMBER closed without merging" >&2
+              exit 1
+            fi
+            sleep 10
+          done
+
+          echo "CMS pull request #$PR_NUMBER was not merged within 20 minutes" >&2
+          exit 1
       - name: Cancel auto-merge after leaving pending_publish
         if: steps.stage.outputs.ready != 'true'
         run: gh pr merge "$PR_NUMBER" --disable-auto || true
