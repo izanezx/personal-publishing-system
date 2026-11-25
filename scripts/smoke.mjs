@@ -16,6 +16,8 @@ if (!baseUrl) {
   throw new Error("Provide --base-url or SMOKE_BASE_URL");
 }
 
+const isSmokeMirror = new URL(baseUrl).hostname.endsWith(".workers.dev");
+
 if (retries > 0) {
   let lastError;
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -66,7 +68,7 @@ const indexing = await (
 ).json();
 assert.equal(indexing.enabled, expectIndex, "Runtime indexing mode differs");
 
-if (expectIndex) {
+if (expectIndex && !isSmokeMirror) {
   assert.equal(
     homeHeaders.get("x-robots-tag"),
     null,
@@ -76,7 +78,7 @@ if (expectIndex) {
   assert.equal(
     homeHeaders.get("x-robots-tag"),
     "noindex, nofollow",
-    "Preview home must remain noindex"
+    "Preview and smoke-mirror homes must remain noindex"
   );
 }
 

@@ -57,6 +57,7 @@ Repository Variables:
 
 - `CLOUDFLARE_ACCOUNT_ID`
 - `PREVIEW_URL`
+- `PRODUCTION_SMOKE_URL`
 - `PUBLIC_INDEXING_ENABLED`
 
 Environment Secrets:
@@ -83,6 +84,18 @@ zanezx.com/*
 ```
 
 `www.zanezx.com` is intentionally unbound.
+
+The production Worker also has a diagnostic Workers.dev hostname:
+
+```text
+https://personal-publishing-system.zanezx.workers.dev
+```
+
+It is used by the GitHub release workflow because zone security policies can
+challenge datacenter IP addresses before a request reaches the Worker. The
+diagnostic hostname is always served with `X-Robots-Tag: noindex, nofollow`
+and is not the public site URL. The apex domain remains the only canonical
+hostname.
 
 The production job records the active Worker Version before deployment, runs
 the live smoke suite after deployment and automatically rolls back to the
