@@ -56,11 +56,19 @@ const request = async (pathname, init = {}) => {
 };
 
 const expectStatus = async (pathname, status) => {
-  const response = await request(pathname);
+  let response;
+  const attempts = Math.max(1, retries);
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    response = await request(pathname);
+    if (response.status === status) return response;
+    if (attempt < attempts) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
   assert.equal(
-    response.status,
+    response?.status,
     status,
-    `${pathname} returned ${response.status}, expected ${status}`
+    `${pathname} returned ${response?.status}, expected ${status}`
   );
   return response;
 };
