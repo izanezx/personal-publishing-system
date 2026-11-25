@@ -19,6 +19,8 @@ const make = (uid: string, data: Partial<Publication> = {}): Publication => ({
   stage: "seedling",
   relationships: [],
   publishedAt: new Date("2025-12-31T15:45:00Z"),
+  status: "published",
+  translationStatus: "not-required",
   title: "Identical title",
   description: "",
   path: `/posts/${uid}/`,

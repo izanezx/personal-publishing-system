@@ -5,6 +5,7 @@ import { withBase, withoutBase } from "@/lib/site-paths";
 import { localePrefix } from "@/i18n/locales";
 import { serializeJsonLd } from "@/utils/serializeJsonLd";
 import { languages, pageAlternates, resolveLocale } from "@/i18n/locales";
+import { isPublicIndexingEnabled } from "@/lib/indexing";
 
 type Props = {
   title?: string;
@@ -89,6 +90,8 @@ const finalStructuredData =
           ...(description && { description }),
         }
       : null);
+
+const shouldNoindex = noindex || !isPublicIndexingEnabled();
 ---
 
 <meta charset="UTF-8" />
@@ -109,7 +112,7 @@ const finalStructuredData =
       )
     );
   })}
-{noindex && <meta name="robots" content="noindex, follow" />}
+{shouldNoindex && <meta name="robots" content="noindex, follow" />}
 <meta name="generator" content={Astro.generator} />
 
 <!-- Relational Pagination Links -->

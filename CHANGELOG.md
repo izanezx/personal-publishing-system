@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Added Sveltia CMS 0.272.0 with schema validation, bilingual collections,
+  editorial workflow, pinned SRI and responsive single-pane editing.
+- Added publication lifecycle support for scheduled, unlisted, archived,
+  expired and withdrawn content, including 301/410 runtime behavior.
+- Added a Cloudflare R2 media library, public media origin and bucket-scoped
+  CORS.
+- Vendored and deployed the pinned Sveltia CMS authenticator Worker.
+- Added automatic PR Preview, content-only auto-merge, production deployment,
+  live smoke tests and rollback on failure.
+- Added a 15-minute scheduled-content check that rebuilds due publications.
 - Resolved the dependency security release gate, added a high-severity audit
   check to CI, and verified the updated Sharp and Satori Open Graph output.
 - Vendored 35 project Skills with a content-hashed lockfile and documented the

@@ -1,14 +1,20 @@
 {
   "$schema": "https://workers.cloudflare.com/wrangler/config-schema.json",
   "name": "personal-publishing-system",
+  "main": "./src/worker.ts",
   "compatibility_date": "2026-11-20",
   "workers_dev": false,
   "preview_urls": false,
+  "observability": {
+    "enabled": true,
+  },
   "routes": [{ "pattern": "zanezx.com/*", "zone_name": "zanezx.com" }],
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "404-page",
     "html_handling": "force-trailing-slash",
+    "run_worker_first": true,
   },
   "env": {
     "preview": {
@@ -18,8 +24,10 @@
       "routes": [],
       "assets": {
         "directory": "./dist",
+        "binding": "ASSETS",
         "not_found_handling": "404-page",
         "html_handling": "force-trailing-slash",
+        "run_worker_first": true,
       },
     },
   },

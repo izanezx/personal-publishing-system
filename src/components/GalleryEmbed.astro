@@ -12,8 +12,8 @@ import { localePrefix, resolveLocale } from "@/i18n/locales";
  *   showLink  — show "View full gallery" link (default: true)
  *   cols      — grid columns: 2 | 3 | 4 (default: 3)
  */
-import { Image } from "astro:assets";
 import { getPublicEntries } from "@/lib/content/queries";
+import PublicationImage from "@/components/common/PublicationImage.astro";
 import GalleryLightbox from "./GalleryLightbox.astro";
 
 type Props = {
@@ -107,7 +107,7 @@ const gridClass = {
               aria-label={`View image: ${img.alt}`}
               type="button"
             >
-              <Image
+              <PublicationImage
                 src={img.src}
                 alt={img.alt}
                 class="ge-img"

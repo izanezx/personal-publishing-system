@@ -16,20 +16,29 @@ try {
     process.exit();
   }
 
-  const child = spawn(process.execPath, ["scripts/index-search.mjs"], {
-    env: process.env,
-    stdio: "inherit",
-  });
-  process.exitCode = await new Promise((resolve, reject) => {
-    child.once("error", reject);
-    child.once("exit", (code, signal) => {
-      if (signal) {
-        reject(new Error(`search index exited after signal ${signal}`));
-        return;
-      }
-      resolve(code ?? 1);
+  for (const script of [
+    "scripts/index-search.mjs",
+    "scripts/finalize-index.mjs",
+  ]) {
+    const child = spawn(process.execPath, [script], {
+      env: process.env,
+      stdio: "inherit",
     });
-  });
+    const code = await new Promise((resolve, reject) => {
+      child.once("error", reject);
+      child.once("exit", (exitCode, signal) => {
+        if (signal) {
+          reject(new Error(`${script} exited after signal ${signal}`));
+          return;
+        }
+        resolve(exitCode ?? 1);
+      });
+    });
+    if (code !== 0) {
+      process.exitCode = code;
+      process.exit();
+    }
+  }
 } catch (error) {
   process.stderr.write(`${error instanceof Error ? error.message : error}\n`);
   process.exitCode = 1;

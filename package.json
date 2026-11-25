@@ -13,11 +13,14 @@
     "format:check": "node scripts/run-project-tool.mjs prettier --check .",
     "format": "node scripts/run-project-tool.mjs prettier --write .",
     "lint": "node scripts/run-project-tool.mjs eslint .",
+    "cms:check": "node scripts/validate-cms-config.mjs",
     "security:audit": "pnpm audit --audit-level=high",
     "skills:check": "node scripts/check-skills.mjs",
     "skills:lock": "node scripts/check-skills.mjs --write",
     "test:e2e": "playwright test",
-    "test:release": "node scripts/release-drill.mjs"
+    "test:release": "node scripts/release-drill.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "status:due": "node scripts/status-due.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "7.3.10",
@@ -42,6 +45,7 @@
     "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^24.12.4",
     "@typescript-eslint/parser": "^8.74.0",
+    "ajv": "8.20.0",
     "eslint": "^10.15.0",
     "eslint-plugin-astro": "^3.2.1",
     "globals": "^17.14.0",
@@ -50,7 +54,8 @@
     "prettier-plugin-astro": "^1.1.2",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.74.0"
+    "typescript-eslint": "^8.74.0",
+    "yaml": "2.9.0"
   },
   "pnpm": {
     "overrides": {

@@ -1,6 +1,7 @@
 dist/
 .astro/
 .agents/
+infra/sveltia-auth/
 pnpm-lock.yaml
 public/pagefind/
 playwright-report/

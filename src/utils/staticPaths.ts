@@ -4,14 +4,14 @@ import { SITE } from "@/config";
 import {
   assertUniquePublicationKeys,
   getPublicationFeed,
-  getPublicEntries,
+  getRoutableEntries,
 } from "@/lib/content/queries";
 import getPostsByTag from "./getPostsByTag";
 import getUniqueTags from "./getUniqueTags";
 
 export async function buildPostStaticPaths(locale: Locale) {
   await assertUniquePublicationKeys();
-  const sortedPosts = (await getPublicEntries("blog", locale)).sort(
+  const sortedPosts = (await getRoutableEntries("blog", locale)).sort(
     (a, b) => b.data.pubDatetime.getTime() - a.data.pubDatetime.getTime()
   );
   return sortedPosts.map(post => ({
@@ -23,7 +23,7 @@ export async function buildPostStaticPaths(locale: Locale) {
 export async function buildGalleryStaticPaths(locale: Locale) {
   if (!SITE.showGalleries) return [];
 
-  const galleries = await getPublicEntries("galleries", locale);
+  const galleries = await getRoutableEntries("galleries", locale);
   return galleries.map(gallery => ({
     params: { gallery: gallery.data.slug },
     props: { entry: gallery },

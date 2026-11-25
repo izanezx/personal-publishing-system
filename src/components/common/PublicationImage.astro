@@ -1,0 +1,53 @@
+---
+import { Image } from "astro:assets";
+import type { PublicationImageSource } from "@/utils/media";
+
+type Props = {
+  src: PublicationImageSource;
+  alt: string;
+  class?: string;
+  loading?: "lazy" | "eager";
+  fetchpriority?: "auto" | "high" | "low";
+  widths?: number[];
+  sizes?: string;
+  format?: "avif" | "webp" | "png" | "jpeg";
+  quality?: number;
+  decoding?: "async" | "sync" | "auto";
+};
+
+const {
+  src,
+  alt,
+  class: className,
+  loading = "lazy",
+  fetchpriority = "auto",
+  widths,
+  sizes,
+  format = "avif",
+  quality = 72,
+  decoding = "async",
+} = Astro.props;
+---
+
+{typeof src === "string" ? (
+  <img
+    src={src}
+    alt={alt}
+    class={className}
+    loading={loading}
+    fetchpriority={fetchpriority}
+    decoding={decoding}
+  />
+) : (
+  <Image
+    src={src}
+    alt={alt}
+    class={className}
+    loading={loading}
+    fetchpriority={fetchpriority}
+    widths={widths}
+    sizes={sizes}
+    format={format}
+    quality={quality}
+  />
+)}

@@ -1,6 +1,13 @@
 import type { Publication } from "./model";
 import { topicLabel } from "./topics";
 
+interface Tombstone {
+  data: {
+    path: string;
+    redirectTo?: string;
+  };
+}
+
 export function validatePublications(entries: readonly Publication[]) {
   const byUid = new Map<string, Publication>();
   const paths = new Set<string>();
@@ -51,6 +58,22 @@ export function validatePublications(entries: readonly Publication[]) {
         throw new Error(`Conflicting redirect from ${path}`);
       redirects.add(path);
     }
+  }
+}
+
+export function validateTombstones(
+  entries: readonly Publication[],
+  tombstones: readonly Tombstone[]
+) {
+  const livePaths = new Set(entries.map(entry => entry.path));
+  const tombstonePaths = new Set<string>();
+  for (const tombstone of tombstones) {
+    const path = tombstone.data.path;
+    if (livePaths.has(path))
+      throw new Error(`Tombstone conflicts with a live publication: ${path}`);
+    if (tombstonePaths.has(path))
+      throw new Error(`Duplicate tombstone path: ${path}`);
+    tombstonePaths.add(path);
   }
 }
 

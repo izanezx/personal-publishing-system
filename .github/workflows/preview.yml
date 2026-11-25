@@ -1,0 +1,72 @@
+name: Preview
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-preview:
+    name: Deploy preview
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+      url: ${{ vars.PREVIEW_URL }}
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_PREVIEW }}
+      PUBLIC_INDEXING_ENABLED: "false"
+      PREVIEW_URL: ${{ vars.PREVIEW_URL }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm cms:check
+      - run: pnpm build
+      - name: Deploy isolated preview Worker
+        run: pnpm dlx wrangler@4.165.0 deploy --env preview
+      - name: Verify the preview deployment
+        env:
+          SMOKE_RETRIES: "30"
+        run: pnpm smoke --base-url "$PREVIEW_URL"
+      - name: Publish the preview URL to the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          marker="<!-- publishing-preview -->"
+          body="${marker}
+          Preview: ${PREVIEW_URL}
+
+          Commit: \`${COMMIT_SHA}\`
+          Indexing: disabled"
+          comment_id="$(
+            gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+              --paginate \
+              --jq ".[] | select(.body | contains(\"${marker}\")) | .id" |
+              head -n 1
+          )"
+          if [[ -n "$comment_id" ]]; then
+            gh api --method PATCH \
+              "repos/${GITHUB_REPOSITORY}/issues/comments/${comment_id}" \
+              --field body="$body" >/dev/null
+          else
+            gh pr comment "$PR_NUMBER" --body "$body"
+          fi

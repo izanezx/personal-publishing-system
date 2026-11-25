@@ -17,7 +17,8 @@ import GalleryEmbed from "@/components/GalleryEmbed.astro";
 import ResponsiveTable from "@/components/ResponsiveTable.astro";
 import TableOfContents from "@/components/TableOfContents.astro";
 import { getEntryPath } from "@/utils/contentEntry";
-import { getEntryAlternates } from "@/lib/content/queries";
+import { adaptPublication, getEntryAlternates } from "@/lib/content/queries";
+import { isSearchablePublication } from "@/lib/content/status";
 import { slugifyStr } from "@/utils/slugify";
 import { getEntryTransitionName } from "@/utils/contentEntry";
 import { getReadingTime } from "@/utils/readingTime";
@@ -36,6 +37,9 @@ Astro.locals.entryAlternates = await getEntryAlternates(post);
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 const prefix = localePrefix(locale);
+const publication = adaptPublication(post);
+const noindex = publication.status === "unlisted";
+const searchable = isSearchablePublication(post.data, locale);
 
 const {
   title,
@@ -92,6 +96,7 @@ const layoutProps = {
   modDatetime,
   ogImage,
   canonicalURL,
+  noindex,
   scrollSmooth: true,
   tags,
 };
@@ -171,6 +176,7 @@ const recommendedPost = rawRecommendedPost
       { "mt-8": !SITE.showBackButton },
     ]}
     data-pagefind-body
+    data-pagefind-ignore={searchable ? undefined : true}
     data-resume-question={t("post.resumeQuestion")}
     data-resume-btn={t("post.resumeBtn")}
   >

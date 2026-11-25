@@ -1,16 +1,16 @@
 ---
 import { localePrefix, resolveLocale } from "@/i18n/locales";
 import type { CollectionEntry } from "astro:content";
-import type { ImageMetadata } from "astro";
-import { Image } from "astro:assets";
 import Datetime from "./Datetime.astro";
 import { getEntryTransitionName } from "@/utils/contentEntry";
 import { useTranslations } from "@/i18n/utils";
+import PublicationImage from "@/components/common/PublicationImage.astro";
+import type { PublicationImageSource } from "@/utils/media";
 
 type Props = {
   gallery: CollectionEntry<"galleries">;
   slug: string;
-  fallbackImage?: ImageMetadata;
+  fallbackImage?: PublicationImageSource;
   imageCount?: number;
   loading?: "lazy" | "eager";
   fetchpriority?: "auto" | "high" | "low";
@@ -61,7 +61,7 @@ const prefix = localePrefix(locale);
   <!-- Cover image -->
   <div class="gallery-card-cover relative aspect-video w-full overflow-hidden bg-foreground/5">
     {coverSrc ? (
-      <Image
+      <PublicationImage
         src={coverSrc}
         alt={title}
         class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-105"

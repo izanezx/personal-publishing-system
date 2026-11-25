@@ -1,4 +1,5 @@
 import type { Locale } from "@/i18n/locales";
+import type { PublicationStatus, TranslationStatus } from "./status";
 
 export const publicationKinds = [
   "article",
@@ -32,6 +33,11 @@ export interface Publication {
   publishedAt: Date;
   updatedAt?: Date | null;
   draft?: boolean;
+  status: PublicationStatus;
+  translationStatus: TranslationStatus;
+  scheduledFor?: Date | null;
+  expireAt?: Date | null;
+  redirectTo?: string;
   title: string;
   description: string;
   path: string;

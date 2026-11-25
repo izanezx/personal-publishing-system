@@ -6,6 +6,7 @@ import {
   BLOG_PATH,
   GALLERY_PATH,
   EDITORIAL_PAGE_PATH,
+  TOMBSTONE_PATH,
 } from "@/lib/content/locations";
 import { isValidTimezone } from "@/lib/content/dates";
 import {
@@ -13,6 +14,7 @@ import {
   publicationKinds,
   relationshipKinds,
 } from "@/lib/content/model";
+import { publicationStatuses, translationStatuses } from "@/lib/content/status";
 
 const slug = z
   .string()
@@ -25,6 +27,19 @@ const publication = {
   slug,
   previousSlugs: z.array(slug).default([]),
   translationKey: z.string().trim().min(1).optional(),
+  status: z.enum(publicationStatuses).default("published"),
+  scheduledFor: z.date().optional().nullable(),
+  expireAt: z.date().optional().nullable(),
+  redirectTo: z
+    .string()
+    .refine(
+      value => value.startsWith("/") || /^https?:\/\//.test(value),
+      "Use an absolute path or an HTTP(S) URL"
+    )
+    .optional(),
+  // Chinese entries treat an omitted value as not-required. English entries
+  // must explicitly reach `published` before they become public.
+  translationStatus: z.enum(translationStatuses).optional(),
   topics: z.array(slug).default([]),
   stage: z.enum(maturityStages).default("seedling"),
   relationships: z
@@ -39,7 +54,7 @@ const publication = {
 
 // Astro's glob loader otherwise uses frontmatter slug as the internal ID.
 const fileId = ({ entry }: { entry: string }) =>
-  entry.replaceAll("\\", "/").replace(/\.mdx?$/, "");
+  entry.replaceAll("\\", "/").replace(/\.(?:mdx?|ya?ml)$/, "");
 
 const blog = defineCollection({
   loader: glob({
@@ -56,10 +71,11 @@ const blog = defineCollection({
       modDatetime: z.date().optional().nullable(),
       title: z.string(),
       featured: z.boolean().optional(),
+      // Kept for compatibility with older content. New content uses `status`.
       draft: z.boolean().optional(),
       tags: z.array(z.string()).default(["others"]),
       ogImage: image().or(z.string()).optional(),
-      coverImage: image().optional(),
+      coverImage: image().or(z.url()).optional(),
       description: z.string(),
       canonicalURL: z
         .url()
@@ -87,12 +103,12 @@ const galleries = defineCollection({
       description: z.string(),
       pubDatetime: z.date(),
       draft: z.boolean().optional(),
-      coverImage: image().optional(),
+      coverImage: image().or(z.url()).optional(),
       tags: z.array(z.string()).default([]),
       media: z
         .array(
           z.object({
-            src: image(),
+            src: image().or(z.url()),
             alt: z.string().trim().min(1),
             credit: z.string().trim().min(1).optional(),
             license: z.string().trim().min(1).optional(),
@@ -118,4 +134,27 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { blog, galleries, pages };
+const tombstones = defineCollection({
+  loader: glob({
+    pattern: "**/*.{yaml,yml}",
+    base: `./${TOMBSTONE_PATH}`,
+    generateId: fileId,
+  }),
+  schema: z.object({
+    path: z
+      .string()
+      .regex(/^\/.*\/$/, "Use a site-relative path with a trailing slash"),
+    status: z.enum(["expired", "withdrawn", "deleted"]),
+    redirectTo: z
+      .string()
+      .refine(
+        value => value.startsWith("/") || /^https?:\/\//.test(value),
+        "Use an absolute path or an HTTP(S) URL"
+      )
+      .optional(),
+    withdrawnAt: z.date().optional(),
+    note: z.string().optional(),
+  }),
+});
+
+export const collections = { blog, galleries, pages, tombstones };

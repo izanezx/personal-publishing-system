@@ -3,6 +3,9 @@
 本文说明如何新增、修改、排期、下线和部署内容。内容模型以
 `src/content.config.ts` 为准。
 
+日常写作和发布以 [Sveltia CMS 写作与发布](SVELTIA.zh-CN.md) 为准。本文件保留
+内容模型和本地开发说明；不需要本地命令行也能完成正常内容发布。
+
 ## 内容放在哪里
 
 中文内容放在：
@@ -189,13 +192,14 @@ https://zanezx.com/en/posts/my-new-article/
 
 ## 图片、封面与 Gallery
 
-- 文章图片放在文章附近；例如
-  `src/data/blog/zh-cn/my-new-article/cover.jpg`。
-- Frontmatter 使用相对路径，例如 `coverImage: ./my-new-article/cover.jpg`。
-- 正文 Markdown 使用 `![准确的替代文本](./my-new-article/photo.jpg)`。
+- Sveltia CMS 上传的图片放在 Cloudflare R2，公开地址以
+  `https://media.zanezx.com/cms/` 开头。
+- 旧本地内容仍可使用仓库内图片，但新图片默认使用 R2。
 - 每张有意义的图片必须有说明性替代文本。
 - 保存创作者、来源、许可证和署名记录。
 - 上传前清除位置、设备和隐私元数据。
+
+创建、轮换和验证 R2 凭据见 [R2 媒体存储](MEDIA_R2.zh-CN.md)。
 
 Gallery 使用独立目录：
 
@@ -230,24 +234,26 @@ MDX 文章可以嵌入同语言中已发布的 Gallery：
 <GalleryEmbed slug="my-gallery" limit={3} />
 ```
 
-## 草稿与定时发布
+## 草稿、定时与归档
 
-草稿：
-
-```yaml
-draft: true
-```
-
-定时发布：
+当前统一使用 `status`：
 
 ```yaml
-pubDatetime: 2026-12-01T09:00:00+08:00
+status: draft
 ```
 
-草稿和 `pubDatetime` 尚未到达的内容不会进入页面、RSS、Sitemap 或搜索。
+定时公开：
 
-本站是静态站点。未来时间到达后不会自动出现，必须在目标时间之后重新构建并
-部署。若希望精确自动发布，需要另外增加定时构建和部署工作流。
+```yaml
+status: scheduled
+scheduledFor: 2026-12-01T09:00:00+08:00
+```
+
+未来的 `scheduledFor` 或 `pubDatetime` 不会提前进入页面、RSS、Sitemap 或搜索。
+定时检查每 15 分钟运行一次；到点后自动触发生产重建和线上验证。
+
+其他状态为 `published`、`unlisted`、`archived`、`expired` 和 `withdrawn`。
+完整行为见 [Sveltia CMS 写作与发布](SVELTIA.zh-CN.md)。
 
 ## 修改已发布文章
 
@@ -256,7 +262,7 @@ pubDatetime: 2026-12-01T09:00:00+08:00
 1. 保留 `uid`、`slug` 和 `translationKey`。
 2. 修改标题或正文。
 3. 对实质性修改填写 `modDatetime`。
-4. 构建、检查、提交 PR 并部署。
+4. 在 Sveltia 中保存，推进到 Pending Publish，等待自动合并和部署。
 
 不要因为标题、文件夹或摘要变化就修改 `slug`。公开 URL 应保持稳定。
 
@@ -273,9 +279,9 @@ previousSlugs: ["old-address"]
 
 ### 下线或删除内容
 
-短期下线可设置 `draft: true`，然后重新构建和部署。若文章已被搜索引擎收录，
-长期删除时还应规划：保留一个说明页、重定向到相关内容，或返回明确的 410。
-当前系统只自动生成 `previousSlugs` 对应的 301。
+使用 `status: expired` 或 `status: withdrawn`。`redirectTo` 有值时返回 301；
+留空时返回 410。已经删除文件的内容使用 tombstone。详细操作见
+[Sveltia CMS 写作与发布](SVELTIA.zh-CN.md)。
 
 ## 本地检查
 
@@ -329,6 +335,11 @@ pnpm test:release
 
 ## 提交与合并
 
+使用 Sveltia 时，保存内容会自动创建分支和 PR。推进到 Pending Publish 后，
+系统只在变更全部位于允许的内容路径时启用自动合并。
+
+手动开发内容时仍然可以执行：
+
 ```bash
 git add src/data/blog
 git commit -m "content: add my new article"
@@ -340,49 +351,18 @@ git push -u origin content/my-new-article
 - `Linux checks`
 - `Windows build`
 
-合并只代表内容进入仓库。当前项目没有在合并后自动部署，必须继续执行 Cloudflare
-发布。
+合并后，主分支 CI 成功会自动触发生产部署和 Smoke Test。
 
 ## 发布到 Cloudflare
 
-### 有 GitHub Actions Secrets 时
+正常内容发布由 GitHub Actions 自动完成：
 
-1. 在 `main` 上运行 **Cloudflare release** 工作流。
-2. 选择 `target=preview`。
-3. 检查 Preview URL、`X-Robots-Tag: noindex, nofollow`、搜索、RSS 和页面。
-4. 记录成功 Preview run ID。
-5. 需要正式发布时，再次运行工作流：
-   - `target=production`
-   - 填写 Preview run ID
-   - `owner_approved=true`
+1. PR 自动部署到独立 Preview Worker。
+2. Pending Publish 触发内容路径校验和 auto-merge。
+3. `main` CI 成功后自动部署生产 Worker。
+4. 线上 Smoke Test 失败时自动回滚。
 
-### 当前 CLI 手动发布时
-
-非索引候选版本：
-
-```bash
-pnpm build
-node scripts/preview-policy.mjs
-pnpm dlx wrangler@4.165.0 deploy --env ''
-```
-
-独立 Preview Worker：
-
-```bash
-pnpm build
-node scripts/preview-policy.mjs
-pnpm dlx wrangler@4.165.0 deploy --env preview
-```
-
-获得正式索引批准后，重新构建并发布生产版：
-
-```bash
-pnpm build
-pnpm dlx wrangler@4.165.0 deploy --env ''
-```
-
-最后一条命令不能复用已执行 `preview-policy.mjs` 的 `dist`；必须先重新构建，
-确保不再带 `noindex, nofollow`。
+CLI 只用于基础设施维护、故障诊断或首次配置，不再是日常发布步骤。
 
 当前唯一域名是 `https://zanezx.com/`。不要重新添加
 `www.zanezx.com`；若 CLI 登录过期，使用：
@@ -410,16 +390,13 @@ https://zanezx.com/sitemap-index.xml
 
 ## 回滚
 
-先查看最近的 Worker Versions：
+生产 Workflow 在 Smoke Test 失败时会自动回滚到部署前 Version。人工回滚只用于
+Workflow 之外的故障；先查看最近的 Worker Versions：
 
 ```bash
-pnpm dlx wrangler@4.165.0 versions list
-```
-
-回滚到已知正常版本：
-
-```bash
-pnpm dlx wrangler@4.165.0 rollback <version-id>
+pnpm dlx wrangler@4.165.0 versions list --name personal-publishing-system
+pnpm dlx wrangler@4.165.0 rollback <version-id> \
+  --name personal-publishing-system
 ```
 
 内容错误也可用一次修复 PR 重新发布。不要通过强推 `main` 或删除历史来修复生产

@@ -22,3 +22,8 @@ license and notice files are retained inside each Skill directory. Known
 upstream sources include mattpocock/skills, astrolicious/agent-skills,
 addyosmani/web-quality-skills, delineas/astro-framework-agents, openai/skills
 cloudflare/skills and sveltia/ai-tools.
+
+The Sveltia CMS authenticator is vendored under `infra/sveltia-auth/` from
+[sveltia/sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth) at
+revision `e62e76ae5ca4dd28e751607b331bb47bb1feddfe`. Its MIT license and
+source record are retained in that directory.

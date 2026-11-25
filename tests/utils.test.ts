@@ -9,6 +9,13 @@ import postFilter from "@/utils/postFilter";
 import { getReadingTime } from "@/utils/readingTime";
 import type { ContentEntry } from "@/utils/contentEntry";
 import { slugifyAll, slugifyStr } from "@/utils/slugify";
+import {
+  effectivePublicationStatus,
+  isListedPublication,
+  isRoutablePublication,
+  isSearchablePublication,
+} from "@/lib/content/status";
+import { findGoneMatch } from "@/lib/content/runtime";
 
 test("slugifyStr normalizes diacritics, versions, punctuation, and unicode", () => {
   assert.equal(slugifyStr("E2E Testing"), "e2e-testing");
@@ -93,6 +100,7 @@ test("getPath skips _-prefixed dirs and slugifies nested subdirectories", () => 
 test("postFilter hides drafts and scheduled future posts", () => {
   const entry = (overrides: Record<string, unknown>) =>
     ({
+      id: "zh-cn/fixture",
       data: {
         title: "t",
         description: "d",
@@ -127,4 +135,136 @@ test("a publication becomes visible at its exact timestamp", () => {
     isPublished({ pubDatetime: start, draft: true }, start.getTime()),
     false
   );
+});
+
+test("English translations remain hidden until their review is published", () => {
+  const start = new Date("2020-01-01T00:00:00Z");
+  assert.equal(isPublished({ pubDatetime: start }, "en"), false);
+  assert.equal(
+    isPublished({ pubDatetime: start, translationStatus: "ai-draft" }, "en"),
+    false
+  );
+  assert.equal(
+    isPublished({ pubDatetime: start, translationStatus: "published" }, "en"),
+    true
+  );
+});
+
+test("publication lifecycle controls routing, listing and indexing", () => {
+  const now = new Date("2026-06-01T00:00:00Z");
+  const base = {
+    pubDatetime: new Date("2026-01-01T00:00:00Z"),
+    translationStatus: "published" as const,
+  };
+
+  assert.equal(
+    effectivePublicationStatus(
+      { ...base, status: "scheduled", scheduledFor: new Date("2026-05-01") },
+      now.getTime()
+    ),
+    "published"
+  );
+  assert.equal(
+    isRoutablePublication(
+      { ...base, status: "unlisted" },
+      "zh-CN",
+      now.getTime()
+    ),
+    true
+  );
+  assert.equal(
+    isListedPublication(
+      { ...base, status: "unlisted" },
+      "zh-CN",
+      now.getTime()
+    ),
+    false
+  );
+  assert.equal(
+    isSearchablePublication(
+      { ...base, status: "unlisted" },
+      "zh-CN",
+      now.getTime()
+    ),
+    false
+  );
+  assert.equal(
+    isRoutablePublication(
+      { ...base, status: "archived" },
+      "zh-CN",
+      now.getTime()
+    ),
+    true
+  );
+  assert.equal(
+    isListedPublication(
+      { ...base, status: "archived" },
+      "zh-CN",
+      now.getTime()
+    ),
+    false
+  );
+  assert.equal(
+    isSearchablePublication(
+      { ...base, status: "archived" },
+      "zh-CN",
+      now.getTime()
+    ),
+    true
+  );
+  assert.equal(
+    isRoutablePublication(
+      {
+        ...base,
+        status: "published",
+        expireAt: new Date("2026-05-01"),
+      },
+      "zh-CN",
+      now.getTime()
+    ),
+    false
+  );
+});
+
+test("future tombstones activate at their effective time", () => {
+  const entries = [
+    {
+      path: "/posts/future-expiry/",
+      status: "expired" as const,
+      effectiveAt: "2026-12-01T00:00:00.000Z",
+    },
+    {
+      path: "/posts/immediate-gone/",
+      status: "withdrawn" as const,
+    },
+    {
+      path: "/posts/moved/",
+      status: "deleted" as const,
+      redirectTo: "/posts/new/",
+    },
+  ];
+
+  assert.equal(
+    findGoneMatch(
+      "/posts/future-expiry/",
+      entries,
+      new Date("2026-11-30T23:59:59.000Z").getTime()
+    ),
+    undefined
+  );
+  assert.deepEqual(
+    findGoneMatch(
+      "/posts/future-expiry/",
+      entries,
+      new Date("2026-12-01T00:00:00.000Z").getTime()
+    ),
+    { status: 410 }
+  );
+  assert.deepEqual(findGoneMatch("/posts/immediate-gone/", entries), {
+    status: 410,
+  });
+  assert.deepEqual(findGoneMatch("/posts/moved/", entries), {
+    status: 301,
+    redirectTo: "/posts/new/",
+  });
 });
