@@ -113,7 +113,38 @@ Repository → Settings → Secrets and variables → Actions → Variables：
 Environment Secrets 不应改成 Repository Secrets。`preview` 和 `production` 使用
 不同 Cloudflare Token。
 
-## 5. 验收顺序
+## 5. 重建 Cloudflare Actions Token
+
+当前 `preview/CLOUDFLARE_API_TOKEN_PREVIEW` 曾被填入说明文字，Wrangler 会以
+`contains a character that cannot be used in an HTTP Authorization header`
+拒绝部署。必须重新创建下列两个 Token，并把完整 Token 值分别写入对应
+Environment。
+
+Cloudflare Dashboard → My Profile → API Tokens → Create Token →
+Create Custom Token：
+
+| Token                         | Account 权限          | Zone 权限                                    |
+| ----------------------------- | --------------------- | -------------------------------------------- |
+| Preview Worker 部署           | Workers Scripts: Edit | 无                                           |
+| Production Worker 部署        | Workers Scripts: Edit | Zone: Read；Workers Routes: Edit             |
+
+两个 Token 都只授权 Account
+`e9e4d464cf14a55127f534b7f3f63378`。Production Token 的 Zone 只授权
+`zanezx.com`。不要添加 R2、D1 或其他与部署无关的权限。
+
+创建后立即把完整 Token 写入：
+
+```text
+https://github.com/izanezx/personal-publishing-system/settings/environments
+```
+
+- `preview` → `CLOUDFLARE_API_TOKEN_PREVIEW`
+- `production` → `CLOUDFLARE_API_TOKEN_PRODUCTION`
+
+不要把 Token 发到对话、Issue 或提交中。不要复制 Dashboard 中的省略号，
+也不要粘贴“下一步”等说明文字。更新后重新运行失败的工作流即可。
+
+## 6. 验收顺序
 
 1. 把本分支合并到 `main`。
 2. 等新 Workflow 出现在默认分支。
@@ -127,7 +158,7 @@ Environment Secrets 不应改成 Repository Secrets。`preview` 和 `production`
 10. 检查生产页面、RSS、Sitemap、搜索和 Worker Version。
 11. 删除测试内容，验证下线流程。
 
-## 6. 首次正式索引
+## 7. 首次正式索引
 
 正式内容、品牌信息、联系方式、图片授权和隐私检查完成后，才允许：
 
