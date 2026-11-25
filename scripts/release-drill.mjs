@@ -114,7 +114,14 @@ async function serve(assets, verify) {
 }
 
 async function verifyProduction(origin, home, version) {
-  assert.equal(home.headers.get("x-robots-tag"), null);
+  const indexing = await (
+    await fetch(origin + "/runtime/indexing.json")
+  ).json();
+  if (indexing.enabled) {
+    assert.equal(home.headers.get("x-robots-tag"), null);
+  } else {
+    assert.equal(home.headers.get("x-robots-tag"), "noindex, nofollow");
+  }
   assert.equal(home.headers.get("x-content-type-options"), "nosniff");
   assert.match(
     await home.text(),
@@ -122,11 +129,14 @@ async function verifyProduction(origin, home, version) {
   );
   assert.match(
     await (await fetch(origin + "/robots.txt")).text(),
-    /https:\/\/zanezx.com\/sitemap-index\.xml/
+    indexing.enabled
+      ? /https:\/\/zanezx.com\/sitemap-index\.xml/
+      : /Disallow:\s*\/$/m
   );
   assert.equal((await fetch(origin + "/sitemap-index.xml")).status, 200);
   assert.equal((await fetch(origin + "/en/rss.xml")).status, 200);
   assert.equal((await fetch(origin + "/__missing-test__/")).status, 404);
+  assert.equal((await fetch(origin + "/posts/deleted-example/")).status, 404);
   const redirect = await fetch(origin + "/posts/publishing-guide/", {
     redirect: "manual",
   });
@@ -135,6 +145,18 @@ async function verifyProduction(origin, home, version) {
     new URL(redirect.headers.get("location"), origin).pathname,
     "/posts/publishing-baseline/"
   );
+  const aliasRedirect = await fetch(
+    origin + "/posts/legacy-publishing-baseline/",
+    { redirect: "manual" }
+  );
+  assert.equal(aliasRedirect.status, 301);
+  assert.equal(
+    new URL(aliasRedirect.headers.get("location"), origin).pathname,
+    "/posts/publishing-baseline/"
+  );
+  const archived = await fetch(origin + "/posts/archived-fixture/");
+  assert.equal(archived.status, 200);
+  assert.match(await archived.text(), /data-archive-notice/);
   assert.equal(
     await (await fetch(origin + "/release-drill.txt")).text(),
     version

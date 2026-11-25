@@ -23,7 +23,7 @@ const { entry } = Astro.props;
 Astro.locals.entryAlternates = await getEntryAlternates(entry);
 const { title, description, pubDatetime, coverImage, tags } = entry.data;
 const publication = adaptPublication(entry);
-const noindex = publication.status === "unlisted";
+const noindex = publication.status !== "published";
 
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
@@ -147,6 +147,23 @@ const gallerySchema = {
         </div>
       </div>
     </header>
+
+    {publication.status === "archived" && (
+      <aside
+        class="mb-8 rounded-2xl border border-accent/25 bg-accent/5 px-5 py-4 text-sm text-foreground/75"
+        role="note"
+        data-archive-notice
+      >
+        <strong class="text-foreground">
+          {locale === "zh-CN" ? "归档图库" : "Archived gallery"}
+        </strong>
+        <span class="mt-1 block">
+          {locale === "zh-CN"
+            ? "该图库保留原地址供历史阅读，但已退出首页、订阅、站点地图和搜索。"
+            : "This gallery remains available at its original URL for historical reading, but it is excluded from indexes, feeds, the sitemap and search."}
+        </span>
+      </aside>
+    )}
 
     <!-- Large cover (if defined in frontmatter and not in the folder) -->
     {coverImage && !hasCoverInFolder && (

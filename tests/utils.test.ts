@@ -118,6 +118,23 @@ test("postFilter hides drafts and scheduled future posts", () => {
     postFilter(entry({ pubDatetime: new Date(Date.now() - 86_400_000) })),
     true
   );
+
+  const previousPreviewMode = process.env.PUBLIC_PREVIEW_CONTENT;
+  process.env.PUBLIC_PREVIEW_CONTENT = "true";
+  try {
+    assert.equal(postFilter(entry({ draft: true })), true);
+    assert.equal(
+      postFilter(entry({ pubDatetime: new Date(Date.now() + 86_400_000) })),
+      true
+    );
+    assert.equal(postFilter(entry({ status: "expired" })), false);
+  } finally {
+    if (previousPreviewMode === undefined) {
+      delete process.env.PUBLIC_PREVIEW_CONTENT;
+    } else {
+      process.env.PUBLIC_PREVIEW_CONTENT = previousPreviewMode;
+    }
+  }
 });
 
 test("JSON-LD preserves text while escaping HTML delimiters", () => {
@@ -210,19 +227,52 @@ test("publication lifecycle controls routing, listing and indexing", () => {
       "zh-CN",
       now.getTime()
     ),
-    true
+    false
   );
   assert.equal(
     isRoutablePublication(
       {
         ...base,
         status: "published",
-        expireAt: new Date("2026-05-01"),
+        expiresAt: new Date("2026-05-01"),
       },
       "zh-CN",
       now.getTime()
     ),
     false
+  );
+  assert.equal(
+    effectivePublicationStatus(
+      {
+        ...base,
+        status: "published",
+        expireAt: new Date("2026-05-01"),
+      },
+      now.getTime()
+    ),
+    "expired"
+  );
+  assert.equal(
+    effectivePublicationStatus(
+      {
+        ...base,
+        status: "published",
+        archivedAt: new Date("2026-05-15"),
+      },
+      now.getTime()
+    ),
+    "archived"
+  );
+  assert.equal(
+    effectivePublicationStatus(
+      {
+        ...base,
+        status: "published",
+        archivedAt: new Date("2026-06-15"),
+      },
+      now.getTime()
+    ),
+    "published"
   );
 });
 
@@ -241,6 +291,10 @@ test("future tombstones activate at their effective time", () => {
       path: "/posts/moved/",
       status: "deleted" as const,
       redirectTo: "/posts/new/",
+    },
+    {
+      path: "/posts/deleted/",
+      status: "deleted" as const,
     },
   ];
 
@@ -267,4 +321,5 @@ test("future tombstones activate at their effective time", () => {
     status: 301,
     redirectTo: "/posts/new/",
   });
+  assert.equal(findGoneMatch("/posts/deleted/", entries), undefined);
 });

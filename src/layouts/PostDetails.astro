@@ -38,7 +38,7 @@ const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 const prefix = localePrefix(locale);
 const publication = adaptPublication(post);
-const noindex = publication.status === "unlisted";
+const noindex = publication.status !== "published";
 const searchable = isSearchablePublication(post.data, locale);
 
 const {
@@ -299,6 +299,23 @@ const recommendedPost = rawRecommendedPost
         </div>
       </div>
     </header>
+
+    {publication.status === "archived" && (
+      <aside
+        class="mx-auto mt-8 max-w-3xl rounded-2xl border border-accent/25 bg-accent/5 px-5 py-4 text-sm text-foreground/75"
+        role="note"
+        data-archive-notice
+      >
+        <strong class="text-foreground">
+          {locale === "zh-CN" ? "归档内容" : "Archived content"}
+        </strong>
+        <span class="mt-1 block">
+          {locale === "zh-CN"
+            ? "这篇内容保留原地址供历史阅读，但已退出首页、订阅、站点地图和搜索。"
+            : "This entry remains available at its original URL for historical reading, but it is excluded from indexes, feeds, the sitemap and search."}
+        </span>
+      </aside>
+    )}
 
     {hasToc ? (
       <div class="mt-8 grid w-full grid-cols-1 items-start lg:grid-cols-[1fr_250px] lg:gap-12">

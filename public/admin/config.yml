@@ -22,7 +22,7 @@ app_title: zanezx 内容发布台
 logo_url: https://zanezx.com/favicon.svg
 
 editor:
-  preview: false
+  preview: true
   second_pane: false
 
 output:
@@ -39,6 +39,7 @@ i18n:
   locales: [zh-cn, en]
   default_locale: zh-cn
   initial_locales: default
+  omit_default_locale_from_preview_path: true
 
 media_libraries:
   all:
@@ -65,14 +66,36 @@ collections:
     label: 发布内容
     label_singular: 发布条目
     description: Markdown 文章、Notes、Projects、Library 和 Garden 条目。MDX 交互文章由代码或 Agent 维护。
+    icon: article
     folder: src/data/blog
     identifier_field: slug
     summary: "{{title}} · {{status}} · {{locales}}"
+    thumbnail: coverImage
     sortable_fields:
       fields: [pubDatetime, modDatetime, title, status]
       default:
         field: pubDatetime
         direction: descending
+    table_columns:
+      - title
+      - { field: "{{pubDatetime | date('YYYY-MM-DD')}}", label: 发布时间 }
+      - status
+      - translationStatus
+      - { field: "{{locales}}", label: 语言 }
+    bulk_edit:
+      fields: [status, kind]
+    view_groups:
+      groups:
+        - name: kind
+          label: 内容类型
+          field: kind
+        - name: status
+          label: 状态
+          field: status
+        - name: year
+          label: 年份
+          field: pubDatetime
+          pattern: '\d{4}'
     path: "{{slug}}"
     extension: md
     format: frontmatter
@@ -80,6 +103,8 @@ collections:
       key: body
     i18n: true
     slug: "{{fields.slug}}"
+    aliases_field: aliases
+    preview_path: "/{{locale}}/posts/{{slug}}/"
     view_filters:
       - label: 文章
         field: kind
@@ -116,13 +141,14 @@ collections:
             '/^[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*$/u',
             "只能使用一个 URL 段：字母、数字和连字符",
           ]
-        hint: 发布后尽量保持不变。修改 URL 时把旧值加入 previousSlugs。
+        hint: 修改 URL 时，Sveltia 会把旧公开路径写入 aliases 并生成 301。
       - name: previousSlugs
-        label: 旧 Slug
+        label: 兼容旧 Slug
         widget: list
         field: { name: slug, label: 旧 Slug, widget: string }
         default: []
         required: false
+        hint: 仅兼容旧内容；新链接变更使用 aliases。
       - name: translationKey
         label: 翻译关联键
         widget: string
@@ -180,7 +206,15 @@ collections:
         input_timezone: Asia/Shanghai
         output_utc: true
         hint: status=scheduled 时使用。
-      - name: expireAt
+      - name: archivedAt
+        label: 自动归档时间
+        widget: datetime
+        i18n: duplicate
+        required: false
+        input_timezone: Asia/Shanghai
+        output_utc: true
+        hint: 到点后保留正文、显示归档提示，并退出列表、RSS、Sitemap 和搜索。
+      - name: expiresAt
         label: 自动过期时间
         widget: datetime
         i18n: duplicate
@@ -259,11 +293,17 @@ collections:
         widget: image
         choose_url: true
         required: false
+        media_libraries:
+          cloudflare_r2:
+            prefix: "cms/{{locale}}/{{fields.kind}}/{{year}}/{{slug}}/"
       - name: ogImage
         label: 社交分享图
         widget: image
         choose_url: true
         required: false
+        media_libraries:
+          cloudflare_r2:
+            prefix: "cms/{{locale}}/{{fields.kind}}/{{year}}/{{slug}}/"
       - name: canonicalURL
         label: Canonical URL
         widget: string
@@ -304,13 +344,32 @@ collections:
             numbered-list,
             quote,
           ]
+        editor_components: [code-block, image, table, hr, callout]
 
   - name: galleries
     label: 图库
     label_singular: 图库
+    icon: photo_library
     folder: src/data/galleries
     identifier_field: slug
     summary: "{{title}} · {{status}} · {{locales}}"
+    thumbnail: coverImage
+    table_columns:
+      - title
+      - { field: "{{pubDatetime | date('YYYY-MM-DD')}}", label: 发布时间 }
+      - status
+      - { field: "{{locales}}", label: 语言 }
+    bulk_edit:
+      fields: [status]
+    view_groups:
+      groups:
+        - name: status
+          label: 状态
+          field: status
+        - name: year
+          label: 年份
+          field: pubDatetime
+          pattern: '\d{4}'
     path: "{{slug}}/index"
     extension: md
     format: frontmatter
@@ -318,6 +377,8 @@ collections:
       key: body
     i18n: true
     slug: "{{fields.slug}}"
+    aliases_field: aliases
+    preview_path: "/{{locale}}/galleries/{{slug}}/"
     fields:
       - name: uid
         widget: hidden
@@ -334,6 +395,13 @@ collections:
         widget: string
         i18n: duplicate
         required: false
+      - name: previousSlugs
+        label: 兼容旧 Slug
+        widget: list
+        field: { name: slug, label: 旧 Slug, widget: string }
+        default: []
+        required: false
+        hint: 仅兼容旧内容；新链接变更使用 aliases。
       - name: title
         label: 标题
         widget: string
@@ -363,7 +431,14 @@ collections:
         input_timezone: Asia/Shanghai
         output_utc: true
         required: false
-      - name: expireAt
+      - name: archivedAt
+        label: 自动归档时间
+        widget: datetime
+        i18n: duplicate
+        input_timezone: Asia/Shanghai
+        output_utc: true
+        required: false
+      - name: expiresAt
         label: 自动过期时间
         widget: datetime
         i18n: duplicate
@@ -405,6 +480,9 @@ collections:
         widget: image
         choose_url: true
         required: false
+        media_libraries:
+          cloudflare_r2:
+            prefix: "cms/{{locale}}/gallery/{{year}}/{{slug}}/"
       - name: media
         label: 图片
         widget: list
@@ -415,6 +493,9 @@ collections:
             widget: image
             choose_url: true
             required: true
+            media_libraries:
+              cloudflare_r2:
+                prefix: "cms/{{locale}}/gallery/{{year}}/{{slug}}/"
           - name: alt
             label: 替代文本
             widget: string
@@ -436,10 +517,12 @@ collections:
         widget: richtext
         format: markdown
         required: false
+        editor_components: [code-block, image, table, hr, callout]
 
   - name: editorial-pages
     label: About 与 Now
     label_singular: 页面
+    icon: description
     i18n: true
     files:
       - name: about
@@ -449,9 +532,6 @@ collections:
         format: frontmatter
         body_field:
           key: body
-        editor:
-          preview: false
-          second_pane: false
         fields:
           - {
               name: title,
@@ -474,6 +554,7 @@ collections:
               i18n: true,
               format: markdown,
               required: false,
+              editor_components: [code-block, image, table, hr, callout],
             }
       - name: now
         label: Now
@@ -482,9 +563,6 @@ collections:
         format: frontmatter
         body_field:
           key: body
-        editor:
-          preview: false
-          second_pane: false
         fields:
           - {
               name: title,
@@ -507,12 +585,14 @@ collections:
               i18n: true,
               format: markdown,
               required: false,
+              editor_components: [code-block, image, table, hr, callout],
             }
 
   - name: tombstones
     label: 下线记录
     label_singular: 下线记录
     description: 用于保留已删除页面、返回 410，或把旧地址 301 到新内容。
+    icon: link_off
     folder: src/data/tombstones
     identifier_field: path
     summary: "{{path}} · {{status}}"

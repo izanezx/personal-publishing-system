@@ -34,6 +34,7 @@
 - [ ] 审核 `PUBLIC_SOCIAL_GITHUB` 对应的作者署名。
 - [ ] 如需更改文字标识，提供 Logo 或字标。
 - [ ] 提供 favicon 和社交分享图，并确认所有权与使用权。
+- [ ] 选择 AI 翻译服务并在浏览器中配置 API Key；不要发送到对话或提交到仓库。
 
 ## 发布内容
 
@@ -62,7 +63,7 @@
 
 - [x] 确认 `https://zanezx.com/` 为生产规范域名。
 - [x] 确认 Cloudflare 账号并批准 Preview Worker。
-- [ ] 批准用于生产的具体 Preview commit 和 artifact。
+- [x] 自动生产发布使用同一次 `main` CI 生成并通过校验的 artifact。
 - [x] 绑定根域名 `zanezx.com` 的 Worker Route。
 - [x] 只保留不带 `www` 的根域名，不绑定 `www.zanezx.com`。
 - [ ] 批准首次允许搜索引擎公开索引的日期。
@@ -81,8 +82,8 @@
 
 ## 后续修改方式
 
-创建短生命周期分支，每次只处理一个明确改动，运行文档规定的检查，并在
-Linux 与 Windows CI 通过后，通过 Pull Request 合并。
+日常文章和页面内容在 Sveltia 中保存，直接提交 `main` 并自动进入生产验收。
+代码、Schema、依赖、Workflow 和基础设施改动使用短生命周期分支与 Pull Request。
 
 常用文件位置：
 
@@ -99,8 +100,8 @@ Linux 与 Windows CI 通过后，通过 Pull Request 合并。
 | 路由和列表页         | `src/pages/` 和 `src/lib/content/`                            |
 | Skills 和 Agent 规则 | `.agents/skills/`、`AGENTS.md` 和 `docs/AGENT_ENVIRONMENT.md` |
 
-修改文章 URL 时，保留原有 `uid` 和 `slug`，把旧公开路径追加到
-`previousSlugs`。不要仅因为标题或文件夹变化就修改 `translationKey`。
+修改文章 URL 时，保留原有 `uid`，在 Sveltia 中修改 `slug`。Sveltia 会自动把
+旧公开路径追加到 `aliases`。不要仅因为标题或文件夹变化就修改 `translationKey`。
 
 建议修改流程：
 
@@ -118,5 +119,6 @@ git commit -m "content: update about page"
 git push -u origin content/update-about
 ```
 
-打开 Pull Request，等待 Linux 与 Windows CI 通过，检查 Preview artifact，
-然后合并。生产部署仍是独立的所有者批准流程。
+打开 Pull Request，等待 Linux 与 Windows CI 和 Preview 检查通过后合并。合并后的
+`main` CI 产物会绑定提交、索引策略和 SHA-256，通过生产 Smoke Test 后自动上线；
+失败会自动回滚。正式索引与稳定版发布仍需所有者单独批准。

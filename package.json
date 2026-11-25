@@ -20,7 +20,10 @@
     "test:e2e": "playwright test",
     "test:release": "node scripts/release-drill.mjs",
     "smoke": "node scripts/smoke.mjs",
-    "status:due": "node scripts/status-due.mjs"
+    "status:due": "node scripts/status-due.mjs",
+    "candidate:create": "node scripts/candidate-artifact.mjs create",
+    "candidate:verify": "node scripts/candidate-artifact.mjs verify",
+    "media:check": "node scripts/validate-media-sources.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "7.3.10",

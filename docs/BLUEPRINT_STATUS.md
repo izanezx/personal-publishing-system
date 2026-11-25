@@ -13,6 +13,9 @@ This record checks the current `main` branch against:
 
 The latest source comparison is in
 [UPSTREAM_COMPARISON.md](UPSTREAM_COMPARISON.md).
+The Sveltia CMS automation scope, content-state matrix and A0–A8 acceptance
+evidence are in
+[SVELTIA_AUTOMATION_ACCEPTANCE.md](SVELTIA_AUTOMATION_ACCEPTANCE.md).
 
 ## Upstream decoupling
 

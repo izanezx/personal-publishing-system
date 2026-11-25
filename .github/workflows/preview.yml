@@ -1,23 +1,27 @@
 name: Preview
 
 on:
-  pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
 
 permissions:
   contents: read
+  actions: read
   pull-requests: write
+  statuses: write
 
 concurrency:
-  group: preview-${{ github.event.pull_request.number }}
+  group: cloudflare-preview
   cancel-in-progress: true
 
 jobs:
   deploy-preview:
     name: Deploy preview
     if: >-
-      github.event.pull_request.draft == false &&
-      github.event.pull_request.head.repo.full_name == github.repository
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     environment:
       name: preview
@@ -28,29 +32,53 @@ jobs:
       PUBLIC_INDEXING_ENABLED: "false"
       PREVIEW_URL: ${{ vars.PREVIEW_URL }}
     steps:
+      # Keep the deployable Worker source on the trusted default branch. Only
+      # the immutable static artifact comes from the pull-request CI run.
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version-file: .node-version
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm cms:check
-      - run: pnpm build
+      - name: Download the verified preview artifact
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: site-preview
+          path: preview-candidate
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - name: Verify the preview artifact and source commit
+        env:
+          EXPECTED_COMMIT: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          node scripts/candidate-artifact.mjs verify preview-candidate \
+            --commit "$EXPECTED_COMMIT" \
+            --mode preview \
+            --indexing false \
+            --preview-content true
+          rm -rf dist
+          mv preview-candidate/dist dist
       - name: Deploy isolated preview Worker
+        id: deploy
         run: pnpm dlx wrangler@4.165.0 deploy --env preview
       - name: Verify the preview deployment
+        id: preview-smoke
         env:
           SMOKE_RETRIES: "30"
-        run: pnpm smoke --base-url "$PREVIEW_URL"
+        run: pnpm smoke --base-url "$PREVIEW_URL" --expect-preview-content
       - name: Publish the preview URL to the pull request
         env:
           GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
+          PR_NUMBER="$(
+            gh api "repos/${GITHUB_REPOSITORY}/commits/${COMMIT_SHA}/pulls" \
+              --jq '.[0].number // empty'
+          )"
+          if [[ -z "$PR_NUMBER" ]]; then
+            echo "No pull request is associated with ${COMMIT_SHA}; skipping comment."
+            exit 0
+          fi
           marker="<!-- publishing-preview -->"
           body="${marker}
           Preview: ${PREVIEW_URL}
@@ -70,3 +98,23 @@ jobs:
           else
             gh pr comment "$PR_NUMBER" --body "$body"
           fi
+      - name: Publish the preview commit status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+          SMOKE_OUTCOME: ${{ steps.preview-smoke.outcome }}
+        run: |
+          state="failure"
+          description="Preview deployment failed"
+          if [[ "$DEPLOY_OUTCOME" == "success" && "$SMOKE_OUTCOME" == "success" ]]; then
+            state="success"
+            description="Preview deployed without indexing"
+          fi
+          gh api --method POST \
+            "repos/${GITHUB_REPOSITORY}/statuses/${COMMIT_SHA}" \
+            --field state="$state" \
+            --field context="Preview deployment" \
+            --field description="$description" \
+            --field target_url="$PREVIEW_URL" >/dev/null

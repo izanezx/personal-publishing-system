@@ -29,6 +29,7 @@ export function adaptPublication(entry: ContentEntry): Publication {
     uid: data.uid,
     slug: data.slug,
     previousSlugs: data.previousSlugs,
+    aliases: data.aliases,
     locale,
     kind: "kind" in data ? data.kind : "gallery",
     translationKey: data.translationKey,
@@ -43,12 +44,14 @@ export function adaptPublication(entry: ContentEntry): Publication {
       draft: data.draft,
       pubDatetime: data.pubDatetime,
       scheduledFor: data.scheduledFor,
-      expireAt: data.expireAt,
+      archivedAt: data.archivedAt,
+      expiresAt: data.expiresAt ?? data.expireAt,
       translationStatus: data.translationStatus,
     }),
     translationStatus: effectiveTranslationStatus(data, locale),
     scheduledFor: data.scheduledFor,
-    expireAt: data.expireAt,
+    archivedAt: data.archivedAt,
+    expiresAt: data.expiresAt ?? data.expireAt,
     redirectTo: data.redirectTo,
     title: data.title,
     description: data.description,
@@ -151,11 +154,12 @@ export async function getPublicationRedirects() {
   ];
   return entries
     .map(adaptPublication)
-    .flatMap(entry =>
-      entry.previousSlugs.map(
+    .flatMap(entry => [
+      ...entry.previousSlugs.map(
         slug => `${previousPath(entry, slug)} ${entry.path} 301`
-      )
-    )
+      ),
+      ...entry.aliases.map(alias => `${alias} ${entry.path} 301`),
+    ])
     .sort();
 }
 
@@ -193,20 +197,18 @@ export async function getGonePublicationManifest() {
       ({ entry, publication }) =>
         publication.status === "expired" ||
         publication.status === "withdrawn" ||
-        Boolean(entry.data.expireAt)
+        Boolean(entry.data.expiresAt ?? entry.data.expireAt)
     )
     .map(({ entry, publication }) => {
       const immediate =
-        entry.data.status === "expired" ||
-        entry.data.status === "withdrawn" ||
-        entry.data.draft === true;
+        entry.data.status === "expired" || entry.data.status === "withdrawn";
       return {
         path: publication.path,
         status: publication.status === "withdrawn" ? "withdrawn" : "expired",
         redirectTo: publication.redirectTo,
-        ...(immediate || !publication.expireAt
+        ...(immediate || !publication.expiresAt
           ? {}
-          : { effectiveAt: publication.expireAt.toISOString() }),
+          : { effectiveAt: publication.expiresAt.toISOString() }),
       };
     });
   const tombstones = (await getCollection("tombstones")).map(entry => ({
@@ -244,11 +246,17 @@ export async function getScheduleRuntimeManifest(now = new Date()) {
           ? activationAt.toISOString()
           : undefined;
       const expireAt =
-        publication.expireAt &&
-        publication.expireAt.getTime() > now.getTime() &&
+        publication.expiresAt &&
+        publication.expiresAt.getTime() > now.getTime() &&
         entry.data.status !== "expired" &&
         entry.data.status !== "withdrawn"
-          ? publication.expireAt.toISOString()
+          ? publication.expiresAt.toISOString()
+          : undefined;
+      const archiveAt =
+        publication.archivedAt &&
+        publication.archivedAt.getTime() > now.getTime() &&
+        entry.data.status !== "archived"
+          ? publication.archivedAt.toISOString()
           : undefined;
 
       return {
@@ -257,8 +265,9 @@ export async function getScheduleRuntimeManifest(now = new Date()) {
           ? { activateAt }
           : {}),
         ...(expireAt ? { expireAt } : {}),
+        ...(archiveAt ? { archiveAt } : {}),
       };
     })
-    .filter(entry => entry.activateAt || entry.expireAt)
+    .filter(entry => entry.activateAt || entry.expireAt || entry.archiveAt)
     .sort((a, b) => a.path.localeCompare(b.path));
 }

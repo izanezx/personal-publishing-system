@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { appendFile } from "node:fs/promises";
+import { classifyScheduleManifest } from "./schedule-due.mjs";
 
 const baseUrl =
   process.env.PRODUCTION_URL?.replace(/\/$/, "") ?? "https://zanezx.com";
@@ -20,22 +21,13 @@ if (!response.ok) {
 
 const manifest = await response.json();
 const entries = Array.isArray(manifest.entries) ? manifest.entries : [];
-const due = entries.filter(
-  entry =>
-    typeof entry.activateAt === "string" &&
-    new Date(entry.activateAt).getTime() <= now
-);
-const expiring = entries.filter(
-  entry =>
-    typeof entry.expireAt === "string" &&
-    new Date(entry.expireAt).getTime() <= now
-);
-const hasDueActivation = due.length > 0;
+const { activations, expirations, archives, rebuildRequired } =
+  classifyScheduleManifest(entries, now);
 
 if (process.env.GITHUB_OUTPUT) {
   await appendFile(
     process.env.GITHUB_OUTPUT,
-    `due=${hasDueActivation}\ncount=${due.length}\n`
+    `due=${rebuildRequired}\ncount=${activations.length + expirations.length + archives.length}\n`
   );
 }
 
@@ -43,8 +35,9 @@ process.stdout.write(
   JSON.stringify({
     manifestUrl,
     generatedAt: manifest.generatedAt,
-    dueForPublication: due.map(entry => entry.path),
-    expiredSinceLastBuild: expiring.map(entry => entry.path),
-    rebuildRequired: hasDueActivation,
+    dueForPublication: activations.map(entry => entry.path),
+    expiredSinceLastBuild: expirations.map(entry => entry.path),
+    dueForArchive: archives.map(entry => entry.path),
+    rebuildRequired,
   }) + "\n"
 );

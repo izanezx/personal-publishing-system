@@ -38,6 +38,30 @@ test("drafts and future posts stay out of routes, feeds, and sitemaps", async ({
   ]) {
     expect((await request.get(path)).status()).toBe(404);
   }
+  const archived = await request.get("/posts/archived-fixture/");
+  expect(archived.status()).toBe(200);
+  const archivedHtml = await archived.text();
+  expect(archivedHtml).toContain("data-archive-notice");
+  expect(archivedHtml).toContain(
+    '<meta name="robots" content="noindex, follow">'
+  );
+  const unlisted = await request.get("/posts/unlisted-fixture/");
+  expect(unlisted.status()).toBe(200);
+  expect(await unlisted.text()).toContain(
+    '<meta name="robots" content="noindex, follow">'
+  );
+  for (const path of [
+    "/rss.xml",
+    "/en/rss.xml",
+    "/activity.xml",
+    "/sitemap-0.xml",
+  ]) {
+    const response = await request.get(path);
+    expect(response.ok()).toBeTruthy();
+    expect(await response.text()).not.toMatch(
+      /archived-fixture|unlisted-fixture/
+    );
+  }
   for (const path of [
     "/rss.xml",
     "/en/rss.xml",
@@ -99,6 +123,13 @@ test("shareable search restores Chinese and English queries", async ({
   await expect(page.locator("#linked-search input").first()).toHaveValue(
     "个人出版"
   );
+
+  await page.goto("/search/?q=" + encodeURIComponent("归档内容"));
+  await expect
+    .poll(() =>
+      page.locator("#linked-search .pagefind-ui__result-link").count()
+    )
+    .toBe(0);
 
   await page.goto("/en/search/?q=publishing");
   await expect(

@@ -4,6 +4,8 @@ The acceptance criteria come from the original “选择Astro博客模板” con
 System 项目执行计划 · v2”, and “Devosfera Personal Publishing System — 基线融合与长期维护实施蓝图”.
 
 The development checkout is `/data/workspace/personal-publishing-system`.
+The Sveltia CMS A0–A8 matrix and current hosted gates are tracked separately in
+[SVELTIA_AUTOMATION_ACCEPTANCE.md](SVELTIA_AUTOMATION_ACCEPTANCE.md).
 Devosfera supplies the licensed source baseline at `bba247e2`; its provenance
 and MIT notice are recorded in [UPSTREAM_BASELINES.md](../UPSTREAM_BASELINES.md).
 This repository starts a new Git history for the independently maintained

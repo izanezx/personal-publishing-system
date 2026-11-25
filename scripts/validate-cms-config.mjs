@@ -10,9 +10,11 @@ const cmsVersion = "0.272.0";
 const schemaUrl = `https://unpkg.com/@sveltia/cms@${cmsVersion}/schema/sveltia-cms.json`;
 const adminPath = resolve("public/admin/index.html");
 const configPath = resolve("public/admin/config.yml");
-const [html, source, schemaResponse] = await Promise.all([
+const customScriptPath = resolve("public/admin/custom.js");
+const [html, source, customScript, schemaResponse] = await Promise.all([
   readFile(adminPath, "utf8"),
   readFile(configPath, "utf8"),
+  readFile(customScriptPath, "utf8"),
   fetch(schemaUrl, {
     headers: { Accept: "application/json", "Cache-Control": "no-cache" },
   }),
@@ -71,8 +73,10 @@ if (config.backend?.base_url !== "https://sveltia-auth.zanezx.com") {
 if (config.publish_mode !== "simple") {
   throw new Error("Sveltia CMS must use the simple workflow");
 }
-if (config.editor?.second_pane !== false || config.editor?.preview !== false) {
-  throw new Error("Sveltia CMS must keep the single-pane editor");
+if (config.editor?.second_pane !== false || config.editor?.preview !== true) {
+  throw new Error(
+    "Sveltia CMS must keep a single-pane editor with optional preview"
+  );
 }
 if (config.i18n?.default_locale !== "zh-cn") {
   throw new Error("Chinese must remain the default CMS locale");
@@ -126,6 +130,50 @@ const scriptUrl = html.match(/src="([^"]+sveltia-cms\.js)"/)?.[1];
 if (!aria || !scriptUrl || !scriptUrl.includes(`@sveltia/cms@${cmsVersion}/`)) {
   throw new Error("Sveltia CMS script version or SRI metadata is incomplete");
 }
+if (!html.includes('src="./custom.js"')) {
+  throw new Error("Sveltia CMS custom script is not loaded by the admin page");
+}
+if (!customScript.includes("CMS.registerPreviewStyle")) {
+  throw new Error("Sveltia CMS custom script must register preview styles");
+}
+if (!customScript.includes('id: "callout"')) {
+  throw new Error("Sveltia CMS custom script must register the callout editor");
+}
+
+if (config.i18n?.omit_default_locale_from_preview_path !== true) {
+  throw new Error("Chinese preview paths must omit the default locale");
+}
+
+for (const collectionName of ["publications", "galleries"]) {
+  const collection = config.collections.find(
+    candidate => candidate.name === collectionName
+  );
+  if (collection?.aliases_field !== "aliases") {
+    throw new Error(`${collectionName} must use aliases_field: aliases`);
+  }
+  if (typeof collection?.preview_path !== "string") {
+    throw new Error(`${collectionName} must define a preview_path`);
+  }
+  const fieldNames = new Set(
+    collection.fields.map(field => field.name).filter(Boolean)
+  );
+  if (fieldNames.has("aliases")) {
+    throw new Error(
+      `${collectionName} must not define aliases when Sveltia maintains it`
+    );
+  }
+  for (const fieldName of ["archivedAt", "expiresAt"]) {
+    if (!fieldNames.has(fieldName)) {
+      throw new Error(`${collectionName} is missing field: ${fieldName}`);
+    }
+  }
+  const body = collection.fields.find(field => field.name === "body");
+  for (const component of ["table", "hr", "callout"]) {
+    if (!body?.editor_components?.includes(component)) {
+      throw new Error(`${collectionName} body is missing ${component}`);
+    }
+  }
+}
 
 const scriptResponse = await fetch(scriptUrl);
 if (!scriptResponse.ok) {
@@ -146,7 +194,7 @@ if (!r2?.bucket || !r2?.account_id || !r2?.public_url) {
 }
 if (
   process.env.CMS_REQUIRE_MEDIA_CREDENTIALS === "true" &&
-  (!/^[0-9a-f]{64}$/.test(r2.access_key_id ?? "") ||
+  (!/^[0-9a-f]{32}$/.test(r2.access_key_id ?? "") ||
     /^0+$/.test(r2.access_key_id))
 ) {
   throw new Error(

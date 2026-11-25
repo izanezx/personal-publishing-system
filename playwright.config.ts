@@ -4,6 +4,10 @@ const base = (process.env.SITE_BASE_PATH ?? "/").replace(/\/$/, "");
 
 export default defineConfig({
   testDir: "tests/e2e",
+  testIgnore:
+    process.env.PUBLIC_PREVIEW_CONTENT === "true"
+      ? []
+      : ["**/preview-content.spec.ts"],
   workers: 1,
   reporter: process.env.CI ? [["dot"], ["html", { open: "never" }]] : "list",
   use: {

@@ -21,6 +21,23 @@ Sveltia CMS
 日常写作只需要 Sveltia CMS 和 GitHub 登录，不需要在本地执行构建、提交、PR、
 合并或部署命令。
 
+## 编辑器界面
+
+- 默认使用单栏全宽编辑器，优先保证 Notion 风格长文写作时的可用宽度。
+- 需要对照英文时，在条目顶部切换语言；需要检查排版时再临时打开预览。
+- 新建条目默认只有中文。在条目顶部切换到 English 才会创建英文文件，
+  标记为 `i18n: duplicate` 的字段（日期、状态、封面等）会自动复制。
+- 顶部工具栏的「发布指南」是自定义页面，汇总写作、字段、R2 和回滚文档。
+- 正文工具栏的「提示框」写入 `> [!TIP]` 形式的 GitHub Callout，由站点现有
+  的 `rehype-callouts` 渲染，不需要写 HTML。
+
+预览用站点排版样式近似渲染字段，不会执行 Astro 组件。MDX 文章和交互组件的
+最终效果仍以部署后的线上页面为准。
+
+Sveltia 内置 AI 翻译入口。第一次使用时选择 Google、OpenAI、Anthropic、
+DeepSeek 或 Mistral，并在浏览器中输入自己的 API Key。Key 只保存在当前浏览器，
+不写入仓库、Cloudflare 或 GitHub Secrets。
+
 ## 第一次登录
 
 1. 打开 `https://zanezx.com/admin/`。
@@ -59,19 +76,23 @@ GitHub App 只安装到 `izanezx/personal-publishing-system`，不授予其他�
 
 ## 页面状态
 
-| `status`    | 页面             | 列表     | 搜索   | RSS          | Sitemap | 索引      |
-| ----------- | ---------------- | -------- | ------ | ------------ | ------- | --------- |
-| `draft`     | 不生成           | 否       | 否     | 否           | 否      | 否        |
-| `scheduled` | 到点并重建后生成 | 到点后   | 到点后 | 到点后       | 到点后  | 到点后    |
-| `published` | 生成             | 是       | 是     | 是           | 是      | 是        |
-| `unlisted`  | 可访问           | 否       | 否     | 否           | 否      | `noindex` |
-| `archived`  | 生成             | 归档视图 | 是     | 可进入归档流 | 是      | 是        |
-| `expired`   | 410 或 301       | 否       | 否     | 否           | 否      | 否        |
-| `withdrawn` | 410 或 301       | 否       | 否     | 否           | 否      | 否        |
+| `status`    | 页面                           | 列表   | 搜索   | RSS    | Sitemap | 索引      |
+| ----------- | ------------------------------ | ------ | ------ | ------ | ------- | --------- |
+| `draft`     | 生产不生成；Preview 可看       | 否     | 否     | 否     | 否      | `noindex` |
+| `scheduled` | 到点并重建后生成；Preview 可看 | 到点后 | 到点后 | 到点后 | 到点后  | 到点后    |
+| `published` | 生成                           | 是     | 是     | 是     | 是      | 是        |
+| `unlisted`  | 可访问                         | 否     | 否     | 否     | 否      | `noindex` |
+| `archived`  | 可访问并显示归档提示           | 否     | 否     | 否     | 否      | `noindex` |
+| `expired`   | 410 或 301                     | 否     | 否     | 否     | 否      | 否        |
+| `withdrawn` | 410 或 301                     | 否     | 否     | 否     | 否      | 否        |
 
-`expireAt` 到点时，Worker 会根据运行时 manifest 立即开始返回 410 或 301，不必
-等到下一次重建。定时发布时间到达后，每 15 分钟运行的检查会触发一次生产重建，
-使新页面出现。
+`expiresAt` 到点时，Worker 会根据运行时 manifest 开始返回 410 或 301，不必等到
+下一次静态构建。定时发布、自然过期和自动归档到达后，每 15 分钟运行的检查会触发
+一次生产重建。GitHub Actions 的定时任务可能略有延迟。
+
+删除文件且没有 tombstone 时返回 404。需要在删除后保留旧地址时，在“下线记录”
+中使用 `withdrawn` 返回 410 或 301；`deleted` 记录填写 `redirectTo` 时返回 301，
+不填写时仍返回 404。
 
 ### 英文翻译状态
 
@@ -91,7 +112,10 @@ AI 生成的英文内容应先保存为 `ai-draft`，人工完成事实、语气
 ## 永久链接
 
 - `slug` 发布后尽量保持不变。
-- 必须修改 URL 时，把旧值加入 `previousSlugs`。
+- 必须修改 URL 时，Sveltia 会根据 `preview_path` 自动把旧地址追加到
+  `aliases`，构建时生成 301；不要手动定义 `aliases` 表单字段，否则会关闭
+  Sveltia 的自动维护。
+- 历史内容已有的 `previousSlugs` 继续兼容并生成 301。
 - 中文和英文建议使用相同 slug，但 `uid` 必须不同。
 - 两个翻译版本共享同一个 `translationKey`。
 

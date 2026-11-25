@@ -47,10 +47,10 @@ Pagefind binary under QEMU, outside the repository.
 
 Cloudflare deployment uses two workflows:
 
-| Workflow                        | Trigger                                                                   | Result                                                                       |
-| ------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `Preview`                       | Same-repository pull request                                              | Builds, deploys the preview Worker, runs smoke tests and comments the URL    |
-| `Cloudflare production release` | Successful `CI` run on `main`, manual dispatch or scheduled-content check | Builds, deploys production, verifies the live site and rolls back on failure |
+| Workflow                        | Trigger                                                               | Result                                                                                 |
+| ------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `Preview`                       | Successful `CI` for a same-repository pull request                    | Downloads the PR artifact, deploys noindex preview, runs smoke and comments the URL    |
+| `Cloudflare production release` | Successful `CI` on `main`, manual dispatch or scheduled-content check | Downloads or creates a verified artifact, deploys production and rolls back on failure |
 
 Repository Variables:
 
@@ -100,6 +100,12 @@ The production job records the active Worker Version before deployment, runs
 the live smoke suite after deployment and automatically rolls back to the
 recorded Version if verification fails.
 
+For a `main` push, production does not rebuild the site. It downloads the
+`release-candidate` artifact uploaded by that exact `CI` run, checks the full
+commit, build mode, indexing policy and directory SHA-256, then deploys those
+files. Manual and scheduled releases build a new candidate from the checked-out
+`main` commit because no matching push artifact exists.
+
 ## Sveltia CMS and media
 
 - CMS: `https://zanezx.com/admin/`
@@ -108,8 +114,11 @@ recorded Version if verification fails.
 - Public media origin: `https://media.zanezx.com`
 
 Sveltia uses the simple workflow. Save commits directly to `main`; there is no
-content branch, CMS Pull Request or pending-publication label. If CI fails,
-production remains on the previously verified Worker Version.
+content branch, CMS Pull Request, review stage or pending-publication label.
+The resulting push CI is the production gate. If CI fails, production remains
+on the previously verified Worker Version. This direct-main behavior is an
+owner-approved simplification of the original CMS-PR plan; code and workflow
+changes still use pull requests and the isolated Preview Worker.
 
 The GitHub App is restricted to the single project repository. The R2 token
 is restricted to the single media bucket. Follow the complete setup and

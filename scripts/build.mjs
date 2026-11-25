@@ -17,6 +17,7 @@ try {
   }
 
   for (const script of [
+    "scripts/validate-media-sources.mjs",
     "scripts/index-search.mjs",
     "scripts/finalize-index.mjs",
   ]) {
