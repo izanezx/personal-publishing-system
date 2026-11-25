@@ -27,13 +27,36 @@ const optionalNonEmptyString = z.preprocess(
     typeof value === "string" && value.trim() === "" ? undefined : value,
   z.string().trim().min(1).optional()
 );
+const hostedMediaUrl = z
+  .string()
+  .url()
+  .refine(
+    value => new URL(value).origin === "https://media.zanezx.com",
+    "Remote publication media must use https://media.zanezx.com"
+  );
+const localMediaPath = z
+  .string()
+  .regex(
+    /^\/(?!\/).+/,
+    "Local publication media must use a site-relative /path"
+  );
+const publicationImage = <T extends z.ZodType>(imageField: () => T) =>
+  z.union([imageField(), hostedMediaUrl, localMediaPath]);
+const aliasPath = z
+  .string()
+  .regex(/^\/.*\/$/, "Use a site-relative path with a trailing slash");
 const publication = {
   uid: z.string().trim().min(1),
   slug,
   previousSlugs: z.array(slug).default([]),
+  aliases: z.array(aliasPath).default([]),
   translationKey: optionalNonEmptyString,
   status: z.enum(publicationStatuses).default("published"),
   scheduledFor: z.date().optional().nullable(),
+  archivedAt: z.date().optional().nullable(),
+  expiresAt: z.date().optional().nullable(),
+  // Legacy field retained so existing entries and Agent-created content keep
+  // building. New content and the CMS use `expiresAt`.
   expireAt: z.date().optional().nullable(),
   redirectTo: z
     .string()
@@ -79,8 +102,8 @@ const blog = defineCollection({
       // Kept for compatibility with older content. New content uses `status`.
       draft: z.boolean().optional(),
       tags: z.array(z.string()).default(["others"]),
-      ogImage: image().or(z.string()).optional(),
-      coverImage: image().or(z.url()).optional(),
+      ogImage: publicationImage(image).optional(),
+      coverImage: publicationImage(image).optional(),
       description: z.string(),
       canonicalURL: z
         .url()
@@ -108,12 +131,12 @@ const galleries = defineCollection({
       description: z.string(),
       pubDatetime: z.date(),
       draft: z.boolean().optional(),
-      coverImage: image().or(z.url()).optional(),
+      coverImage: publicationImage(image).optional(),
       tags: z.array(z.string()).default([]),
       media: z
         .array(
           z.object({
-            src: image().or(z.url()),
+            src: publicationImage(image),
             alt: z.string().trim().min(1),
             credit: z.string().trim().min(1).optional(),
             license: z.string().trim().min(1).optional(),

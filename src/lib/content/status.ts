@@ -27,6 +27,9 @@ export interface PublicationStatusData {
   translationStatus?: TranslationStatus;
   pubDatetime: Date | string;
   scheduledFor?: Date | string | null;
+  archivedAt?: Date | string | null;
+  expiresAt?: Date | string | null;
+  /** @deprecated Use expiresAt for new content. */
   expireAt?: Date | string | null;
   redirectTo?: string;
 }
@@ -47,8 +50,11 @@ export function effectivePublicationStatus(
   const startsAt = timestamp(data.scheduledFor) ?? timestamp(data.pubDatetime);
   if (startsAt !== undefined && startsAt > now) return "scheduled";
 
-  const expiresAt = timestamp(data.expireAt);
+  const expiresAt = timestamp(data.expiresAt) ?? timestamp(data.expireAt);
   if (expiresAt !== undefined && expiresAt <= now) return "expired";
+
+  const archivedAt = timestamp(data.archivedAt);
+  if (archivedAt !== undefined && archivedAt <= now) return "archived";
 
   if (data.status === "scheduled") return "published";
   if (data.status === "archived") return "archived";
@@ -80,7 +86,7 @@ export function isRoutableStatus(status: PublicationStatus) {
 }
 
 export function isListedStatus(status: PublicationStatus) {
-  return status === "published" || status === "archived";
+  return status === "published";
 }
 
 export function isGoneStatus(status: PublicationStatus) {
@@ -117,8 +123,5 @@ export function isSearchablePublication(
   now = Date.now()
 ) {
   const status = effectivePublicationStatus(data, now);
-  return (
-    isTranslationPublished(data, locale) &&
-    (status === "published" || status === "archived")
-  );
+  return isTranslationPublished(data, locale) && status === "published";
 }

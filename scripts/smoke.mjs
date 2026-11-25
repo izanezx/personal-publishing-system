@@ -10,6 +10,10 @@ const expectIndex =
   process.argv.includes("--expect-index") ||
   process.env.PUBLIC_INDEXING_ENABLED === "true" ||
   process.env.PUBLIC_INDEXING_ENABLED === "1";
+const expectPreviewContent =
+  process.argv.includes("--expect-preview-content") ||
+  process.env.PUBLIC_PREVIEW_CONTENT === "true" ||
+  process.env.PUBLIC_PREVIEW_CONTENT === "1";
 const retries = Number(process.env.SMOKE_RETRIES ?? 0);
 
 if (!baseUrl) {
@@ -52,11 +56,19 @@ const request = async (pathname, init = {}) => {
 };
 
 const expectStatus = async (pathname, status) => {
-  const response = await request(pathname);
+  let response;
+  const attempts = Math.max(1, retries);
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    response = await request(pathname);
+    if (response.status === status) return response;
+    if (attempt < attempts) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
   assert.equal(
-    response.status,
+    response?.status,
     status,
-    `${pathname} returned ${response.status}, expected ${status}`
+    `${pathname} returned ${response?.status}, expected ${status}`
   );
   return response;
 };
@@ -99,6 +111,7 @@ for (const pathname of [
 
 await expectStatus("/admin/", 200);
 await expectStatus("/__missing-smoke-fixture__/", 404);
+await expectStatus("/posts/deleted-example/", 404);
 await expectStatus("/en/posts/translation-pending-fixture/", 404);
 await expectStatus("/en/posts/expired-example/", 410);
 
@@ -107,6 +120,29 @@ assert.equal(
   new URL(retired.headers.get("location"), baseUrl).pathname,
   "/posts/publishing-baseline/"
 );
+for (const [pathname, target] of [
+  ["/posts/publishing-guide/", "/posts/publishing-baseline/"],
+  ["/posts/legacy-publishing-baseline/", "/posts/publishing-baseline/"],
+  ["/en/posts/publishing-guide/", "/en/posts/publishing-baseline/"],
+  ["/en/posts/legacy-publishing-baseline/", "/en/posts/publishing-baseline/"],
+]) {
+  const response = await expectStatus(pathname, 301);
+  assert.equal(
+    new URL(response.headers.get("location"), baseUrl).pathname,
+    target,
+    `${pathname} redirected to the wrong target`
+  );
+}
+
+const archivedPage = await expectStatus("/posts/archived-fixture/", 200);
+const archivedHtml = await archivedPage.text();
+assert.match(archivedHtml, /data-archive-notice/);
+assert.match(archivedHtml, /<meta name="robots" content="noindex, follow">/);
+
+if (expectPreviewContent) {
+  await expectStatus("/posts/unreleased-fixture/", 200);
+  await expectStatus("/en/posts/future-fixture/", 200);
+}
 
 const robots = await (await expectStatus("/robots.txt", 200)).text();
 assert.equal(
@@ -124,8 +160,9 @@ process.stdout.write(
   JSON.stringify({
     baseUrl,
     indexing: expectIndex ? "enabled" : "disabled",
-    routes: 12,
-    redirects: 1,
+    previewContent: expectPreviewContent ? "enabled" : "disabled",
+    routes: expectPreviewContent ? 14 : 12,
+    redirects: 5,
     gone: 1,
     result: "pass",
   }) + "\n"

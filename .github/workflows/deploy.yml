@@ -26,6 +26,8 @@ jobs:
     name: Check scheduled content
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
+    env:
+      PRODUCTION_URL: ${{ vars.PRODUCTION_SMOKE_URL || 'https://personal-publishing-system.zanezx.workers.dev' }}
     outputs:
       due: ${{ steps.check.outputs.due }}
     steps:
@@ -73,9 +75,42 @@ jobs:
         with:
           node-version-file: .node-version
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm cms:check
-      - run: pnpm build
+      - name: Download the CI-verified production artifact
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: release-candidate
+          path: release-candidate
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - name: Build a verified candidate for a manual or scheduled release
+        if: github.event_name != 'workflow_run'
+        env:
+          PUBLIC_INDEXING_ENABLED: ${{ vars.PUBLIC_INDEXING_ENABLED || 'false' }}
+          PUBLIC_PREVIEW_CONTENT: "false"
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm cms:check
+          pnpm build
+          node scripts/candidate-artifact.mjs create \
+            --source dist \
+            --destination release-candidate \
+            --mode production \
+            --commit "$(git rev-parse HEAD)" \
+            --indexing "$PUBLIC_INDEXING_ENABLED" \
+            --preview-content false
+      - name: Verify the production artifact and commit
+        env:
+          EXPECTED_COMMIT: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          PUBLIC_INDEXING_ENABLED: ${{ vars.PUBLIC_INDEXING_ENABLED || 'false' }}
+        run: |
+          node scripts/candidate-artifact.mjs verify release-candidate \
+            --commit "$EXPECTED_COMMIT" \
+            --mode production \
+            --indexing "$PUBLIC_INDEXING_ENABLED" \
+            --preview-content false
+          rm -rf dist
+          mv release-candidate/dist dist
       - name: Record the active version for rollback
         id: baseline
         run: |
@@ -87,13 +122,14 @@ jobs:
           )"
           printf 'version_id=%s\n' "$version" >> "$GITHUB_OUTPUT"
       - name: Deploy the production Worker
+        id: deploy
         run: pnpm dlx wrangler@4.165.0 deploy --env ""
       - name: Verify the production deployment
         env:
           SMOKE_RETRIES: "30"
         run: pnpm smoke --base-url "$PRODUCTION_SMOKE_URL"
       - name: Roll back a failed production deployment
-        if: failure() && steps.baseline.outputs.version_id != ''
+        if: failure() && steps.deploy.outcome == 'success' && steps.baseline.outputs.version_id != ''
         run: |
           pnpm dlx wrangler@4.165.0 rollback \
             "${{ steps.baseline.outputs.version_id }}" \

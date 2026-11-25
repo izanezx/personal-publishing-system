@@ -33,6 +33,7 @@ Verified on 2026-11-25:
 - [ ] Review the author credit represented by `PUBLIC_SOCIAL_GITHUB`.
 - [ ] Supply a logo or wordmark if the text identity should change.
 - [ ] Supply a favicon and social sharing image, including ownership rights.
+- [ ] Choose an AI translation service and keep its API key in the browser only.
 
 ## Publishing content
 
@@ -63,7 +64,7 @@ Verified on 2026-11-25:
 
 - [x] Confirm `https://zanezx.com/` as the production canonical origin.
 - [x] Confirm the Cloudflare account and approve the preview Worker.
-- [ ] Approve the exact preview commit and artifact for production.
+- [x] Production uses the exact CI artifact bound to each `main` commit.
 - [x] Bind the root `zanezx.com` Worker Route.
 - [x] Keep only the apex domain; no `www.zanezx.com` binding.
 - [ ] Approve the first public indexing date.
@@ -82,8 +83,9 @@ Verified on 2026-11-25:
 
 ## How to edit later
 
-Open a short-lived branch, make one focused change, run the documented checks,
-and merge through a pull request after Linux and Windows CI pass.
+Save daily content in Sveltia; the simple workflow commits directly to `main`
+and enters the guarded production pipeline. Use short-lived branches and pull
+requests for code, schema, dependency, workflow and infrastructure changes.
 
 Common locations:
 
@@ -100,9 +102,9 @@ Common locations:
 | Routes and listings         | `src/pages/` and `src/lib/content/`                            |
 | Skills and agent rules      | `.agents/skills/`, `AGENTS.md` and `docs/AGENT_ENVIRONMENT.md` |
 
-For a publication URL change, keep the existing `uid` and `slug`, then append
-the old public path to `previousSlugs`. Do not rename a translation key merely
-because a title or folder changed.
+For a publication URL change, keep the existing `uid` and change the slug in
+Sveltia. Sveltia appends the old public path to `aliases` automatically. Do not
+rename a translation key merely because a title or folder changed.
 
 Suggested change procedure:
 
@@ -120,5 +122,8 @@ git commit -m "content: update about page"
 git push -u origin content/update-about
 ```
 
-Open a pull request, wait for both CI jobs, review the preview artifact, and
-merge. Production deployment remains a separate owner-approved workflow.
+Open a pull request and wait for Linux CI, Windows CI and Preview. The merged
+`main` CI artifact is bound to the commit, indexing policy and SHA-256, deployed
+only after those checks pass, and rolled back automatically if production
+verification fails. Public indexing and the stable release still require owner
+approval.

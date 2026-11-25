@@ -6,6 +6,7 @@ import {
   isTranslationPublished,
   type PublicationStatusData,
 } from "@/lib/content/status";
+import { isPreviewContentEnabled } from "@/lib/content/build-mode";
 
 export function isPublished(
   data: PublicationStatusData,
@@ -14,8 +15,11 @@ export function isPublished(
 ) {
   const locale = typeof localeOrNow === "number" ? "zh-CN" : localeOrNow;
   const now = typeof localeOrNow === "number" ? localeOrNow : explicitNow;
+  const status = effectivePublicationStatus(data, now);
+  const previewRoutable =
+    isPreviewContentEnabled() && (status === "draft" || status === "scheduled");
   return (
-    isRoutableStatus(effectivePublicationStatus(data, now)) &&
+    (isRoutableStatus(status) || previewRoutable) &&
     isTranslationPublished(data, locale)
   );
 }

@@ -1,4 +1,4 @@
 path: /en/posts/expired-example/
-status: deleted
+status: expired
 withdrawnAt: 2026-11-25T00:00:00Z
 note: Gone fixture for the 410 response and automated smoke test.

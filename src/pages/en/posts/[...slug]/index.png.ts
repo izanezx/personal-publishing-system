@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { type CollectionEntry } from "astro:content";
-import { getPublicEntries } from "@/lib/content/queries";
+import { getRoutableEntries } from "@/lib/content/queries";
 import { generateOgImageForPost } from "@/utils/generateOgImages";
 import { SITE } from "@/config";
 
@@ -9,7 +9,7 @@ export async function getStaticPaths() {
     return [];
   }
 
-  const posts = (await getPublicEntries("blog", "en")).filter(
+  const posts = (await getRoutableEntries("blog", "en")).filter(
     post => !post.data.ogImage
   );
 

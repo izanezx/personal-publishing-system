@@ -58,6 +58,17 @@ export function validatePublications(entries: readonly Publication[]) {
         throw new Error(`Conflicting redirect from ${path}`);
       redirects.add(path);
     }
+    for (const alias of entry.aliases) {
+      if (!alias.startsWith("/") || !alias.endsWith("/")) {
+        throw new Error(`Invalid alias path on ${entry.uid}: ${alias}`);
+      }
+      if (alias === entry.path) {
+        throw new Error(`Publication ${entry.uid} aliases its current path`);
+      }
+      if (paths.has(alias) || redirects.has(alias))
+        throw new Error(`Conflicting redirect from ${alias}`);
+      redirects.add(alias);
+    }
   }
 }
 
@@ -66,11 +77,19 @@ export function validateTombstones(
   tombstones: readonly Tombstone[]
 ) {
   const livePaths = new Set(entries.map(entry => entry.path));
+  const redirectPaths = new Set(
+    entries.flatMap(entry => [
+      ...entry.previousSlugs.map(slug => previousPath(entry, slug)),
+      ...entry.aliases,
+    ])
+  );
   const tombstonePaths = new Set<string>();
   for (const tombstone of tombstones) {
     const path = tombstone.data.path;
     if (livePaths.has(path))
       throw new Error(`Tombstone conflicts with a live publication: ${path}`);
+    if (redirectPaths.has(path))
+      throw new Error(`Tombstone conflicts with a redirect: ${path}`);
     if (tombstonePaths.has(path))
       throw new Error(`Duplicate tombstone path: ${path}`);
     tombstonePaths.add(path);

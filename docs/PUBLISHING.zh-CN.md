@@ -63,6 +63,7 @@ src/data/blog/zh-cn/my-new-article.md
 ---
 uid: zh-my-new-article
 slug: my-new-article
+status: published
 kind: article
 title: "文章标题"
 description: "用于列表、搜索和社交预览的一句话摘要。"
@@ -100,12 +101,17 @@ https://zanezx.com/posts/my-new-article/
 | ---------------- | ------------------------------------------------------ |
 | `modDatetime`    | 实质修改时间；不要因为修正错别字而随意改变文章活动时间 |
 | `featured`       | 是否在首页精选区域展示                                 |
-| `draft`          | `true` 时不出现在页面、RSS、Sitemap 和搜索中           |
+| `status`         | 页面生命周期状态，默认 `published`                     |
+| `draft`          | 旧内容兼容字段；新内容使用 `status: draft`             |
 | `tags`           | 文章标签；可使用中文或英文                             |
 | `topics`         | Garden 主题 ID；只能使用已有主题                       |
 | `stage`          | `seedling`、`budding` 或 `evergreen`                   |
 | `translationKey` | 同一文章的中英文版本使用相同值                         |
-| `previousSlugs`  | 文章改 URL 后保留旧地址，用于生成 301 重定向           |
+| `aliases`        | Sveltia 修改 URL 时自动维护的旧公开路径                |
+| `previousSlugs`  | 旧内容兼容的旧 slug；新链接变更使用 `aliases`          |
+| `archivedAt`     | 指定时间到达后自动归档并保留直链                       |
+| `expiresAt`      | 指定时间到达后自动下线并返回 410 或 301                |
+| `redirectTo`     | 过期或撤下内容的 301 目标；留空时返回 410              |
 | `relationships`  | 通过目标 UID 建立 `related` 或 `evolvedFrom` 关系      |
 | `coverImage`     | 文章本地封面图                                         |
 | `ogImage`        | 社交分享图或自定义 OG 图                               |
@@ -195,6 +201,8 @@ https://zanezx.com/en/posts/my-new-article/
 - Sveltia CMS 上传的图片放在 Cloudflare R2，公开地址以
   `https://media.zanezx.com/cms/` 开头。
 - 旧本地内容仍可使用仓库内图片，但新图片默认使用 R2。
+- Markdown 正文可以使用安全的 HTTPS 外部图片进行功能测试或引用。
+  `pnpm media:check` 只拒绝不安全的外部 URL，不会禁止 HTTPS 图片。
 - 每张有意义的图片必须有说明性替代文本。
 - 保存创作者、来源、许可证和署名记录。
 - 上传前清除位置、设备和隐私元数据。
@@ -254,7 +262,9 @@ scheduledFor: 2026-12-01T09:00:00+08:00
 定时检查每 15 分钟运行一次；到点后自动触发生产重建和线上验证。
 
 其他状态为 `published`、`unlisted`、`archived`、`expired` 和 `withdrawn`。
-完整行为见 [Sveltia CMS 写作与发布](SVELTIA.zh-CN.md)。
+`scheduled`、`archivedAt` 和 `expiresAt` 在到达时间后由定时 Workflow 触发重建；
+`status: expired`、`status: withdrawn` 的 410/301 由 Cloudflare Worker 读取运行时
+manifest 后立即执行。完整行为见 [Sveltia CMS 写作与发布](SVELTIA.zh-CN.md)。
 
 ## 修改已发布文章
 
@@ -269,14 +279,16 @@ scheduledFor: 2026-12-01T09:00:00+08:00
 
 ### 必须修改 URL 时
 
-保留原 `uid`，设置新 `slug`，并把旧 slug 加入 `previousSlugs`：
+保留原 `uid` 并在 Sveltia 中修改 `slug`。Sveltia 会把旧公开地址自动追加到
+`aliases`：
 
 ```yaml
 slug: new-address
-previousSlugs: ["old-address"]
+aliases: ["/posts/old-address/"]
 ```
 
 系统会生成旧地址到新地址的 301 重定向。不要删除旧值或重复使用旧 slug。
+`previousSlugs: ["old-address"]` 仅为旧内容兼容方式。
 
 ### 下线或删除内容
 

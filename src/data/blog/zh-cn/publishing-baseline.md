@@ -4,6 +4,8 @@ uid: zh-publishing-baseline
 slug: publishing-baseline
 previousSlugs:
   - publishing-guide
+aliases:
+  - /posts/legacy-publishing-baseline/
 kind: article
 title: 个人出版基线
 description: 用于验证 Markdown、中文搜索和双语链接的公开示例。111111111111111111111111111111111111111111111111

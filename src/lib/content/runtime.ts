@@ -21,6 +21,7 @@ export function findGoneMatch(
       (!item.effectiveAt || new Date(item.effectiveAt).getTime() <= now)
   );
   if (!entry) return undefined;
+  if (entry.status === "deleted" && !entry.redirectTo) return undefined;
   return entry.redirectTo
     ? { status: 301, redirectTo: entry.redirectTo }
     : { status: 410 };

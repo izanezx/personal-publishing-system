@@ -27,20 +27,93 @@ jobs:
       - run: pnpm test
       - run: pnpm lint
       - run: pnpm format:check
-      - run: pnpm build
+      - name: Build the standard test site
+        env:
+          PUBLIC_INDEXING_ENABLED: "false"
+          PUBLIC_PREVIEW_CONTENT: "false"
+        run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
-      - name: Build an indexed release artifact
+      - name: Build the production candidate
         env:
-          PUBLIC_INDEXING_ENABLED: "true"
+          PUBLIC_INDEXING_ENABLED: ${{ vars.PUBLIC_INDEXING_ENABLED || 'false' }}
+          PUBLIC_PREVIEW_CONTENT: "false"
         run: pnpm build
       - run: pnpm test:release
+      - name: Create the verified production artifact
+        env:
+          CANDIDATE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+          PUBLIC_INDEXING_ENABLED: ${{ vars.PUBLIC_INDEXING_ENABLED || 'false' }}
+        run: |
+          node scripts/candidate-artifact.mjs create \
+            --source dist \
+            --destination artifacts/release-candidate \
+            --mode production \
+            --commit "$CANDIDATE_COMMIT" \
+            --indexing "$PUBLIC_INDEXING_ENABLED" \
+            --preview-content false
+      - name: Verify the production artifact before upload
+        env:
+          CANDIDATE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+          PUBLIC_INDEXING_ENABLED: ${{ vars.PUBLIC_INDEXING_ENABLED || 'false' }}
+        run: |
+          node scripts/candidate-artifact.mjs verify artifacts/release-candidate \
+            --commit "$CANDIDATE_COMMIT" \
+            --mode production \
+            --indexing "$PUBLIC_INDEXING_ENABLED" \
+            --preview-content false
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: release-candidate
+          path: artifacts/release-candidate
+          if-no-files-found: error
+          retention-days: 3
       - name: Verify subpath hosting
         env:
           SITE_BASE_PATH: /publishing
+          PUBLIC_INDEXING_ENABLED: "false"
+          PUBLIC_PREVIEW_CONTENT: "false"
         run: |
           pnpm build
           pnpm exec playwright test tests/e2e/base-path.spec.ts
+      - name: Build the preview-content artifact
+        if: github.event_name == 'pull_request'
+        env:
+          PUBLIC_INDEXING_ENABLED: "false"
+          PUBLIC_PREVIEW_CONTENT: "true"
+        run: |
+          pnpm build
+          node scripts/preview-policy.mjs
+          pnpm exec playwright test tests/e2e/preview-content.spec.ts
+      - name: Create the verified preview artifact
+        if: github.event_name == 'pull_request'
+        env:
+          CANDIDATE_COMMIT: ${{ github.event.pull_request.head.sha }}
+        run: |
+          node scripts/candidate-artifact.mjs create \
+            --source dist \
+            --destination artifacts/site-preview \
+            --mode preview \
+            --commit "$CANDIDATE_COMMIT" \
+            --indexing false \
+            --preview-content true
+      - name: Verify the preview artifact before upload
+        if: github.event_name == 'pull_request'
+        env:
+          CANDIDATE_COMMIT: ${{ github.event.pull_request.head.sha }}
+        run: |
+          node scripts/candidate-artifact.mjs verify artifacts/site-preview \
+            --commit "$CANDIDATE_COMMIT" \
+            --mode preview \
+            --indexing false \
+            --preview-content true
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        if: github.event_name == 'pull_request'
+        with:
+          name: site-preview
+          path: artifacts/site-preview
+          if-no-files-found: error
+          retention-days: 3
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: failure()
         with:

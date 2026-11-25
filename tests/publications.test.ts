@@ -6,6 +6,7 @@ import { publicationTimestamp, type Publication } from "@/lib/content/model";
 import {
   publicationRelations,
   validatePublications,
+  validateTombstones,
 } from "@/lib/content/relations";
 import { getEntryPath, getEntryTransitionName } from "@/utils/contentEntry";
 
@@ -13,6 +14,7 @@ const make = (uid: string, data: Partial<Publication> = {}): Publication => ({
   uid,
   slug: uid,
   previousSlugs: [],
+  aliases: [],
   locale: "zh-CN",
   kind: "article",
   topics: ["publishing"],
@@ -44,6 +46,21 @@ test("publication integrity rejects collisions and broken internal URLs", () => 
   assert.throws(
     () =>
       validatePublications([
+        make("alias-a", { aliases: ["/posts/legacy/"] }),
+        make("alias-b", { aliases: ["/posts/legacy/"] }),
+      ]),
+    /Conflicting redirect/
+  );
+  assert.throws(
+    () =>
+      validatePublications([
+        make("alias-self", { aliases: ["/posts/alias-self/"] }),
+      ]),
+    /aliases its current path/
+  );
+  assert.throws(
+    () =>
+      validatePublications([
         make("c", { relationships: [{ kind: "related", uid: "missing" }] }),
       ]),
     /Unknown related UID/
@@ -71,6 +88,37 @@ test("unpublished targets are omitted and visible backlinks stay stable", () => 
   assert.deepEqual(
     links.incoming.map(x => x.uid),
     ["b"]
+  );
+});
+
+test("tombstones cannot silently override live paths or redirects", () => {
+  const live = make("live", {
+    aliases: ["/posts/legacy-tombstone/"],
+    previousSlugs: ["old-tombstone"],
+  });
+  assert.throws(
+    () =>
+      validateTombstones(
+        [live],
+        [
+          { data: { path: "/posts/live/" } },
+          { data: { path: "/posts/legacy-tombstone/" } },
+        ]
+      ),
+    /live publication/
+  );
+  assert.throws(
+    () =>
+      validateTombstones(
+        [live],
+        [{ data: { path: "/posts/legacy-tombstone/" } }]
+      ),
+    /redirect/
+  );
+  assert.throws(
+    () =>
+      validateTombstones([live], [{ data: { path: "/posts/old-tombstone/" } }]),
+    /redirect/
   );
 });
 

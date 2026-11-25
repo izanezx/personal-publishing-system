@@ -37,20 +37,20 @@ A long-lived publishing system built from the Devosfera reading experience, enha
 
 ## Tech stack
 
-| Area            | Choice                                            |
-| --------------- | ------------------------------------------------- |
-| Framework       | Astro 7 with TypeScript                           |
-| Styling         | Tailwind CSS 4                                    |
-| Content         | Astro Content Collections, Markdown and MDX       |
-| Search          | Pagefind 1.6                                      |
-| Images          | Sharp, Satori and resvg                           |
-| Browser tests   | Playwright                                        |
-| Package manager | pnpm 10.28.0                                      |
-| Runtime         | Node.js 24.22.3                                   |
-| Hosting         | Cloudflare Workers Static Assets                  |
-| Publishing      | Sveltia CMS, GitHub App and Simple Workflow       |
-| Media           | Cloudflare R2                                     |
-| Release control | GitHub Actions, auto-merge and automatic rollback |
+| Area            | Choice                                       |
+| --------------- | -------------------------------------------- |
+| Framework       | Astro 7 with TypeScript                      |
+| Styling         | Tailwind CSS 4                               |
+| Content         | Astro Content Collections, Markdown and MDX  |
+| Search          | Pagefind 1.6                                 |
+| Images          | Sharp, Satori and resvg                      |
+| Browser tests   | Playwright                                   |
+| Package manager | pnpm 10.28.0                                 |
+| Runtime         | Node.js 24.22.3                              |
+| Hosting         | Cloudflare Workers Static Assets             |
+| Publishing      | Sveltia CMS, GitHub App and Simple Workflow  |
+| Media           | Cloudflare R2                                |
+| Release control | Verified CI artifacts and automatic rollback |
 
 ## Project structure
 
@@ -144,21 +144,24 @@ Read the [Chinese publishing guide](docs/PUBLISHING.zh-CN.md), [docs/PRODUCT.md]
 
 ## Commands
 
-| Command               | Action                                                     |
-| --------------------- | ---------------------------------------------------------- |
-| `pnpm dev`            | Start the Astro development server                         |
-| `pnpm build`          | Type-check, build the site and generate the Pagefind index |
-| `pnpm preview`        | Preview the generated static output                        |
-| `pnpm test`           | Run unit tests                                             |
-| `pnpm lint`           | Run ESLint                                                 |
-| `pnpm format:check`   | Verify Prettier formatting                                 |
-| `pnpm cms:check`      | Validate Sveltia Schema, SRI, workflow and R2 shape        |
-| `pnpm test:e2e`       | Run the Playwright browser suite                           |
-| `pnpm test:release`   | Rehearse preview policy, production responses and rollback |
-| `pnpm smoke`          | Verify a deployed preview or production site               |
-| `pnpm status:due`     | Check scheduled publication and expiration manifests       |
-| `pnpm security:audit` | Fail on high or critical dependency advisories             |
-| `pnpm skills:check`   | Verify every vendored Skill against `skills-lock.json`     |
+| Command                 | Action                                                                 |
+| ----------------------- | ---------------------------------------------------------------------- |
+| `pnpm dev`              | Start the Astro development server                                     |
+| `pnpm build`            | Type-check, build the site and generate the Pagefind index             |
+| `pnpm preview`          | Preview the generated static output                                    |
+| `pnpm test`             | Run unit tests                                                         |
+| `pnpm lint`             | Run ESLint                                                             |
+| `pnpm format:check`     | Verify Prettier formatting                                             |
+| `pnpm cms:check`        | Validate Sveltia Schema, SRI, workflow and R2 shape                    |
+| `pnpm media:check`      | Reject insecure external media; R2 remains the production media origin |
+| `pnpm test:e2e`         | Run the Playwright browser suite                                       |
+| `pnpm test:release`     | Rehearse preview policy, production responses and rollback             |
+| `pnpm candidate:create` | Package a build with commit and policy metadata                        |
+| `pnpm candidate:verify` | Reject a candidate whose commit, policy or files changed               |
+| `pnpm smoke`            | Verify a deployed preview or production site                           |
+| `pnpm status:due`       | Check scheduled publication and expiration manifests                   |
+| `pnpm security:audit`   | Fail on high or critical dependency advisories                         |
+| `pnpm skills:check`     | Verify every vendored Skill against `skills-lock.json`                 |
 
 Before opening a pull request, run:
 
@@ -189,9 +192,9 @@ Save -> main -> CI -> production deployment -> live smoke test
 
 After the `main` CI succeeds, the production workflow:
 
-1. builds with the current indexing policy;
-2. records the active Cloudflare Worker Version;
-3. deploys `zanezx.com`;
+1. downloads the exact production artifact built and tested by that CI run;
+2. verifies its commit, mode, indexing policy and SHA-256 fingerprint;
+3. records the active Cloudflare Worker Version and deploys `zanezx.com`;
 4. runs live HTTP, route, RSS, Sitemap, search, Admin, 404, 410 and 301 checks;
 5. rolls back automatically if verification fails.
 

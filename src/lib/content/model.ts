@@ -24,6 +24,7 @@ export interface Publication {
   uid: string;
   slug: string;
   previousSlugs: readonly string[];
+  aliases: readonly string[];
   locale: Locale;
   kind: PublicationKind;
   translationKey?: string;
@@ -36,7 +37,8 @@ export interface Publication {
   status: PublicationStatus;
   translationStatus: TranslationStatus;
   scheduledFor?: Date | null;
-  expireAt?: Date | null;
+  archivedAt?: Date | null;
+  expiresAt?: Date | null;
   redirectTo?: string;
   title: string;
   description: string;

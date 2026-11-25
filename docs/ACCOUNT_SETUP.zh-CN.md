@@ -114,12 +114,12 @@ Repository → Settings → Secrets and variables → Actions → Variables：
 Environment Secrets 不应改成 Repository Secrets。`preview` 和 `production` 使用
 不同 Cloudflare Token。
 
-## 5. 重建 Cloudflare Actions Token
+## 5. 验证或轮换 Cloudflare Actions Token
 
-当前 `preview/CLOUDFLARE_API_TOKEN_PREVIEW` 曾被填入说明文字，Wrangler 会以
-`contains a character that cannot be used in an HTTP Authorization header`
-拒绝部署。必须重新创建下列两个 Token，并把完整 Token 值分别写入对应
-Environment。
+`preview/CLOUDFLARE_API_TOKEN_PREVIEW` 和
+`production/CLOUDFLARE_API_TOKEN_PRODUCTION` 已能完成部署。仅在轮换凭据或
+部署出现鉴权错误时，按下列最小权限重新创建 Token，并把完整值分别写入对应
+Environment。不要把说明文字、省略号或换行粘贴进 Secret 值。
 
 Cloudflare Dashboard → My Profile → API Tokens → Create Token →
 Create Custom Token：
@@ -157,7 +157,14 @@ https://github.com/izanezx/personal-publishing-system/settings/environments
 8. 检查生产页面、RSS、Sitemap、搜索和 Worker Version。
 9. 删除测试内容，验证下线流程。
 
-## 7. 首次正式索引
+## 7. 英文 AI 翻译
+
+Sveltia 的翻译功能不需要服务端 Secret。第一次使用时，在 `/admin/` 的翻译
+入口选择服务并输入 API Key；Key 只保存在当前浏览器。支持 Google Cloud
+Translation、OpenAI、Anthropic、DeepSeek、Mistral 和 Gemini。把英文状态设为
+`ai-draft`，人工完成事实、语气、标题、摘要和链接审核后才改为 `published`。
+
+## 8. 首次正式索引
 
 正式内容、品牌信息、联系方式、图片授权和隐私检查完成后，才允许：
 
