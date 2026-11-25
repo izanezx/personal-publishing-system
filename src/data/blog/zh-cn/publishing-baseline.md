@@ -6,7 +6,7 @@ previousSlugs:
   - publishing-guide
 kind: article
 title: 个人出版基线
-description: 用于验证 Markdown、中文搜索和双语链接的公开示例。
+description: 用于验证 Markdown、中文搜索和双语链接的公开示例。111111111111111111111111111111111111111111111111
 pubDatetime: 2026-01-10T10:00:00Z
 status: published
 featured: true
