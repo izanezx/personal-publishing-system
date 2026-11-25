@@ -36,7 +36,7 @@ Request 和独立 Preview 验证。
 | A2 Sveltia 配置与编辑体验 | 已完成     | 单栏全宽编辑器；可选预览；长短字段、双语、状态视图、自动 Alias、Callout、表格、R2 路径和自定义发布指南                                                                | 合并后在线上 `/admin/` 做一次浏览器复验      |
 | A3 GitHub App 登录        | 已完成     | 限定单仓库的 GitHub App；Cloudflare Auth Worker；允许域；GitHub Client ID 和加密 Secret；CMS 登录已由所有者验证                                                       | 后续每次轮换时复查                           |
 | A4 R2 与媒体              | 已完成     | Bucket、CORS、公开域、限定 Bucket 的 S3 凭据、WebP 转换、20 MB 上限、媒体来源构建检查                                                                                 | 正式内容上传时继续检查版权、替代文本和隐私   |
-| A5 PR Preview 自动化      | 待远程验收 | CI 构建并校验 Preview artifact；Preview Workflow 只从同仓库可信 PR 读取 artifact；强制 noindex；回写 URL 和 Commit Status                                             | 本分支 CI、Preview 和 Commit Status 运行结果 |
+| A5 PR Preview 自动化      | 待远程验收 | CI 构建并校验 Preview artifact；Preview Workflow 只从同仓库可信 PR 读取 artifact；支持按 CI run 和完整 commit 手动引导；强制 noindex；回写 URL 和 Commit Status       | 本分支 CI、Preview 和 Commit Status 运行结果 |
 | A6 自动发布与回滚         | 待远程验收 | `main` 使用同一次 CI artifact；校验 commit、mode、indexing、SHA-256；记录 Worker Version；Smoke 失败自动回滚                                                          | 本分支合并后的生产运行结果                   |
 | A7 定时发布与归档         | 待远程验收 | 15 分钟检查 `activateAt`、`expireAt`、`archiveAt`；无到期内容不部署；运行时不修改内容文件                                                                             | 合并后人工 Dispatch 一次生产 Workflow        |
 | A8 上线与文档             | 部分完成   | README、中文发布、Sveltia、R2、账号、Release 和本验收矩阵已更新；稳定版流程已定义                                                                                     | 最终身份、内容、索引批准、稳定版批准         |

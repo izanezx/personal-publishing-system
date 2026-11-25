@@ -4,6 +4,16 @@ on:
   workflow_run:
     workflows: [CI]
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: CI run ID containing the verified site-preview artifact
+        required: true
+        type: string
+      source_commit:
+        description: Full 40-character commit SHA verified by that CI run
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -19,9 +29,17 @@ jobs:
   deploy-preview:
     name: Deploy preview
     if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.head_repository.full_name == github.repository
+      (
+        github.event_name == 'workflow_dispatch' &&
+        inputs.source_run_id != '' &&
+        inputs.source_commit != ''
+      ) ||
+      (
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.head_repository.full_name == github.repository
+      )
     runs-on: ubuntu-latest
     environment:
       name: preview
@@ -45,11 +63,11 @@ jobs:
         with:
           name: site-preview
           path: preview-candidate
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ github.event.workflow_run.id || inputs.source_run_id }}
           github-token: ${{ github.token }}
       - name: Verify the preview artifact and source commit
         env:
-          EXPECTED_COMMIT: ${{ github.event.workflow_run.head_sha }}
+          EXPECTED_COMMIT: ${{ github.event.workflow_run.head_sha || inputs.source_commit }}
         run: |
           node scripts/candidate-artifact.mjs verify preview-candidate \
             --commit "$EXPECTED_COMMIT" \
@@ -69,7 +87,7 @@ jobs:
       - name: Publish the preview URL to the pull request
         env:
           GH_TOKEN: ${{ github.token }}
-          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha || inputs.source_commit }}
         run: |
           PR_NUMBER="$(
             gh api "repos/${GITHUB_REPOSITORY}/commits/${COMMIT_SHA}/pulls" \
@@ -102,7 +120,7 @@ jobs:
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
-          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha || inputs.source_commit }}
           DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
           SMOKE_OUTCOME: ${{ steps.preview-smoke.outcome }}
         run: |

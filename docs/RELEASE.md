@@ -52,6 +52,11 @@ Cloudflare deployment uses two workflows:
 | `Preview`                       | Successful `CI` for a same-repository pull request                    | Downloads the PR artifact, deploys noindex preview, runs smoke and comments the URL    |
 | `Cloudflare production release` | Successful `CI` on `main`, manual dispatch or scheduled-content check | Downloads or creates a verified artifact, deploys production and rolls back on failure |
 
+The Preview workflow also has a manual `workflow_dispatch` path for the
+one-time bootstrap of a changed `workflow_run` trigger. Supply the successful
+CI run ID and its full 40-character commit SHA; the workflow validates and
+deploys the `site-preview` artifact from that run.
+
 Repository Variables:
 
 - `CLOUDFLARE_ACCOUNT_ID`
