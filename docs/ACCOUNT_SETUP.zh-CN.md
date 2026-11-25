@@ -6,8 +6,8 @@
 ## 已完成的仓库与基础设施
 
 - `[已完成]` GitHub 仓库公开为 `izanezx/personal-publishing-system`。
-- `[已完成]` `main` 要求 `Linux checks` 和 `Windows build`。
-- `[已完成]` 仓库管理员可以通过 Simple Workflow 直接保存内容到 `main`。
+- `[已完成]` `main` 保留 `Linux checks` 和 `Windows build` 检查，并禁止强推和删除。
+- `[已完成]` 仓库写入者可以通过 Simple Workflow 直接保存内容到 `main`；代码改动仍建议使用 PR。
 - `[已完成]` `preview` 和 `production` Environment 已存在。
 - `[已完成]` Environment Secret：
   - `preview/CLOUDFLARE_API_TOKEN_PREVIEW`
