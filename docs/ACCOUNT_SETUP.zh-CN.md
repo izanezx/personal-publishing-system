@@ -123,10 +123,10 @@ Environment。
 Cloudflare Dashboard → My Profile → API Tokens → Create Token →
 Create Custom Token：
 
-| Token                         | Account 权限          | Zone 权限                                    |
-| ----------------------------- | --------------------- | -------------------------------------------- |
-| Preview Worker 部署           | Workers Scripts: Edit | 无                                           |
-| Production Worker 部署        | Workers Scripts: Edit | Zone: Read；Workers Routes: Edit             |
+| Token                  | Account 权限          | Zone 权限                        |
+| ---------------------- | --------------------- | -------------------------------- |
+| Preview Worker 部署    | Workers Scripts: Edit | 无                               |
+| Production Worker 部署 | Workers Scripts: Edit | Zone: Read；Workers Routes: Edit |
 
 两个 Token 都只授权 Account
 `e9e4d464cf14a55127f534b7f3f63378`。Production Token 的 Zone 只授权
