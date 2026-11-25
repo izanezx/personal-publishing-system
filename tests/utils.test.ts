@@ -16,6 +16,7 @@ import {
   isSearchablePublication,
 } from "@/lib/content/status";
 import { findGoneMatch } from "@/lib/content/runtime";
+import { isSafeRemoteMediaUrl } from "@/utils/media";
 
 test("slugifyStr normalizes diacritics, versions, punctuation, and unicode", () => {
   assert.equal(slugifyStr("E2E Testing"), "e2e-testing");
@@ -27,6 +28,27 @@ test("slugifyStr normalizes diacritics, versions, punctuation, and unicode", () 
   );
   assert.equal(slugifyStr("日本語 テスト"), "日本語-テスト");
   assert.deepEqual(slugifyAll(["Astro 7", "Web Dev"]), ["astro-7", "web-dev"]);
+});
+
+test("publication media accepts safe HTTPS sources and rejects unsafe URLs", () => {
+  assert.equal(
+    isSafeRemoteMediaUrl("https://media.zanezx.com/cms/example.webp"),
+    true
+  );
+  assert.equal(
+    isSafeRemoteMediaUrl("https://images.unsplash.com/photo-example"),
+    true
+  );
+  assert.equal(
+    isSafeRemoteMediaUrl("https://cdn.example.com/cover.jpg?width=1600"),
+    true
+  );
+  assert.equal(isSafeRemoteMediaUrl("http://example.com/cover.jpg"), false);
+  assert.equal(
+    isSafeRemoteMediaUrl("https://user:secret@example.com/cover.jpg"),
+    false
+  );
+  assert.equal(isSafeRemoteMediaUrl("not-a-url"), false);
 });
 
 test("getReadingTime strips frontmatter/code and formats by locale", () => {

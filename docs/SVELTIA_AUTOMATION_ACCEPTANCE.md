@@ -12,16 +12,16 @@
 
 ## 所有者已确认的最终决策
 
-| 决策       | 当前口径                                              |
-| ---------- | ----------------------------------------------------- |
-| 仓库       | 公开并启用 Public template                            |
-| 维护者     | 仅站点所有者                                          |
-| CMS 工作流 | Simple Workflow，保存直接提交 `main`                  |
-| 发布链路   | Save → `main` → CI → 生产部署 → Smoke Test → 失败回滚 |
-| 内容       | 中文为源头；英文可先由 Sveltia AI 翻译，再人工审核    |
-| 媒体       | Cloudflare R2，公开域 `media.zanezx.com`              |
-| 域名       | 仅 `zanezx.com`，不绑定 `www`                         |
-| 首次索引   | `PUBLIC_INDEXING_ENABLED=false`，等待所有者批准       |
+| 决策       | 当前口径                                                                  |
+| ---------- | ------------------------------------------------------------------------- |
+| 仓库       | 公开并启用 Public template                                                |
+| 维护者     | 仅站点所有者                                                              |
+| CMS 工作流 | Simple Workflow，保存直接提交 `main`                                      |
+| 发布链路   | Save → `main` → CI → 生产部署 → Smoke Test → 失败回滚                     |
+| 内容       | 中文为源头；英文可先由 Sveltia AI 翻译，再人工审核                        |
+| 媒体       | 正式上传使用 Cloudflare R2；封面、OG 和 Gallery 也允许安全 HTTPS 外部图片 |
+| 域名       | 仅 `zanezx.com`，不绑定 `www`                                             |
+| 首次索引   | `PUBLIC_INDEXING_ENABLED=false`，等待所有者批准                           |
 
 直接提交 `main` 是对原计划“CMS PR → 自动合并”的有意简化，用来满足日常写作
 不操作 Git、不创建 PR 的要求。代码、Schema、依赖和 Workflow 修改仍通过 Pull
@@ -29,24 +29,24 @@ Request 和独立 Preview 验证。
 
 ## A0–A8 验收矩阵
 
-| 阶段                      | 状态       | 已完成内容                                                                                                                                                            | 尚需证据或输入                               |
-| ------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| A0 基线与 Agent 规范      | 已完成     | 独立仓库历史、Node/pnpm 锁文件、38 个 vendored Skills、内容哈希锁、固定上游来源和 `AGENTS.md` 已提交                                                                  | 无                                           |
-| A1 内容状态与 Schema      | 已完成     | 统一生命周期解析；Alias、301、410、404、404/301 分支；Draft、Scheduled、Published、Unlisted、Archived、Expired、Withdrawn；翻译状态；过期和归档时间；R2 媒体 URL 限制 | 本分支 CI 通过后归档为远程证据               |
-| A2 Sveltia 配置与编辑体验 | 已完成     | 单栏全宽编辑器；可选预览；长短字段、双语、状态视图、自动 Alias、Callout、表格、R2 路径、自定义发布指南；Admin noindex、COOP 和 CSP                                    | 合并后在线上 `/admin/` 做一次浏览器复验      |
-| A3 GitHub App 登录        | 已完成     | 限定单仓库的 GitHub App；Cloudflare Auth Worker；允许域；GitHub Client ID 和加密 Secret；CMS 登录已由所有者验证                                                       | 后续每次轮换时复查                           |
-| A4 R2 与媒体              | 已完成     | Bucket、CORS、公开域、限定 Bucket 的 S3 凭据、WebP 转换、20 MB 上限、HTTPS 媒体安全检查；正式上传默认使用 R2，正文可保留 HTTPS 测试图片                               | 正式内容上传时继续检查版权、替代文本和隐私   |
-| A5 PR Preview 自动化      | 待远程验收 | CI 构建并校验 Preview artifact；Preview Workflow 只从同仓库可信 PR 读取 artifact；支持按 CI run 和完整 commit 手动引导；强制 noindex；回写 URL 和 Commit Status       | 本分支 CI、Preview 和 Commit Status 运行结果 |
-| A6 自动发布与回滚         | 待远程验收 | `main` 使用同一次 CI artifact；校验 commit、mode、indexing、SHA-256；记录 Worker Version；Smoke 失败自动回滚                                                          | 本分支合并后的生产运行结果                   |
-| A7 定时发布与归档         | 待远程验收 | 15 分钟检查 `activateAt`、`expireAt`、`archiveAt`；无到期内容不部署；运行时不修改内容文件                                                                             | 合并后人工 Dispatch 一次生产 Workflow        |
-| A8 上线与文档             | 部分完成   | README、中文发布、Sveltia、R2、账号、Release 和本验收矩阵已更新；稳定版流程已定义                                                                                     | 最终身份、内容、索引批准、稳定版批准         |
+| 阶段                      | 状态       | 已完成内容                                                                                                                                                                    | 尚需证据或输入                               |
+| ------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| A0 基线与 Agent 规范      | 已完成     | 独立仓库历史、Node/pnpm 锁文件、38 个 vendored Skills、内容哈希锁、固定上游来源和 `AGENTS.md` 已提交                                                                          | 无                                           |
+| A1 内容状态与 Schema      | 已完成     | 统一生命周期解析；Alias、301、410、404、404/301 分支；Draft、Scheduled、Published、Unlisted、Archived、Expired、Withdrawn；翻译状态；过期和归档时间；安全 HTTPS 媒体 URL 支持 | 本分支 CI 通过后归档为远程证据               |
+| A2 Sveltia 配置与编辑体验 | 已完成     | 单栏全宽编辑器；可选预览；长短字段、双语、状态视图、自动 Alias、Callout、表格、R2 路径、自定义发布指南；Admin noindex、COOP 和 CSP                                            | 合并后在线上 `/admin/` 做一次浏览器复验      |
+| A3 GitHub App 登录        | 已完成     | 限定单仓库的 GitHub App；Cloudflare Auth Worker；允许域；GitHub Client ID 和加密 Secret；CMS 登录已由所有者验证                                                               | 后续每次轮换时复查                           |
+| A4 R2 与媒体              | 已完成     | Bucket、CORS、公开域、限定 Bucket 的 S3 凭据、WebP 转换、20 MB 上限、HTTPS 媒体安全检查；正式上传默认使用 R2，封面、OG、Gallery 和正文均可使用安全 HTTPS 外部图片             | 正式内容上传时继续检查版权、替代文本和隐私   |
+| A5 PR Preview 自动化      | 待远程验收 | CI 构建并校验 Preview artifact；Preview Workflow 只从同仓库可信 PR 读取 artifact；支持按 CI run 和完整 commit 手动引导；强制 noindex；回写 URL 和 Commit Status               | 本分支 CI、Preview 和 Commit Status 运行结果 |
+| A6 自动发布与回滚         | 待远程验收 | `main` 使用同一次 CI artifact；校验 commit、mode、indexing、SHA-256；记录 Worker Version；Smoke 失败自动回滚                                                                  | 本分支合并后的生产运行结果                   |
+| A7 定时发布与归档         | 待远程验收 | 15 分钟检查 `activateAt`、`expireAt`、`archiveAt`；无到期内容不部署；运行时不修改内容文件                                                                                     | 合并后人工 Dispatch 一次生产 Workflow        |
+| A8 上线与文档             | 部分完成   | README、中文发布、Sveltia、R2、账号、Release 和本验收矩阵已更新；稳定版流程已定义                                                                                             | 最终身份、内容、索引批准、稳定版批准         |
 
 ## 接口与内容模型
 
 ### 内容 Collection
 
 - `blog`：Markdown 与 MDX，使用同一个生命周期 Schema。
-- `galleries`：图库元数据和本地或 R2 媒体。
+- `galleries`：图库元数据和本地、R2 或安全 HTTPS 外部媒体。
 - `pages`：About 与 Now。
 - `tombstones`：删除、过期和撤下记录。
 

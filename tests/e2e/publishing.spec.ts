@@ -47,8 +47,12 @@ test("drafts and future posts stay out of routes, feeds, and sitemaps", async ({
   );
   const unlisted = await request.get("/posts/unlisted-fixture/");
   expect(unlisted.status()).toBe(200);
-  expect(await unlisted.text()).toContain(
+  const unlistedHtml = await unlisted.text();
+  expect(unlistedHtml).toContain(
     '<meta name="robots" content="noindex, follow">'
+  );
+  expect(unlistedHtml).toContain(
+    '<meta property="og:image" content="https://picsum.photos/id/24/1200/630.webp">'
   );
   for (const path of [
     "/rss.xml",

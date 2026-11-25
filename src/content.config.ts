@@ -15,6 +15,7 @@ import {
   relationshipKinds,
 } from "@/lib/content/model";
 import { publicationStatuses, translationStatuses } from "@/lib/content/status";
+import { isSafeRemoteMediaUrl } from "@/utils/media";
 
 const slug = z
   .string()
@@ -27,12 +28,12 @@ const optionalNonEmptyString = z.preprocess(
     typeof value === "string" && value.trim() === "" ? undefined : value,
   z.string().trim().min(1).optional()
 );
-const hostedMediaUrl = z
+const remoteMediaUrl = z
   .string()
   .url()
   .refine(
-    value => new URL(value).origin === "https://media.zanezx.com",
-    "Remote publication media must use https://media.zanezx.com"
+    isSafeRemoteMediaUrl,
+    "Remote publication media must use a safe HTTPS URL"
   );
 const localMediaPath = z
   .string()
@@ -41,7 +42,7 @@ const localMediaPath = z
     "Local publication media must use a site-relative /path"
   );
 const publicationImage = <T extends z.ZodType>(imageField: () => T) =>
-  z.union([imageField(), hostedMediaUrl, localMediaPath]);
+  z.union([imageField(), remoteMediaUrl, localMediaPath]);
 const aliasPath = z
   .string()
   .regex(/^\/.*\/$/, "Use a site-relative path with a trailing slash");
