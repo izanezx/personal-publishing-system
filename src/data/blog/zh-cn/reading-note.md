@@ -1,5 +1,4 @@
 ---
-translationKey: ''
 uid: zh-reading-note
 slug: reading-note
 kind: note
@@ -23,7 +22,6 @@ timezone: Asia/Shanghai
 ## 验证
 
 没有译文时，阅读页不会将读者带到不存在的英语页面。
-
 
 - Serving 100% of the existing Netlify/Decap CMS user base. While we aim to support most use cases, some users may be unable to migrate to Sveltia CMS due to technical limitations, such as unsupported backends. See the [Compatibility](https://sveltiacms.app/docs/migration/netlify-decap-cms#compatibility) section for details.
 - Support for non-Git backends. Sveltia CMS is a Git-based headless CMS and will remain so to avoid feature creep and increased maintenance costs. We may support custom backends through an API in the future, but it’s not a priority right now.

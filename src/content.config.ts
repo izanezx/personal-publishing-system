@@ -22,11 +22,16 @@ const slug = z
     /^[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*$/u,
     "Use a single URL segment with letters, digits or hyphens"
   );
+const optionalNonEmptyString = z.preprocess(
+  value =>
+    typeof value === "string" && value.trim() === "" ? undefined : value,
+  z.string().trim().min(1).optional()
+);
 const publication = {
   uid: z.string().trim().min(1),
   slug,
   previousSlugs: z.array(slug).default([]),
-  translationKey: z.string().trim().min(1).optional(),
+  translationKey: optionalNonEmptyString,
   status: z.enum(publicationStatuses).default("published"),
   scheduledFor: z.date().optional().nullable(),
   expireAt: z.date().optional().nullable(),
