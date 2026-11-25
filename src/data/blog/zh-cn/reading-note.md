@@ -3,7 +3,7 @@ translationKey: ''
 uid: zh-reading-note
 slug: reading-note
 kind: note
-title: 阅读笔记
+title: 阅读笔记1
 description: 一条没有英语译文的公开示例。
 pubDatetime: 2026-01-04T10:00:00Z
 modDatetime: 2026-01-20T10:00:00Z
