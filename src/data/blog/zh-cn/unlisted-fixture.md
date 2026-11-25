@@ -5,6 +5,8 @@ title: "不列出的预览条目"
 description: "用于验证 unlisted 内容可直接访问但不会进入搜索、RSS 或 Sitemap。"
 pubDatetime: 2026-01-05T10:00:00Z
 status: unlisted
+coverImage: https://picsum.photos/id/24/1200/630.webp
+ogImage: https://picsum.photos/id/24/1200/630.webp
 topics: ["publishing"]
 stage: seedling
 tags: ["fixture"]
