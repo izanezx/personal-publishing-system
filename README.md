@@ -27,7 +27,7 @@ A long-lived publishing system built from the Devosfera reading experience, enha
 - **Bilingual publishing:** Chinese at `/`, English at `/en/`, with translation-aware navigation and canonical URLs.
 - **Editorial content model:** stable UIDs, permanent slugs, redirects, relationships, topics, maturity and exact publication time.
 - **Multiple publishing formats:** essays and research articles, Notes, Projects, Library entries, Garden topics and Galleries.
-- **Browser publishing:** Sveltia CMS writes Markdown through GitHub PRs, with preview, editorial stages, content-only auto-merge and automatic production release.
+- **Browser publishing:** Sveltia CMS saves Markdown directly to GitHub, then CI builds, deploys and verifies the production site automatically.
 - **External media:** Cloudflare R2 stores editor uploads under the public `media.zanezx.com` origin.
 - **Reading experience retained from Devosfera:** reading mode, search, table of contents, light and dark themes, gallery lightboxes and optional motion reduction.
 - **Selected AstroPaper practices:** callouts, responsive tables, extension slots, shareable search, typed settings, safe JSON-LD and CJK-aware Open Graph images.
@@ -48,7 +48,7 @@ A long-lived publishing system built from the Devosfera reading experience, enha
 | Package manager | pnpm 10.28.0                                      |
 | Runtime         | Node.js 24.22.3                                   |
 | Hosting         | Cloudflare Workers Static Assets                  |
-| Publishing      | Sveltia CMS, GitHub App and Editorial Workflow    |
+| Publishing      | Sveltia CMS, GitHub App and Simple Workflow       |
 | Media           | Cloudflare R2                                     |
 | Release control | GitHub Actions, auto-merge and automatic rollback |
 
@@ -117,7 +117,7 @@ The temporary public identity and optional integrations are configured in:
 - `src/config.ts`: theme, sharing, edit links, motion and optional audio.
 - `.env`: public social links and edit URL. Never commit `.env`.
 - `src/data/pages/{zh-cn,en}/`: About and Now page content.
-- `public/admin/config.yml`: Sveltia collections, editorial workflow and R2 storage.
+- `public/admin/config.yml`: Sveltia collections, simple workflow and R2 storage.
 
 Owner-specific launch material is tracked in [docs/OWNER_CONTENT_CHECKLIST.md](docs/OWNER_CONTENT_CHECKLIST.md).
 
@@ -179,10 +179,13 @@ Subpath and deployment verification steps are in [docs/RELEASE.md](docs/RELEASE.
 ## Publishing and deployment
 
 Open `https://zanezx.com/admin/` to create or edit content. Sveltia saves through
-the `sveltia-cms/pending_review` and `sveltia-cms/pending_publish` workflow.
-When a content entry reaches Pending Publish, GitHub Actions verifies that the
-Pull Request only changes editorial content paths, waits for the required
-checks and enables squash auto-merge.
+the simple workflow: unsaved edits are backed up in the browser, and Save
+commits directly to `main`. There is no CMS review or pending-publication stage.
+Editorial changes therefore use one step:
+
+```text
+Save -> main -> CI -> production deployment -> live smoke test
+```
 
 After the `main` CI succeeds, the production workflow:
 

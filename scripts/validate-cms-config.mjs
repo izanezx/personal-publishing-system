@@ -52,9 +52,9 @@ for (const name of requiredCollections) {
   if (!collection) {
     throw new Error(`Required Sveltia collection is missing: ${name}`);
   }
-  if (collection.publish !== false) {
+  if (collection.publish === false) {
     throw new Error(
-      `${name} must hide manual publishing; Pending Publish is the approval point`
+      `${name} must expose the normal save control in the simple workflow`
     );
   }
 }
@@ -63,13 +63,13 @@ if (config.backend?.repo !== "izanezx/personal-publishing-system") {
   throw new Error("Sveltia CMS targets an unexpected repository");
 }
 if (config.backend?.branch !== "main") {
-  throw new Error("Sveltia CMS must publish through a pull request to main");
+  throw new Error("Sveltia CMS must save directly to main");
 }
 if (config.backend?.base_url !== "https://sveltia-auth.zanezx.com") {
   throw new Error("Sveltia CMS authentication Worker URL differs");
 }
-if (config.publish_mode?.type !== "editorial_workflow") {
-  throw new Error("Sveltia CMS must use the editorial workflow");
+if (config.publish_mode !== "simple") {
+  throw new Error("Sveltia CMS must use the simple workflow");
 }
 if (config.editor?.second_pane !== false || config.editor?.preview !== false) {
   throw new Error("Sveltia CMS must keep the single-pane editor");
@@ -155,5 +155,5 @@ if (
 }
 
 process.stdout.write(
-  `Verified Sveltia CMS ${cmsVersion} configuration, schema, editorial workflow, R2 shape and SRI.\n`
+  `Verified Sveltia CMS ${cmsVersion} configuration, schema, simple workflow, R2 shape and SRI.\n`
 );

@@ -37,16 +37,15 @@ The [product specification](docs/PRODUCT.md) describes the public routes.
 
 Sveltia CMS at `/admin/` reads its collection model from
 `public/admin/config.yml`. A GitHub App exchanged by the pinned
-`infra/sveltia-auth` Worker creates editorial branches and Pull Requests.
-Sveltia stages map to GitHub labels, while frontmatter `status` controls the
-publication lifecycle after merge.
+`infra/sveltia-auth` Worker authenticates the owner. Sveltia's simple workflow
+commits saved content directly to `main`, while frontmatter `status` controls
+the page lifecycle.
 
 The release chain is:
 
 ```text
-CMS -> GitHub App -> Pull Request -> isolated Preview
-    -> Pending Publish -> content-only validation -> CI + auto-merge
-    -> main CI -> Cloudflare production -> live smoke test
+CMS -> GitHub App -> direct commit to main
+    -> CI -> Cloudflare production -> live smoke test
     -> automatic Worker Version rollback on failure
 ```
 

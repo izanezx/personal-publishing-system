@@ -45,12 +45,11 @@ Pagefind binary under QEMU, outside the repository.
 
 ## Cloudflare and GitHub Actions
 
-Cloudflare deployment is split across three workflows:
+Cloudflare deployment uses two workflows:
 
 | Workflow                        | Trigger                                                                   | Result                                                                       |
 | ------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | `Preview`                       | Same-repository pull request                                              | Builds, deploys the preview Worker, runs smoke tests and comments the URL    |
-| `CMS auto merge`                | `sveltia-cms/pending_publish` label                                       | Verifies a content-only diff and enables squash auto-merge                   |
 | `Cloudflare production release` | Successful `CI` run on `main`, manual dispatch or scheduled-content check | Builds, deploys production, verifies the live site and rolls back on failure |
 
 Repository Variables:
@@ -107,6 +106,10 @@ recorded Version if verification fails.
 - Authentication Worker: `https://sveltia-auth.zanezx.com`
 - R2 bucket: `personal-publishing-media`
 - Public media origin: `https://media.zanezx.com`
+
+Sveltia uses the simple workflow. Save commits directly to `main`; there is no
+content branch, CMS Pull Request or pending-publication label. If CI fails,
+production remains on the previously verified Worker Version.
 
 The GitHub App is restricted to the single project repository. The R2 token
 is restricted to the single media bucket. Follow the complete setup and

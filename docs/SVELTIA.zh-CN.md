@@ -11,11 +11,8 @@ https://zanezx.com/admin/
 ```text
 Sveltia CMS
   -> GitHub App 登录
-  -> 内容分支与 Pull Request
-  -> 自动 Preview
-  -> 移动到 Pending Publish
-  -> 内容路径校验
-  -> CI 通过后自动合并
+  -> 浏览器自动备份未保存编辑
+  -> 点保存直接提交 main
   -> main CI 通过后自动生产部署
   -> 线上 Smoke Test
   -> 失败自动回滚
@@ -41,30 +38,26 @@ GitHub App 只安装到 `izanezx/personal-publishing-system`，不授予其他�
 2. 默认语言是中文。
 3. 填写 `slug`、标题、摘要、首次发布时间和正文。
 4. 如果需要英文版本，在同一个条目中切换到英文并填写英文内容。
-5. 保存后条目进入 GitHub Pull Request 草稿。
+5. 点击保存后直接提交到 `main`。CI 通过后自动部署到生产站。
 
 普通文章保存为 Markdown。需要 Astro 组件、交互演示或 MDX 的内容仍由代码维护，
 不在 Sveltia CMS 中直接编辑。
 
-## 两个不同的“状态”
+## 保存与本地草稿
 
-不要把编辑流程状态和文章发布状态混在一起。
+日常发布没有 Draft、Review、Ready、Pending Publish 等编辑阶段。
 
-### 编辑流程
+- 编辑过程中，Sveltia 会自动把尚未保存的内容备份在当前浏览器。
+- 离开页面或浏览器意外关闭后，再次打开同一内容会提示恢复备份。
+- 点击保存会把内容直接提交到 GitHub `main`，不会创建 CMS Pull Request。
+- GitHub Actions 会先执行构建、单元测试、浏览器测试和发布演练；全部通过后才部署。
+- 任一步失败时，生产站不会被这次提交替换；正在运行的旧版本继续提供服务。
 
-| Sveltia 阶段    | 表示什么           | 自动化行为                                       |
-| --------------- | ------------------ | ------------------------------------------------ |
-| Draft           | 内容尚未准备好评审 | 保留在 PR 草稿中                                 |
-| Pending Review  | 等待内容或翻译审核 | 不自动合并                                       |
-| Pending Publish | 已经批准发布       | 验证仅修改允许的内容文件后启用 squash auto-merge |
+浏览器备份只存在当前浏览器的本地存储中，不等同于 GitHub 草稿。若不希望内容进入
+站点，同时仍要把文件保存到仓库，可以使用下面“文章发布状态”中的 `draft`。
+正常情况下不需要这个状态：保存后等待自动部署即可。
 
-CMS 中不显示手动 Publish 按钮。把条目移动到 Pending Publish 就是最终发布批准；
-GitHub Actions 会等待 `Linux checks` 和 `Windows build`，通过后自动合并。检查失败时
-不会合并。
-
-如果从 Pending Publish 移回其他阶段，自动合并请求会被取消。
-
-### 文章发布状态
+## 页面状态
 
 | `status`    | 页面             | 列表     | 搜索   | RSS          | Sitemap | 索引      |
 | ----------- | ---------------- | -------- | ------ | ------------ | ------- | --------- |
@@ -147,13 +140,8 @@ https://media.zanezx.com/cms/
 
 ## 自动发布后需要检查什么
 
-PR 会收到 Preview 评论，内容包括：
-
-- Preview URL
-- 当前提交 SHA
-- `Indexing: disabled`
-
-进入 Pending Publish 后，系统自动等待 CI 并合并。生产部署完成时会运行：
+每次保存后可以直接在 GitHub Actions 查看 `CI` 和 `Cloudflare production release`。
+生产部署完成时会自动运行：
 
 - 首页和中英文首页
 - 中文和英文文章
@@ -169,7 +157,7 @@ PR 会收到 Preview 评论，内容包括：
 
 CMS 创建的 `src/data/**/*.md` 使用 Sveltia 自己的 frontmatter 和 Markdown
 序列化格式，不参与 Prettier 格式检查；`cms:check`、构建、单元测试和浏览器测试
-仍然会校验其语义。发布流程不会在 CMS 分支追加机器人格式化提交。
+仍然会校验其语义。保存会产生一个直接提交，不会额外创建机器人格式化提交。
 
 ## 本地替代方式
 
