@@ -4,6 +4,10 @@
 方案：Personal Publishing System · Sveltia CMS 自动化落地计划
 项目：`izanezx/personal-publishing-system`
 
+原始实施计划保存在
+[SVELTIA_CMS_AUTOMATION_PLAN.md](SVELTIA_CMS_AUTOMATION_PLAN.md)。本文件记录
+后续实施决定、偏差和 A0–A8 的实际验收状态。
+
 本文件是 A0–A8 的唯一验收矩阵。状态含义：
 
 - **已完成**：代码、配置和可复核证据均存在。
