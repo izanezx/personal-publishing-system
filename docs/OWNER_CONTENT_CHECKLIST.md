@@ -7,7 +7,7 @@ remain open until the repository owner supplies or approves the real material.
 
 ## Repository setup completed
 
-Verified on 2026-11-24:
+Verified on 2026-11-25:
 
 - The repository is public and enabled as a GitHub Public template.
 - The description, `https://zanezx.com` homepage and initial topics are set.
@@ -16,7 +16,7 @@ Verified on 2026-11-24:
   enabled.
 - `main` requires the Linux and Windows CI jobs, current branches, linear
   history and resolved conversations; force pushes and deletion are blocked.
-- All 35 project Skills are tracked and pass `pnpm skills:check`.
+- All 38 project Skills are tracked and pass `pnpm skills:check`.
 - The apex Worker currently returns `X-Robots-Tag: noindex, nofollow` until the
   first public indexing date is approved.
 

@@ -21,4 +21,4 @@ repositories, paths and commit revisions are recorded in `skills-lock.json`;
 license and notice files are retained inside each Skill directory. Known
 upstream sources include mattpocock/skills, astrolicious/agent-skills,
 addyosmani/web-quality-skills, delineas/astro-framework-agents, openai/skills
-and cloudflare/skills.
+cloudflare/skills and sveltia/ai-tools.

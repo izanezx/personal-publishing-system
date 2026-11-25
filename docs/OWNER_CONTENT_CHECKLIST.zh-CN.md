@@ -8,7 +8,7 @@
 
 ## 已完成的仓库设置
 
-已于 2026-11-24 核验：
+已于 2026-11-25 核验：
 
 - 仓库已公开，并启用 GitHub **Public template**。
 - 已设置仓库简介、`https://zanezx.com` 首页地址和初始 Topics。
@@ -16,7 +16,7 @@
 - 已启用私有漏洞报告和 Secret Scanning Push Protection。
 - `main` 强制要求 Linux 与 Windows CI、最新分支、线性历史和对话解决；
   禁止强推和删除。
-- 35 个项目 Skills 已全部纳入 Git，并通过 `pnpm skills:check`。
+- 38 个项目 Skills 已全部纳入 Git，并通过 `pnpm skills:check`。
 - `zanezx.com/*` 生产 Worker Route 已绑定；`www.zanezx.com` 不绑定。
 - 在首次公开索引日期获得批准前，根域名 Worker 返回
   `X-Robots-Tag: noindex, nofollow`。

@@ -31,7 +31,7 @@ A long-lived publishing system built from the Devosfera reading experience, enha
 - **Selected AstroPaper practices:** callouts, responsive tables, extension slots, shareable search, typed settings, safe JSON-LD and CJK-aware Open Graph images.
 - **Static output:** Astro static generation, Pagefind search, RSS, activity feed, Sitemap, robots and dynamic social images.
 - **Quality gates:** unit tests, Chromium end-to-end tests, accessibility-oriented interactions, performance budgets, root and subpath builds, and a Cloudflare promotion and rollback drill.
-- **Reproducible agent workflow:** 35 vendored Skills, a content-hashed `skills-lock.json`, explicit MCP fallbacks and project instructions in [AGENTS.md](AGENTS.md).
+- **Reproducible agent workflow:** 38 vendored Skills, a content-hashed `skills-lock.json`, explicit MCP fallbacks and project instructions in [AGENTS.md](AGENTS.md).
 
 ## Tech stack
 
