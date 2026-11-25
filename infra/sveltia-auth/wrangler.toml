@@ -9,6 +9,7 @@ enabled = true
 
 [vars]
 ALLOWED_DOMAINS = "zanezx.com,personal-publishing-system-preview.zanezx.workers.dev,localhost,cms.netlify.com"
+GITHUB_CLIENT_ID = "Iv23liRSBHPe7cMjdQgi"
 
 [[routes]]
 pattern = "sveltia-auth.zanezx.com"
