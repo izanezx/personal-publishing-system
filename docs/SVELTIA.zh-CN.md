@@ -13,8 +13,8 @@ Sveltia CMS
   -> GitHub App 登录
   -> 内容分支与 Pull Request
   -> 自动 Preview
-  -> 人工推进到 Pending Publish
-  -> 文内容路径校验
+  -> 移动到 Pending Publish
+  -> 内容路径校验
   -> CI 通过后自动合并
   -> main CI 通过后自动生产部署
   -> 线上 Smoke Test
@@ -58,7 +58,9 @@ GitHub App 只安装到 `izanezx/personal-publishing-system`，不授予其他�
 | Pending Review  | 等待内容或翻译审核 | 不自动合并                                       |
 | Pending Publish | 已经批准发布       | 验证仅修改允许的内容文件后启用 squash auto-merge |
 
-自动合并仍会等待 `Linux checks` 和 `Windows build`。检查失败时不会合并。
+CMS 中不显示手动 Publish 按钮。把条目移动到 Pending Publish 就是最终发布批准；
+GitHub Actions 会等待 `Linux checks` 和 `Windows build`，通过后自动合并。检查失败时
+不会合并。
 
 如果从 Pending Publish 移回其他阶段，自动合并请求会被取消。
 
