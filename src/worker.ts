@@ -36,7 +36,11 @@ function loadIndexingEnabled(request: Request, env: Env): Promise<boolean> {
 
 async function serveAsset(request: Request, env: Env) {
   const response = await env.ASSETS.fetch(request);
-  if (await loadIndexingEnabled(request, env)) return response;
+  const url = new URL(request.url);
+  const isSmokeMirror = url.hostname.endsWith(".workers.dev");
+  if (!isSmokeMirror && (await loadIndexingEnabled(request, env))) {
+    return response;
+  }
   const headers = new Headers(response.headers);
   headers.set("X-Robots-Tag", "noindex, nofollow");
   return new Response(response.body, {

@@ -108,6 +108,7 @@ Repository → Settings → Secrets and variables → Actions → Variables：
 | ------------------------- | --------------------------------------------------------------- |
 | `CLOUDFLARE_ACCOUNT_ID`   | `e9e4d464cf14a55127f534b7f3f63378`                              |
 | `PREVIEW_URL`             | `https://personal-publishing-system-preview.zanezx.workers.dev` |
+| `PRODUCTION_SMOKE_URL`    | `https://personal-publishing-system.zanezx.workers.dev`         |
 | `PUBLIC_INDEXING_ENABLED` | 上线前保持 `false`                                              |
 
 Environment Secrets 不应改成 Repository Secrets。`preview` 和 `production` 使用
