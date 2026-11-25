@@ -73,6 +73,49 @@ if (config.i18n?.default_locale !== "zh-cn") {
   throw new Error("Chinese must remain the default CMS locale");
 }
 
+for (const collectionName of ["publications", "galleries"]) {
+  const collection = config.collections.find(
+    candidate => candidate.name === collectionName
+  );
+  const slugField = collection?.fields?.find(field => field.name === "slug");
+  const pattern = Array.isArray(slugField?.pattern)
+    ? slugField.pattern[0]
+    : slugField?.pattern;
+  if (typeof pattern !== "string") {
+    throw new Error(`${collectionName} must define a string slug pattern`);
+  }
+  const delimitedPattern = /^\/(.*)\/([a-z]*)$/.exec(pattern);
+  let slugPattern;
+  try {
+    slugPattern = delimitedPattern
+      ? new RegExp(delimitedPattern[1], delimitedPattern[2])
+      : new RegExp(pattern);
+  } catch (error) {
+    throw new Error(`${collectionName} slug pattern is invalid: ${error}`);
+  }
+  for (const validSlug of ["color-study", "中文-文章", "notes"]) {
+    if (!slugPattern.test(validSlug)) {
+      throw new Error(
+        `${collectionName} slug pattern rejects valid value: ${validSlug}`
+      );
+    }
+  }
+  for (const invalidSlug of [
+    "-leading",
+    "trailing-",
+    "double--dash",
+    "under_score",
+    "nested/path",
+    "two words",
+  ]) {
+    if (slugPattern.test(invalidSlug)) {
+      throw new Error(
+        `${collectionName} slug pattern accepts invalid value: ${invalidSlug}`
+      );
+    }
+  }
+}
+
 const aria = html.match(/integrity="(sha384-[^"]+)"/)?.[1];
 const scriptUrl = html.match(/src="([^"]+sveltia-cms\.js)"/)?.[1];
 if (!aria || !scriptUrl || !scriptUrl.includes(`@sveltia/cms@${cmsVersion}/`)) {
