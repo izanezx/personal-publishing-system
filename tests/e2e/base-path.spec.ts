@@ -29,9 +29,15 @@ test("navigation, SEO and Pagefind work at the configured mount path", async ({
   expect(await (await request.get(base + "/en/rss.xml")).text()).toContain(
     origin + en
   );
-  expect(await (await request.get(base + "/robots.txt")).text()).toContain(
-    origin + base + "/sitemap-index.xml"
-  );
+  const indexing = await (
+    await request.get(base + "/runtime/indexing.json")
+  ).json();
+  const robots = await (await request.get(base + "/robots.txt")).text();
+  if (indexing.enabled) {
+    expect(robots).toContain(origin + base + "/sitemap-index.xml");
+  } else {
+    expect(robots).toMatch(/Disallow:\s*\/$/m);
+  }
 
   await page.goto(base + "/en/search/?q=rendering");
   const result = page
