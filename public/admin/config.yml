@@ -54,7 +54,7 @@ media_libraries:
   cloudflare_r2:
     label: Cloudflare R2
     default: true
-    access_key_id: "0000000000000000000000000000000000000000000000000000000000000000"
+    access_key_id: "b49f57f0e7c5de37c6a1e5b7ea66528a"
     bucket: personal-publishing-media
     account_id: e9e4d464cf14a55127f534b7f3f63378
     public_url: https://media.zanezx.com
