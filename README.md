@@ -27,26 +27,30 @@ A long-lived publishing system built from the Devosfera reading experience, enha
 - **Bilingual publishing:** Chinese at `/`, English at `/en/`, with translation-aware navigation and canonical URLs.
 - **Editorial content model:** stable UIDs, permanent slugs, redirects, relationships, topics, maturity and exact publication time.
 - **Multiple publishing formats:** essays and research articles, Notes, Projects, Library entries, Garden topics and Galleries.
+- **Browser publishing:** Sveltia CMS writes Markdown through GitHub PRs, with preview, editorial stages, content-only auto-merge and automatic production release.
+- **External media:** Cloudflare R2 stores editor uploads under the public `media.zanezx.com` origin.
 - **Reading experience retained from Devosfera:** reading mode, search, table of contents, light and dark themes, gallery lightboxes and optional motion reduction.
 - **Selected AstroPaper practices:** callouts, responsive tables, extension slots, shareable search, typed settings, safe JSON-LD and CJK-aware Open Graph images.
 - **Static output:** Astro static generation, Pagefind search, RSS, activity feed, Sitemap, robots and dynamic social images.
 - **Quality gates:** unit tests, Chromium end-to-end tests, accessibility-oriented interactions, performance budgets, root and subpath builds, and a Cloudflare promotion and rollback drill.
-- **Reproducible agent workflow:** 35 vendored Skills, a content-hashed `skills-lock.json`, explicit MCP fallbacks and project instructions in [AGENTS.md](AGENTS.md).
+- **Reproducible agent workflow:** 38 vendored Skills, a content-hashed `skills-lock.json`, explicit MCP fallbacks and project instructions in [AGENTS.md](AGENTS.md).
 
 ## Tech stack
 
-| Area            | Choice                                                |
-| --------------- | ----------------------------------------------------- |
-| Framework       | Astro 7 with TypeScript                               |
-| Styling         | Tailwind CSS 4                                        |
-| Content         | Astro Content Collections, Markdown and MDX           |
-| Search          | Pagefind 1.6                                          |
-| Images          | Sharp, Satori and resvg                               |
-| Browser tests   | Playwright                                            |
-| Package manager | pnpm 10.28.0                                          |
-| Runtime         | Node.js 24.22.3                                       |
-| Hosting         | Cloudflare Workers Static Assets                      |
-| Release control | GitHub Actions, Dependabot and gated Wrangler deploys |
+| Area            | Choice                                            |
+| --------------- | ------------------------------------------------- |
+| Framework       | Astro 7 with TypeScript                           |
+| Styling         | Tailwind CSS 4                                    |
+| Content         | Astro Content Collections, Markdown and MDX       |
+| Search          | Pagefind 1.6                                      |
+| Images          | Sharp, Satori and resvg                           |
+| Browser tests   | Playwright                                        |
+| Package manager | pnpm 10.28.0                                      |
+| Runtime         | Node.js 24.22.3                                   |
+| Hosting         | Cloudflare Workers Static Assets                  |
+| Publishing      | Sveltia CMS, GitHub App and Editorial Workflow    |
+| Media           | Cloudflare R2                                     |
+| Release control | GitHub Actions, auto-merge and automatic rollback |
 
 ## Project structure
 
@@ -55,6 +59,7 @@ A long-lived publishing system built from the Devosfera reading experience, enha
 ├── .agents/skills/          # Reproducible project Skills for coding agents
 ├── .github/                 # CI, deployment and repository templates
 ├── docs/                    # Product, acceptance, release and owner guides
+├── infra/                   # Sveltia authenticator and R2 configuration
 ├── public/                  # Static files, headers and favicon
 ├── scripts/                 # Build, search, release and Skill verification
 ├── src/
@@ -112,6 +117,7 @@ The temporary public identity and optional integrations are configured in:
 - `src/config.ts`: theme, sharing, edit links, motion and optional audio.
 - `.env`: public social links and edit URL. Never commit `.env`.
 - `src/data/pages/{zh-cn,en}/`: About and Now page content.
+- `public/admin/config.yml`: Sveltia collections, editorial workflow and R2 storage.
 
 Owner-specific launch material is tracked in [docs/OWNER_CONTENT_CHECKLIST.md](docs/OWNER_CONTENT_CHECKLIST.md).
 
@@ -146,8 +152,11 @@ Read the [Chinese publishing guide](docs/PUBLISHING.zh-CN.md), [docs/PRODUCT.md]
 | `pnpm test`           | Run unit tests                                             |
 | `pnpm lint`           | Run ESLint                                                 |
 | `pnpm format:check`   | Verify Prettier formatting                                 |
+| `pnpm cms:check`      | Validate Sveltia Schema, SRI, workflow and R2 shape        |
 | `pnpm test:e2e`       | Run the Playwright browser suite                           |
 | `pnpm test:release`   | Rehearse preview policy, production responses and rollback |
+| `pnpm smoke`          | Verify a deployed preview or production site               |
+| `pnpm status:due`     | Check scheduled publication and expiration manifests       |
 | `pnpm security:audit` | Fail on high or critical dependency advisories             |
 | `pnpm skills:check`   | Verify every vendored Skill against `skills-lock.json`     |
 
@@ -156,6 +165,7 @@ Before opening a pull request, run:
 ```bash
 pnpm security:audit
 pnpm skills:check
+pnpm cms:check
 pnpm test
 pnpm lint
 pnpm format:check
@@ -166,16 +176,36 @@ pnpm test:release
 
 Subpath and deployment verification steps are in [docs/RELEASE.md](docs/RELEASE.md).
 
-## Cloudflare deployment
+## Publishing and deployment
 
-Preview and production use separate Wrangler environments. Production consumes the exact artifact and commit from a successful preview run, verifies its SHA-256 manifest, and requires explicit owner approval.
+Open `https://zanezx.com/admin/` to create or edit content. Sveltia saves through
+the `sveltia-cms/pending_review` and `sveltia-cms/pending_publish` workflow.
+When a content entry reaches Pending Publish, GitHub Actions verifies that the
+Pull Request only changes editorial content paths, waits for the required
+checks and enables squash auto-merge.
 
-Required GitHub Actions secrets:
+After the `main` CI succeeds, the production workflow:
 
-- `CLOUDFLARE_ACCOUNT_ID`
-- `CLOUDFLARE_API_TOKEN`
+1. builds with the current indexing policy;
+2. records the active Cloudflare Worker Version;
+3. deploys `zanezx.com`;
+4. runs live HTTP, route, RSS, Sitemap, search, Admin, 404, 410 and 301 checks;
+5. rolls back automatically if verification fails.
 
-The token should be limited to the target account and Workers Scripts edit access. Never place the token in source, content or an issue. Follow the gated procedure in [docs/RELEASE.md](docs/RELEASE.md).
+Same-repository pull requests receive an isolated non-indexable preview at
+`https://personal-publishing-system-preview.zanezx.workers.dev`.
+
+The repository uses separate Environment Secrets for preview and production.
+Current Variables are `CLOUDFLARE_ACCOUNT_ID`, `PREVIEW_URL` and
+`PUBLIC_INDEXING_ENABLED`. The site remains `noindex, nofollow` until the owner
+approves the first indexing launch.
+
+Read:
+
+- [Sveltia CMS 写作与发布](docs/SVELTIA.zh-CN.md)
+- [Cloudflare R2 媒体存储](docs/MEDIA_R2.zh-CN.md)
+- [账号配置](docs/ACCOUNT_SETUP.zh-CN.md)
+- [Release and owner handoff](docs/RELEASE.md)
 
 ## Agent workflow
 

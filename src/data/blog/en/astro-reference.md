@@ -2,6 +2,7 @@
 uid: en-astro-reference
 slug: astro-reference
 translationKey: astro-reference
+translationStatus: published
 title: "Astro Content Collections documentation"
 description: "The official reference for schema validation and build-time loading."
 kind: resource

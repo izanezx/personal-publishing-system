@@ -1,11 +1,11 @@
 ---
 import { localePrefix, resolveLocale } from "@/i18n/locales";
 import type { CollectionEntry } from "astro:content";
-import type { ImageMetadata } from "astro";
-import { Image } from "astro:assets";
 import { slugifyStr } from "@/utils/slugify";
 import { getEntryPath, getEntryTransitionName } from "@/utils/contentEntry";
 import { getReadingTime } from "@/utils/readingTime";
+import type { PublicationImageSource } from "@/utils/media";
+import PublicationImage from "@/components/common/PublicationImage.astro";
 import Datetime from "./Datetime.astro";
 import IconGallery from "@/assets/icons/IconGallery.svg";
 import IconClock from "@/assets/icons/IconClock.svg";
@@ -43,14 +43,15 @@ const viewTransitionName = getEntryTransitionName({ collection, id, data });
 const readingTime = body ? getReadingTime(body, locale) : null;
 
 // Resolve cover image source
-let coverSrc: string | ImageMetadata | undefined;
+let coverSrc: PublicationImageSource | undefined;
 if (SITE.showCoverImages) {
   if (isGallery) {
     const gallery = data as CollectionEntry<"galleries">["data"];
     coverSrc = gallery.coverImage ?? gallery.media[0]?.src;
   } else {
     // Blog posts: prefer frontmatter coverImage, then ogImage, fallback to dynamic OG image
-    const coverImage = (data as { coverImage?: ImageMetadata }).coverImage;
+    const coverImage = (data as { coverImage?: PublicationImageSource })
+      .coverImage;
     const ogImage = "ogImage" in data ? data.ogImage : undefined;
 
     if (coverImage) {
@@ -133,31 +134,17 @@ if (SITE.showCoverImages) {
       class="card-cover-wrapper block"
       data-cover
     >
-      {typeof coverSrc === "object" ? (
-        <Image
-          src={coverSrc}
-          alt={title}
-          class="card-cover-img"
-          loading={loading}
-          fetchpriority={fetchpriority}
-          widths={[400, 800]}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          format="avif"
-          quality={72}
-        />
-      ) : (
-        <img
-          src={coverSrc}
-          alt={title}
-          class="card-cover-img"
-          loading={loading}
-          fetchpriority={fetchpriority}
-          decoding="async"
-          width="1200"
-          height="630"
-          onerror="this.closest('[data-cover]').style.display='none'"
-        />
-      )}
+      <PublicationImage
+        src={coverSrc}
+        alt={title}
+        class="card-cover-img"
+        loading={loading}
+        fetchpriority={fetchpriority}
+        widths={[400, 800]}
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        format="avif"
+        quality={72}
+      />
       <div class="card-cover-overlay" aria-hidden="true" />
     </a>
   )}

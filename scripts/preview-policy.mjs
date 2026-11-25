@@ -5,16 +5,19 @@ import { fileURLToPath } from "node:url";
 export async function applyPreviewPolicy(directory) {
   const headerPath = resolve(directory, "_headers");
   const headers = await readFile(headerPath, "utf8");
-  if (/(?:^|\n)\s*X-Robots-Tag:/i.test(headers)) {
-    throw new Error("Expected a production artifact without X-Robots-Tag");
+  const hasGlobalNoindex =
+    /(?:^|\n)\/\*\s*\n(?:[ \t]+[^\n]*\n)*?[ \t]+X-Robots-Tag:\s*noindex,\s*nofollow/i.test(
+      headers
+    );
+  if (!hasGlobalNoindex) {
+    await writeFile(
+      headerPath,
+      `${headers.trimEnd()}\n\n/*\n  X-Robots-Tag: noindex, nofollow\n`
+    );
   }
   await writeFile(
-    headerPath,
-    `${headers.trimEnd()}\n\n/*\n  X-Robots-Tag: noindex, nofollow\n`
-  );
-  await writeFile(
     resolve(directory, "robots.txt"),
-    "User-agent: *\nAllow: /\n"
+    "User-agent: *\nDisallow: /\n"
   );
 }
 

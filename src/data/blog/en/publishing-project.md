@@ -1,6 +1,7 @@
 ---
 uid: en-publishing-project
 slug: publishing-project
+translationStatus: published
 kind: project
 title: "Publishing project"
 description: "A synthetic project entry used in the unified feed."

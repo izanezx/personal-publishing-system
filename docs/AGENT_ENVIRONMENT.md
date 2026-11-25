@@ -1,10 +1,10 @@
 # Agent environment and Skills
 
-Verified: 2026-11-24
+Verified: 2026-11-25
 
 ## Reproducibility model
 
-The 35 project Skills are vendored under `.agents/skills/`. Each directory has a
+The 38 project Skills are vendored under `.agents/skills/`. Each directory has a
 SHA-256 content hash in `skills-lock.json`. CI runs `pnpm skills:check`, so an
 unreviewed addition, deletion or content change fails the build.
 
@@ -33,6 +33,8 @@ the authoritative version.
 | [delineas/astro-framework-agents](https://github.com/delineas/astro-framework-agents) | `3e32c91cc433424e162472b81afaa5e9324669bb` | `astro-framework`                              |
 | [openai/skills](https://github.com/openai/skills)                                     | `49f948faa9258a0c61caceaf225e179651397431` | `cloudflare-deploy`, `gh-fix-ci`, `playwright` |
 | [cloudflare/skills](https://github.com/cloudflare/skills)                             | `5108325ecceabc899c761e07aa617b09c02445ee` | `web-perf`                                     |
+| [cloudflare/skills](https://github.com/cloudflare/skills)                             | `ff191de7d903788eceaf516a514ae7d3b56b924a` | `wrangler`, `workers-best-practices`           |
+| [sveltia/ai-tools](https://github.com/sveltia/ai-tools)                               | `20431da85377c48eac96d659a342f4a8c2d3fb47` | `sveltia-cms`                                  |
 
 The exact path and revision for every Skill are recorded in `skills-lock.json`.
 The repository commit and per-directory SHA-256 makes the vendored copy
@@ -56,7 +58,8 @@ unavailable.
 ### Web platform and release
 
 `accessibility`, `astro`, `astro-framework`, `cloudflare-deploy`, `gh-fix-ci`,
-`playwright`, `seo`, `web-perf`.
+`playwright`, `seo`, `sveltia-cms`, `web-perf`, `wrangler`,
+`workers-best-practices`.
 
 The activity-to-Skill map is maintained in [AGENTS.md](../AGENTS.md). The
 working principle is to use the narrow Skill that fits the task while retaining

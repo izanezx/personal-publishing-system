@@ -1,8 +1,8 @@
 ---
 import { localePrefix, resolveLocale } from "@/i18n/locales";
-import { Image } from "astro:assets";
 import Layout from "@/layouts/Layout.astro";
-import { getEntryAlternates } from "@/lib/content/queries";
+import { adaptPublication, getEntryAlternates } from "@/lib/content/queries";
+import { isSearchablePublication } from "@/lib/content/status";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
@@ -14,12 +14,16 @@ import { useTranslations } from "@/i18n/utils";
 import { getEntryTransitionName } from "@/utils/contentEntry";
 import { buildGalleryStaticPaths } from "@/utils/staticPaths";
 import GalleryLightbox from "@/components/GalleryLightbox.astro";
+import PublicationImage from "@/components/common/PublicationImage.astro";
+import { mediaSourceUrl, sameMediaSource } from "@/utils/media";
 
 export const getStaticPaths = () => buildGalleryStaticPaths("zh-CN");
 
 const { entry } = Astro.props;
 Astro.locals.entryAlternates = await getEntryAlternates(entry);
 const { title, description, pubDatetime, coverImage, tags } = entry.data;
+const publication = adaptPublication(entry);
+const noindex = publication.status === "unlisted";
 
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
@@ -29,13 +33,13 @@ const images = entry.data.media;
 
 // If the frontmatter has coverImage, include it at the beginning if it is not already in the list
 const hasCoverInFolder = coverImage
-  ? images.some(img => img.src.src === coverImage.src)
+  ? images.some(img => sameMediaSource(img.src, coverImage))
   : false;
 
 const coverImageSrc = coverImage
-  ? new URL(coverImage.src, SITE.website).href
+  ? mediaSourceUrl(coverImage, SITE.website)
   : images.length > 0
-    ? new URL(images[0].src.src, SITE.website).href
+    ? mediaSourceUrl(images[0].src, SITE.website)
     : undefined;
 
 // Build Schema.org ImageGallery Structured Data
@@ -64,12 +68,16 @@ const gallerySchema = {
   description={description}
   ogImage={coverImageSrc}
   structuredData={gallerySchema}
+  {noindex}
 >
   <Header />
   {SITE.showBackButton && <Breadcrumb withBackButton />}
   <main
     id="main-content"
     data-pagefind-body
+    data-pagefind-ignore={
+      isSearchablePublication(entry.data, locale) ? undefined : true
+    }
     class:list={["relative app-layout pb-16", { "mt-8": !SITE.showBackButton }]}
   >
     <!-- Gallery header -->
@@ -143,7 +151,7 @@ const gallerySchema = {
     <!-- Large cover (if defined in frontmatter and not in the folder) -->
     {coverImage && !hasCoverInFolder && (
       <div class="mb-8 overflow-hidden rounded-2xl">
-        <Image
+        <PublicationImage
           src={coverImage}
           alt={title}
           class="max-h-[60vh] w-full object-cover"
@@ -174,7 +182,7 @@ const gallerySchema = {
               aria-label={`View image: ${img.alt}`}
               type="button"
             >
-              <Image
+              <PublicationImage
                 src={img.src}
                 alt={img.alt}
                 class="gallery-img"

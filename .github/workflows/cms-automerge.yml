@@ -1,0 +1,51 @@
+name: CMS auto merge
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: cms-auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  queue-safe-content:
+    name: Queue content merge
+    if: >-
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Detect the CMS publication stage
+        id: stage
+        run: |
+          ready="$(
+            gh pr view "$PR_NUMBER" --json labels \
+              --jq '[.labels[].name] | index("sveltia-cms/pending_publish") != null'
+          )"
+          printf 'ready=%s\n' "$ready" >> "$GITHUB_OUTPUT"
+      - name: Validate content-only changes
+        if: steps.stage.outputs.ready == 'true'
+        run: |
+          gh pr view "$PR_NUMBER" --json files --jq '.files[].path' |
+            node scripts/validate-content-pr.mjs
+      - name: Enable squash auto-merge
+        if: steps.stage.outputs.ready == 'true'
+        run: |
+          gh pr merge "$PR_NUMBER" \
+            --auto \
+            --squash \
+            --delete-branch \
+            --match-head-commit "$HEAD_SHA"
+      - name: Cancel auto-merge after leaving pending_publish
+        if: steps.stage.outputs.ready != 'true'
+        run: gh pr merge "$PR_NUMBER" --disable-auto || true

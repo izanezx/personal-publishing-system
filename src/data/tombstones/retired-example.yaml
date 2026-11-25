@@ -1,0 +1,5 @@
+path: /posts/retired-example/
+status: withdrawn
+redirectTo: /posts/publishing-baseline/
+withdrawnAt: 2026-11-25T00:00:00Z
+note: Redirect fixture for the 301 response and automated smoke test.

@@ -5,10 +5,17 @@
 Use the version in `.node-version` and the package manager in `package.json`.
 Run `pnpm install --frozen-lockfile`, `pnpm test`, `pnpm lint`,
 `pnpm format:check`, and `pnpm build`. Install Chromium with
-`pnpm exec playwright install --with-deps chromium`, then run `pnpm test:e2e`. With the root build in `dist`, run
-`pnpm test:release` to start Wrangler locally, check both indexing modes and
-restore a verified backup. This rehearsal uses the same preview policy as
-the release workflow and uses loopback HTTP without a Cloudflare account.
+`pnpm exec playwright install --with-deps chromium`, then run `pnpm test:e2e`.
+Rebuild with `PUBLIC_INDEXING_ENABLED=true` before `pnpm test:release`; the
+release drill treats the root artifact as the indexed production candidate.
+It starts Wrangler locally, checks both indexing modes and restores a verified
+backup. This rehearsal uses the same preview policy as the release workflow
+and uses loopback HTTP without a Cloudflare account.
+
+```bash
+PUBLIC_INDEXING_ENABLED=true pnpm build
+pnpm test:release
+```
 
 Before a release candidate is approved, run `pnpm security:audit` and confirm
 the merged GitHub dependency graph has no open high or critical alerts. The
@@ -36,30 +43,79 @@ package of the same version using `NODE_OPTIONS`. `PAGEFIND_BIN` optionally
 points to a compatible Pagefind executable. For this VM we used the original
 Pagefind binary under QEMU, outside the repository.
 
-## Cloudflare
+## Cloudflare and GitHub Actions
 
-1. When hosted preview is required, the repository owner connects the intended Cloudflare account and creates
-   a token with Workers Scripts edit access restricted to that account. Add
-   `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` as GitHub Actions secrets.
-2. Confirm the local acceptance report and the new candidate CI. Run the Cloudflare Release workflow on a green `main` commit with
-   `target=preview`. Supply public sample content only unless Cloudflare
-   Access already restricts the preview hostname.
-3. Verify the preview response contains `X-Robots-Tag: noindex, nofollow`.
-   Check desktop and mobile navigation, a pair of translations, a
-   Chinese-only page, search in both languages, feeds, 404 and gallery.
-   Record the candidate run ID and verify a preview rollback before release.
-4. The owner approves the content, domain configuration and candidate run.
-   Run the workflow on main with `target=production`, the successful
-   `preview_run` and `owner_approved=true`.
-5. Production configuration owns one explicit trigger: the
-   `zanezx.com/*` Worker Route for the apex record. `www.zanezx.com` is
-   intentionally unbound. Verify HTTPS, the canonical hostname, production
-   indexing, RSS, sitemap and the same reader flows. Record commit SHA,
-   artifact checksum and Worker version, then create the owner's first
-   release, `v0.1.0`.
-6. For a failed first release, restore the prior hostname configuration.
-   For later regressions, roll back to the previous verified Worker version
-   and create a corrective PR.
+Cloudflare deployment is split across three workflows:
+
+| Workflow                        | Trigger                                                                   | Result                                                                       |
+| ------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `Preview`                       | Same-repository pull request                                              | Builds, deploys the preview Worker, runs smoke tests and comments the URL    |
+| `CMS auto merge`                | `sveltia-cms/pending_publish` label                                       | Verifies a content-only diff and enables squash auto-merge                   |
+| `Cloudflare production release` | Successful `CI` run on `main`, manual dispatch or scheduled-content check | Builds, deploys production, verifies the live site and rolls back on failure |
+
+Repository Variables:
+
+- `CLOUDFLARE_ACCOUNT_ID`
+- `PREVIEW_URL`
+- `PUBLIC_INDEXING_ENABLED`
+
+Environment Secrets:
+
+- `preview/CLOUDFLARE_API_TOKEN_PREVIEW`
+- `production/CLOUDFLARE_API_TOKEN_PRODUCTION`
+
+The environment secrets are deliberately separate. Use an account-scoped
+Cloudflare token with Workers Scripts edit access. Do not use a user-global
+token.
+
+The preview Worker is:
+
+```text
+https://personal-publishing-system-preview.zanezx.workers.dev
+```
+
+It is public but remains `noindex, nofollow`.
+
+Production configuration owns one explicit hostname:
+
+```text
+zanezx.com/*
+```
+
+`www.zanezx.com` is intentionally unbound.
+
+The production job records the active Worker Version before deployment, runs
+the live smoke suite after deployment and automatically rolls back to the
+recorded Version if verification fails.
+
+## Sveltia CMS and media
+
+- CMS: `https://zanezx.com/admin/`
+- Authentication Worker: `https://sveltia-auth.zanezx.com`
+- R2 bucket: `personal-publishing-media`
+- Public media origin: `https://media.zanezx.com`
+
+The GitHub App is restricted to the single project repository. The R2 token
+is restricted to the single media bucket. Follow the complete setup and
+approval sequence in [ACCOUNT_SETUP.zh-CN.md](ACCOUNT_SETUP.zh-CN.md).
+
+## Release approval
+
+Content publication and search-engine indexing are separate decisions. The
+workflow may deploy approved content automatically while
+`PUBLIC_INDEXING_ENABLED=false`.
+
+Do not set `PUBLIC_INDEXING_ENABLED=true` until the owner has approved:
+
+- final identity and public links;
+- launch content and media rights;
+- privacy and security contact details;
+- the exact production commit;
+- the first public indexing date.
+
+After approval, change the variable and run the production workflow. Verify
+`robots.txt`, Sitemap, canonical URLs and the absence of `X-Robots-Tag`
+before submitting the Sitemap to search engines.
 
 ## Launch inputs
 
@@ -72,5 +128,8 @@ Pagefind binary under QEMU, outside the repository.
 - [ ] Add author credit, bilingual descriptions and chosen public links.
 - [ ] Provide licensed logo or media assets if wanted.
 - [ ] Publish a private conduct and security reporting contact.
-- [ ] Confirm the production hostname binding and first release.
+- [x] Bind the production apex hostname.
+- [ ] Configure the GitHub App and R2 editor credentials.
+- [ ] Confirm the first automated CMS publication.
+- [ ] Create the stable `v0.1.0` release after owner approval.
 - [ ] Re-enable Dependabot version updates when regular maintenance begins.

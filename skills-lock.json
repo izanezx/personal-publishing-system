@@ -1,7 +1,7 @@
 {
   "version": 1,
   "policy": "vendored",
-  "verifiedAt": "2026-11-24",
+  "verifiedAt": "2026-11-25",
   "note": "The repository commit and per-skill SHA-256 pin every vendored skill. Every imported skill also records the exact upstream repository, path, and commit used at import time.",
   "skills": [
     {
@@ -245,6 +245,16 @@
       }
     },
     {
+      "name": "sveltia-cms",
+      "vendorPath": ".agents/skills/sveltia-cms",
+      "sha256": "7a068c7e325359677008b5e43a2bef9fd4cb84766c8a77f7f677f8029f85791c",
+      "source": {
+        "repository": "sveltia/ai-tools",
+        "path": "plugins/sveltia-cms/skills/sveltia-cms",
+        "revision": "20431da85377c48eac96d659a342f4a8c2d3fb47"
+      }
+    },
+    {
       "name": "tdd",
       "vendorPath": ".agents/skills/tdd",
       "sha256": "2bad16f26168acea6368e868eaaf6a783eceb07560412841d472c5922111965f",
@@ -342,6 +352,26 @@
         "repository": "mattpocock/skills",
         "path": "skills/engineering/wizard",
         "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+      }
+    },
+    {
+      "name": "workers-best-practices",
+      "vendorPath": ".agents/skills/workers-best-practices",
+      "sha256": "31b0b6a652f47db24de9e421cafcc5446fd9489392ef57a45c8eb020bb944972",
+      "source": {
+        "repository": "cloudflare/skills",
+        "path": "skills/workers-best-practices",
+        "revision": "ff191de7d903788eceaf516a514ae7d3b56b924a"
+      }
+    },
+    {
+      "name": "wrangler",
+      "vendorPath": ".agents/skills/wrangler",
+      "sha256": "43d6e7641fdac187c060ae9820b8558dd801a38e6703c8920439258197643d15",
+      "source": {
+        "repository": "cloudflare/skills",
+        "path": "skills/wrangler",
+        "revision": "ff191de7d903788eceaf516a514ae7d3b56b924a"
       }
     },
     {

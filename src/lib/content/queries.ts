@@ -13,7 +13,14 @@ import {
   previousPath,
   publicationRelations,
   validatePublications,
+  validateTombstones,
 } from "./relations";
+import {
+  effectivePublicationStatus,
+  effectiveTranslationStatus,
+  isSearchablePublication,
+  isTranslationPublished,
+} from "./status";
 
 export function adaptPublication(entry: ContentEntry): Publication {
   const locale = contentLocale(entry.id);
@@ -31,13 +38,25 @@ export function adaptPublication(entry: ContentEntry): Publication {
     publishedAt: data.pubDatetime,
     updatedAt: "modDatetime" in data ? data.modDatetime : undefined,
     draft: data.draft,
+    status: effectivePublicationStatus({
+      status: data.status,
+      draft: data.draft,
+      pubDatetime: data.pubDatetime,
+      scheduledFor: data.scheduledFor,
+      expireAt: data.expireAt,
+      translationStatus: data.translationStatus,
+    }),
+    translationStatus: effectiveTranslationStatus(data, locale),
+    scheduledFor: data.scheduledFor,
+    expireAt: data.expireAt,
+    redirectTo: data.redirectTo,
     title: data.title,
     description: data.description,
     path: localizedPath(locale, getEntryPath(entry)),
   };
 }
 
-export function getPublicEntries<C extends "blog" | "galleries">(
+export function getRoutableEntries<C extends "blog" | "galleries">(
   collection: C,
   locale?: Locale
 ): Promise<CollectionEntry<C>[]> {
@@ -50,13 +69,33 @@ export function getPublicEntries<C extends "blog" | "galleries">(
   );
 }
 
+export async function getPublicEntries<C extends "blog" | "galleries">(
+  collection: C,
+  locale?: Locale,
+  options: { includeArchived?: boolean } = {}
+): Promise<CollectionEntry<C>[]> {
+  const entries = await getRoutableEntries(collection, locale);
+  return entries.filter(entry => {
+    const currentLocale = contentLocale(entry.id);
+    const publication = adaptPublication(entry);
+    return (
+      isTranslationPublished(entry.data, currentLocale) &&
+      (publication.status === "published" ||
+        (options.includeArchived && publication.status === "archived"))
+    );
+  });
+}
+
 export async function getPublicationFeed(
   locale: Locale,
-  sort: "published" | "activity" = "published"
+  sort: "published" | "activity" = "published",
+  options: { includeArchived?: boolean } = {}
 ) {
   const [posts, galleries] = await Promise.all([
-    getPublicEntries("blog", locale),
-    SITE.showGalleriesInIndex ? getPublicEntries("galleries", locale) : [],
+    getPublicEntries("blog", locale, options),
+    SITE.showGalleriesInIndex
+      ? getPublicEntries("galleries", locale, options)
+      : [],
   ]);
   return [...posts, ...galleries]
     .map(entry => ({ entry, publication: adaptPublication(entry) }))
@@ -77,7 +116,7 @@ export async function getEntryAlternates(
 ): Promise<LocaleAlternates> {
   const current = adaptPublication(entry);
   if (!current.translationKey) return {};
-  const translations = (await getPublicEntries(entry.collection))
+  const translations = (await getRoutableEntries(entry.collection))
     .map(adaptPublication)
     .filter(
       item =>
@@ -98,14 +137,17 @@ export async function assertUniquePublicationKeys() {
     ...(await getCollection("blog")),
     ...(await getCollection("galleries")),
   ];
-  validatePublications(entries.map(adaptPublication));
+  const publications = entries.map(adaptPublication);
+  const tombstones = await getCollection("tombstones");
+  validatePublications(publications);
+  validateTombstones(publications, tombstones);
 }
 
 export async function getPublicationRedirects() {
   await assertUniquePublicationKeys();
   const entries = [
-    ...(await getPublicEntries("blog")),
-    ...(await getPublicEntries("galleries")),
+    ...(await getRoutableEntries("blog")),
+    ...(await getRoutableEntries("galleries")),
   ];
   return entries
     .map(adaptPublication)
@@ -115,4 +157,108 @@ export async function getPublicationRedirects() {
       )
     )
     .sort();
+}
+
+export async function getPublicationRuntimeManifest() {
+  await assertUniquePublicationKeys();
+  const entries = [
+    ...(await getRoutableEntries("blog")),
+    ...(await getRoutableEntries("galleries")),
+  ];
+
+  return entries
+    .map(entry => {
+      const locale = contentLocale(entry.id);
+      return {
+        path: adaptPublication(entry).path,
+        indexable: isSearchablePublication(entry.data, locale),
+        searchable: isSearchablePublication(entry.data, locale),
+      };
+    })
+    .sort((a, b) => a.path.localeCompare(b.path));
+}
+
+export async function getGonePublicationManifest() {
+  await assertUniquePublicationKeys();
+  const allPublications = [
+    ...(await getCollection("blog")),
+    ...(await getCollection("galleries")),
+  ];
+  const contentEntries = allPublications
+    .map(entry => {
+      const publication = adaptPublication(entry);
+      return { entry, publication };
+    })
+    .filter(
+      ({ entry, publication }) =>
+        publication.status === "expired" ||
+        publication.status === "withdrawn" ||
+        Boolean(entry.data.expireAt)
+    )
+    .map(({ entry, publication }) => {
+      const immediate =
+        entry.data.status === "expired" ||
+        entry.data.status === "withdrawn" ||
+        entry.data.draft === true;
+      return {
+        path: publication.path,
+        status: publication.status === "withdrawn" ? "withdrawn" : "expired",
+        redirectTo: publication.redirectTo,
+        ...(immediate || !publication.expireAt
+          ? {}
+          : { effectiveAt: publication.expireAt.toISOString() }),
+      };
+    });
+  const tombstones = (await getCollection("tombstones")).map(entry => ({
+    path: entry.data.path,
+    status: entry.data.status,
+    redirectTo: entry.data.redirectTo,
+  }));
+
+  return [...contentEntries, ...tombstones]
+    .flatMap(entry => [
+      entry,
+      {
+        ...entry,
+        path: `${entry.path.replace(/\/$/, "")}/index.png`,
+      },
+    ])
+    .sort((a, b) => a.path.localeCompare(b.path));
+}
+
+export async function getScheduleRuntimeManifest(now = new Date()) {
+  await assertUniquePublicationKeys();
+  const entries = [
+    ...(await getCollection("blog")),
+    ...(await getCollection("galleries")),
+  ];
+
+  return entries
+    .map(entry => {
+      const locale = contentLocale(entry.id);
+      const publication = adaptPublication(entry);
+      const activationAt =
+        entry.data.scheduledFor ?? entry.data.pubDatetime ?? undefined;
+      const activateAt =
+        activationAt && activationAt.getTime() > now.getTime()
+          ? activationAt.toISOString()
+          : undefined;
+      const expireAt =
+        publication.expireAt &&
+        publication.expireAt.getTime() > now.getTime() &&
+        entry.data.status !== "expired" &&
+        entry.data.status !== "withdrawn"
+          ? publication.expireAt.toISOString()
+          : undefined;
+
+      return {
+        path: publication.path,
+        ...(isTranslationPublished(entry.data, locale) && activateAt
+          ? { activateAt }
+          : {}),
+        ...(expireAt ? { expireAt } : {}),
+      };
+    })
+    .filter(entry => entry.activateAt || entry.expireAt)
+    .sort((a, b) => a.path.localeCompare(b.path));
 }

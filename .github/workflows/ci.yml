@@ -22,12 +22,17 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm security:audit
       - run: pnpm skills:check
+      - run: pnpm cms:check
       - run: pnpm test
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
+      - name: Build an indexed release artifact
+        env:
+          PUBLIC_INDEXING_ENABLED: "true"
+        run: pnpm build
       - run: pnpm test:release
       - name: Verify subpath hosting
         env:
@@ -53,4 +58,5 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm security:audit
       - run: pnpm skills:check
+      - run: pnpm cms:check
       - run: pnpm build

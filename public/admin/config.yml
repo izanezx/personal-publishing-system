@@ -1,0 +1,549 @@
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
+
+backend:
+  name: github
+  repo: izanezx/personal-publishing-system
+  branch: main
+  base_url: https://sveltia-auth.zanezx.com
+  auth_endpoint: auth
+  auth_methods: [oauth]
+  commit_messages:
+    create: "content: create {{collection}} {{slug}}"
+    update: "content: update {{collection}} {{slug}}"
+    delete: "content: delete {{collection}} {{slug}}"
+    uploadMedia: "media: upload {{path}}"
+    deleteMedia: "media: delete {{path}}"
+
+publish_mode:
+  type: editorial_workflow
+  stages: [draft, pending_review, pending_publish]
+  allow_incomplete_drafts: false
+
+site_url: https://zanezx.com
+display_url: https://zanezx.com
+app_title: zanezx 内容发布台
+logo_url: https://zanezx.com/favicon.svg
+
+editor:
+  preview: false
+  second_pane: false
+
+output:
+  omit_empty_optional_fields: true
+  encode_file_path: true
+  yaml:
+    quote: none
+    indent_size: 2
+    indent_sequences: true
+    block_quote: true
+
+i18n:
+  structure: multiple_folders
+  locales: [zh-cn, en]
+  default_locale: zh-cn
+  initial_locales: default
+
+media_libraries:
+  all:
+    max_file_size: 20971520
+    transformations:
+      raster_image:
+        format: webp
+        quality: 88
+        width: 2560
+        height: 2560
+      svg:
+        optimize: true
+  cloudflare_r2:
+    label: Cloudflare R2
+    default: true
+    access_key_id: "0000000000000000000000000000000000000000000000000000000000000000"
+    bucket: personal-publishing-media
+    account_id: e9e4d464cf14a55127f534b7f3f63378
+    public_url: https://media.zanezx.com
+    prefix: cms/
+
+collections:
+  - name: publications
+    label: 发布内容
+    label_singular: 发布条目
+    description: Markdown 文章、Notes、Projects、Library 和 Garden 条目。MDX 交互文章由代码或 Agent 维护。
+    folder: src/data/blog
+    identifier_field: slug
+    summary: "{{title}} · {{status}} · {{locales}}"
+    sortable_fields:
+      fields: [pubDatetime, modDatetime, title, status]
+      default:
+        field: pubDatetime
+        direction: descending
+    path: "{{slug}}"
+    extension: md
+    format: frontmatter
+    body_field:
+      key: body
+    i18n: true
+    slug: "{{fields.slug}}"
+    view_filters:
+      - label: 文章
+        field: kind
+        pattern: article
+      - label: Notes
+        field: kind
+        pattern: note
+      - label: Projects
+        field: kind
+        pattern: project
+      - label: Library
+        field: kind
+        pattern: resource
+      - label: 定时
+        field: status
+        pattern: scheduled
+      - label: 预发布审核
+        field: translationStatus
+        pattern: pending
+      - label: AI 翻译草稿
+        field: translationStatus
+        pattern: ai-draft
+    fields:
+      - name: uid
+        widget: hidden
+        default: "{{uuid}}"
+        i18n: duplicate
+      - name: slug
+        label: Slug
+        widget: string
+        required: true
+        pattern:
+          [
+            '^[\\p{L}\\p{N}]+(?:-[\\p{L}\\p{N}]+)*$',
+            "只能使用一个 URL 段：字母、数字和连字符",
+          ]
+        hint: 发布后尽量保持不变。修改 URL 时把旧值加入 previousSlugs。
+      - name: previousSlugs
+        label: 旧 Slug
+        widget: list
+        field: { name: slug, label: 旧 Slug, widget: string }
+        default: []
+        required: false
+      - name: translationKey
+        label: 翻译关联键
+        widget: string
+        i18n: duplicate
+        required: false
+        hint: 中英文版本使用同一个值。
+      - name: kind
+        label: 内容类型
+        widget: select
+        i18n: duplicate
+        options: [article, note, project, resource, pattern, link, quote]
+        default: article
+      - name: title
+        label: 标题
+        widget: string
+        required: true
+      - name: description
+        label: 摘要
+        widget: text
+        required: true
+        hint: 用于列表、搜索、RSS、SEO 和社交预览。
+      - name: pubDatetime
+        label: 首次发布时间
+        widget: datetime
+        i18n: duplicate
+        required: true
+        input_timezone: Asia/Shanghai
+        output_utc: true
+      - name: modDatetime
+        label: 最近实质修改时间
+        widget: datetime
+        i18n: duplicate
+        required: false
+        input_timezone: Asia/Shanghai
+        output_utc: true
+      - name: status
+        label: 发布状态
+        widget: select
+        i18n: duplicate
+        options:
+          - { label: 已公开, value: published }
+          - { label: 定时公开, value: scheduled }
+          - { label: 不列出（noindex）, value: unlisted }
+          - { label: 归档, value: archived }
+          - { label: 已过期, value: expired }
+          - { label: 已撤下, value: withdrawn }
+          - { label: 草稿（不生成页面）, value: draft }
+        default: published
+        hint: 工作流中的 Draft/Review 阶段已由 PR 管理；合并后按这里的状态发布。
+      - name: scheduledFor
+        label: 定时生效时间
+        widget: datetime
+        i18n: duplicate
+        required: false
+        input_timezone: Asia/Shanghai
+        output_utc: true
+        hint: status=scheduled 时使用。
+      - name: expireAt
+        label: 自动过期时间
+        widget: datetime
+        i18n: duplicate
+        required: false
+        input_timezone: Asia/Shanghai
+        output_utc: true
+      - name: redirectTo
+        label: 下线跳转地址
+        widget: string
+        i18n: duplicate
+        required: false
+        hint: 留空时过期/撤下返回 410；填写站内路径或 HTTPS URL 时返回 301。
+      - name: translationStatus
+        label: 英文翻译审核状态
+        widget: select
+        required: false
+        options:
+          - { label: 尚未开始, value: pending }
+          - { label: AI 草稿, value: ai-draft }
+          - { label: 已人工审核, value: reviewed }
+          - { label: 可公开发布, value: published }
+          - { label: 无需翻译, value: not-required }
+        hint: 英文条目只有 published 或 not-required 会进入公开站点。AI 生成后请人工审核。
+      - name: featured
+        label: 首页精选
+        widget: boolean
+        i18n: duplicate
+        default: false
+        required: false
+      - name: tags
+        label: 标签
+        widget: list
+        field: { name: tag, label: 标签, widget: string }
+        default: []
+        required: false
+      - name: topics
+        label: Garden 主题
+        widget: select
+        i18n: duplicate
+        multiple: true
+        options:
+          - { label: 研究与实验, value: research }
+          - { label: 个人出版, value: publishing }
+          - { label: Web 平台, value: web-platform }
+          - { label: 阅读实践, value: reading-practice }
+          - { label: 视觉记录, value: visual-notes }
+        default: [publishing]
+        required: false
+      - name: stage
+        label: 成熟度
+        widget: select
+        i18n: duplicate
+        options: [seedling, budding, evergreen]
+        default: seedling
+      - name: relationships
+        label: 内容关联
+        widget: list
+        i18n: duplicate
+        required: false
+        fields:
+          - name: kind
+            label: 关系
+            widget: select
+            options:
+              - { label: 相关, value: related }
+              - { label: 演化自, value: evolvedFrom }
+          - name: uid
+            label: 目标 UID
+            widget: relation
+            collection: publications
+            value_field: uid
+            search_fields: [title, slug]
+            display_fields: [title, uid]
+      - name: coverImage
+        label: 封面图
+        widget: image
+        choose_url: true
+        required: false
+      - name: ogImage
+        label: 社交分享图
+        widget: image
+        choose_url: true
+        required: false
+      - name: canonicalURL
+        label: Canonical URL
+        widget: string
+        required: false
+      - name: hideToc
+        label: 隐藏目录
+        widget: boolean
+        i18n: duplicate
+        default: false
+        required: false
+      - name: hideEditPost
+        label: 隐藏编辑链接
+        widget: boolean
+        i18n: duplicate
+        default: false
+        required: false
+      - name: timezone
+        label: 展示时区
+        widget: string
+        required: false
+        default: Asia/Shanghai
+      - name: body
+        label: 正文
+        widget: richtext
+        format: markdown
+        modes: [rich_text, raw]
+        buttons:
+          [
+            bold,
+            italic,
+            strikethrough,
+            code,
+            link,
+            heading-two,
+            heading-three,
+            heading-four,
+            bulleted-list,
+            numbered-list,
+            quote,
+          ]
+
+  - name: galleries
+    label: 图库
+    label_singular: 图库
+    folder: src/data/galleries
+    identifier_field: slug
+    summary: "{{title}} · {{status}} · {{locales}}"
+    path: "{{slug}}/index"
+    extension: md
+    format: frontmatter
+    body_field:
+      key: body
+    i18n: true
+    slug: "{{fields.slug}}"
+    fields:
+      - name: uid
+        widget: hidden
+        default: "{{uuid}}"
+        i18n: duplicate
+      - name: slug
+        label: Slug
+        widget: string
+        required: true
+        pattern:
+          ['^[\\p{L}\\p{N}]+(?:-[\\p{L}\\p{N}]+)*$', "只能使用一个 URL 段"]
+      - name: translationKey
+        label: 翻译关联键
+        widget: string
+        i18n: duplicate
+        required: false
+      - name: title
+        label: 标题
+        widget: string
+        required: true
+      - name: description
+        label: 摘要
+        widget: text
+        required: true
+      - name: pubDatetime
+        label: 发布时间
+        widget: datetime
+        i18n: duplicate
+        input_timezone: Asia/Shanghai
+        output_utc: true
+        required: true
+      - name: status
+        label: 发布状态
+        widget: select
+        i18n: duplicate
+        options:
+          [published, scheduled, unlisted, archived, expired, withdrawn, draft]
+        default: published
+      - name: scheduledFor
+        label: 定时生效时间
+        widget: datetime
+        i18n: duplicate
+        input_timezone: Asia/Shanghai
+        output_utc: true
+        required: false
+      - name: expireAt
+        label: 自动过期时间
+        widget: datetime
+        i18n: duplicate
+        input_timezone: Asia/Shanghai
+        output_utc: true
+        required: false
+      - name: redirectTo
+        label: 下线跳转地址
+        widget: string
+        i18n: duplicate
+        required: false
+      - name: translationStatus
+        label: 英文翻译审核状态
+        widget: select
+        options: [pending, ai-draft, reviewed, published, not-required]
+        required: false
+      - name: topics
+        label: Garden 主题
+        widget: select
+        i18n: duplicate
+        multiple: true
+        options:
+          - { label: 视觉记录, value: visual-notes }
+          - { label: 个人出版, value: publishing }
+        default: [visual-notes]
+      - name: stage
+        label: 成熟度
+        widget: select
+        i18n: duplicate
+        options: [seedling, budding, evergreen]
+        default: budding
+      - name: tags
+        label: 标签
+        widget: list
+        field: { name: tag, label: 标签, widget: string }
+        required: false
+      - name: coverImage
+        label: 封面图
+        widget: image
+        choose_url: true
+        required: false
+      - name: media
+        label: 图片
+        widget: list
+        required: false
+        fields:
+          - name: src
+            label: 图片
+            widget: image
+            choose_url: true
+            required: true
+          - name: alt
+            label: 替代文本
+            widget: string
+            required: true
+          - name: credit
+            label: 署名
+            widget: string
+            required: false
+          - name: license
+            label: 许可证
+            widget: string
+            required: false
+          - name: source
+            label: 来源 URL
+            widget: string
+            required: false
+      - name: body
+        label: 图库说明
+        widget: richtext
+        format: markdown
+        required: false
+
+  - name: editorial-pages
+    label: About 与 Now
+    label_singular: 页面
+    i18n: true
+    files:
+      - name: about
+        label: About
+        file: src/data/pages/{{locale}}/about.md
+        i18n: true
+        format: frontmatter
+        body_field:
+          key: body
+        editor:
+          preview: false
+          second_pane: false
+        fields:
+          - {
+              name: title,
+              label: 页面标题,
+              widget: string,
+              i18n: true,
+              required: true,
+            }
+          - {
+              name: description,
+              label: 页面描述,
+              widget: text,
+              i18n: true,
+              required: false,
+            }
+          - {
+              name: body,
+              label: 正文,
+              widget: richtext,
+              i18n: true,
+              format: markdown,
+              required: false,
+            }
+      - name: now
+        label: Now
+        file: src/data/pages/{{locale}}/now.md
+        i18n: true
+        format: frontmatter
+        body_field:
+          key: body
+        editor:
+          preview: false
+          second_pane: false
+        fields:
+          - {
+              name: title,
+              label: 页面标题,
+              widget: string,
+              i18n: true,
+              required: true,
+            }
+          - {
+              name: description,
+              label: 页面描述,
+              widget: text,
+              i18n: true,
+              required: false,
+            }
+          - {
+              name: body,
+              label: 正文,
+              widget: richtext,
+              i18n: true,
+              format: markdown,
+              required: false,
+            }
+
+  - name: tombstones
+    label: 下线记录
+    label_singular: 下线记录
+    description: 用于保留已删除页面、返回 410，或把旧地址 301 到新内容。
+    folder: src/data/tombstones
+    identifier_field: path
+    summary: "{{path}} · {{status}}"
+    path: "{{slug}}"
+    extension: yaml
+    format: yaml
+    fields:
+      - name: path
+        label: 原公开路径
+        widget: string
+        required: true
+        pattern: ["^/.*/$", "以 / 开头并以 / 结尾"]
+      - name: status
+        label: 下线类型
+        widget: select
+        options: [expired, withdrawn, deleted]
+        required: true
+      - name: redirectTo
+        label: 301 跳转地址
+        widget: string
+        required: false
+      - name: withdrawnAt
+        label: 下线时间
+        widget: datetime
+        input_timezone: Asia/Shanghai
+        output_utc: true
+        required: false
+      - name: note
+        label: 内部备注
+        widget: text
+        required: false

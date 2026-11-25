@@ -19,6 +19,7 @@ export default [
       "dist/**",
       ".astro/**",
       ".agents/**",
+      "infra/sveltia-auth/**",
       "test-results/**",
       "playwright-report/**",
       "public/pagefind/**",

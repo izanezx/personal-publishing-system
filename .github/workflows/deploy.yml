@@ -1,110 +1,101 @@
-name: Cloudflare release
+name: Cloudflare production release
 
 on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
   workflow_dispatch:
     inputs:
-      target:
-        description: Deployment target
-        type: choice
-        options: [preview, production]
-        required: true
-      preview_run:
-        description: Successful preview workflow run ID, required for production
+      reason:
+        description: Reason for rebuilding the current main branch
+        required: false
         type: string
-      owner_approved:
-        description: I approve production publication of this verified preview
-        type: boolean
-        default: false
+  schedule:
+    - cron: "*/15 * * * *"
 
 permissions:
   contents: read
   actions: read
 
 concurrency:
-  group: cloudflare-release
+  group: cloudflare-production
   cancel-in-progress: false
 
 jobs:
-  preview:
-    if: github.ref == 'refs/heads/main' && inputs.target == 'preview'
+  scheduled-content:
+    name: Check scheduled content
+    if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
+    outputs:
+      due: ${{ steps.check.outputs.due }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Verify that CI passed on this main commit
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?branch=main&event=push&head_sha=$GITHUB_SHA&status=success" --jq '.total_count' | grep -Eq '^[1-9][0-9]*$'
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - name: Check the production schedule manifest
+        id: check
+        run: node scripts/status-due.mjs
+
+  deploy-production:
+    name: Deploy production
+    needs: scheduled-content
+    if: >-
+      always() &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event_name == 'workflow_run' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main'
+        ) ||
+        (
+          github.event_name == 'schedule' &&
+          needs.scheduled-content.outputs.due == 'true'
+        )
+      )
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://zanezx.com
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_PRODUCTION }}
+      PUBLIC_INDEXING_ENABLED: ${{ vars.PUBLIC_INDEXING_ENABLED || 'false' }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm cms:check
       - run: pnpm build
-      - name: Save the production candidate
+      - name: Record the active version for rollback
+        id: baseline
         run: |
-          mkdir candidate
-          tar -cf candidate/site.tar dist
-          cp wrangler.jsonc candidate/
-          printf '%s\n' "$GITHUB_SHA" > candidate/commit
-          (cd candidate && sha256sum site.tar wrangler.jsonc commit > SHA256SUMS)
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: candidate-${{ github.run_attempt }}
-          path: candidate/
-          if-no-files-found: error
-          retention-days: 30
-      - name: Prepare non-indexable preview
-        run: node scripts/preview-policy.mjs
-      - name: Deploy preview
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm dlx wrangler@4.165.0 deploy --env preview
-
-  production:
-    if: github.ref == 'refs/heads/main' && inputs.target == 'production' && inputs.owner_approved
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
-        with:
-          node-version-file: .node-version
-      - name: Verify successful preview of a main commit
-        id: preview
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PREVIEW_RUN: ${{ inputs.preview_run }}
-        run: |
-          [[ "$PREVIEW_RUN" =~ ^[1-9][0-9]*$ ]]
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PREVIEW_RUN" > preview.json
-          jq -e '.event == "workflow_dispatch" and .path == ".github/workflows/deploy.yml" and .head_branch == "main" and .conclusion == "success"' preview.json
-          sha=$(jq -r .head_sha preview.json)
-          git merge-base --is-ancestor "$sha" HEAD
-          printf 'sha=%s\n' "$sha" >> "$GITHUB_OUTPUT"
-          printf 'artifact=candidate-%s\n' "$(jq -r .run_attempt preview.json)" >> "$GITHUB_OUTPUT"
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
-        with:
-          github-token: ${{ github.token }}
-          run-id: ${{ inputs.preview_run }}
-          name: ${{ steps.preview.outputs.artifact }}
-          path: candidate
-      - name: Verify and unpack exact candidate
-        env:
-          CANDIDATE_SHA: ${{ steps.preview.outputs.sha }}
-        run: |
-          (cd candidate && sha256sum --check SHA256SUMS)
-          test "$(cat candidate/commit)" = "$CANDIDATE_SHA"
-          tar -xf candidate/site.tar
-          cmp candidate/wrangler.jsonc <(git show "$CANDIDATE_SHA:wrangler.jsonc")
-          cp candidate/wrangler.jsonc wrangler.jsonc
-          printf 'Production candidate: %s\n' "$CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
-      - name: Deploy production
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          version="$(
+            pnpm dlx wrangler@4.165.0 versions list \
+              --name personal-publishing-system \
+              --json |
+              jq -r 'sort_by(.metadata.created_on) | last.id // ""'
+          )"
+          printf 'version_id=%s\n' "$version" >> "$GITHUB_OUTPUT"
+      - name: Deploy the production Worker
         run: pnpm dlx wrangler@4.165.0 deploy --env ""
+      - name: Verify the production deployment
+        env:
+          SMOKE_RETRIES: "30"
+        run: pnpm smoke --base-url https://zanezx.com
+      - name: Roll back a failed production deployment
+        if: failure() && steps.baseline.outputs.version_id != ''
+        run: |
+          pnpm dlx wrangler@4.165.0 rollback \
+            "${{ steps.baseline.outputs.version_id }}" \
+            --name personal-publishing-system \
+            --yes \
+            --message "Automatic rollback after failed smoke test"
