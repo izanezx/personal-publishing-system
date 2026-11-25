@@ -29,17 +29,17 @@ Request 和独立 Preview 验证。
 
 ## A0–A8 验收矩阵
 
-| 阶段                      | 状态       | 已完成内容                                                                                                                                                                    | 尚需证据或输入                               |
-| ------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| A0 基线与 Agent 规范      | 已完成     | 独立仓库历史、Node/pnpm 锁文件、38 个 vendored Skills、内容哈希锁、固定上游来源和 `AGENTS.md` 已提交                                                                          | 无                                           |
-| A1 内容状态与 Schema      | 已完成     | 统一生命周期解析；Alias、301、410、404、404/301 分支；Draft、Scheduled、Published、Unlisted、Archived、Expired、Withdrawn；翻译状态；过期和归档时间；安全 HTTPS 媒体 URL 支持 | 本分支 CI 通过后归档为远程证据               |
-| A2 Sveltia 配置与编辑体验 | 已完成     | 单栏全宽编辑器；可选预览；长短字段、双语、状态视图、自动 Alias、Callout、表格、R2 路径、自定义发布指南；Admin noindex、COOP 和 CSP                                            | 合并后在线上 `/admin/` 做一次浏览器复验      |
-| A3 GitHub App 登录        | 已完成     | 限定单仓库的 GitHub App；Cloudflare Auth Worker；允许域；GitHub Client ID 和加密 Secret；CMS 登录已由所有者验证                                                               | 后续每次轮换时复查                           |
-| A4 R2 与媒体              | 已完成     | Bucket、CORS、公开域、限定 Bucket 的 S3 凭据、WebP 转换、20 MB 上限、HTTPS 媒体安全检查；正式上传默认使用 R2，封面、OG、Gallery 和正文均可使用安全 HTTPS 外部图片             | 正式内容上传时继续检查版权、替代文本和隐私   |
-| A5 PR Preview 自动化      | 待远程验收 | CI 构建并校验 Preview artifact；Preview Workflow 只从同仓库可信 PR 读取 artifact；支持按 CI run 和完整 commit 手动引导；强制 noindex；回写 URL 和 Commit Status               | 本分支 CI、Preview 和 Commit Status 运行结果 |
-| A6 自动发布与回滚         | 待远程验收 | `main` 使用同一次 CI artifact；校验 commit、mode、indexing、SHA-256；记录 Worker Version；Smoke 失败自动回滚                                                                  | 本分支合并后的生产运行结果                   |
-| A7 定时发布与归档         | 待远程验收 | 15 分钟检查 `activateAt`、`expireAt`、`archiveAt`；无到期内容不部署；运行时不修改内容文件                                                                                     | 合并后人工 Dispatch 一次生产 Workflow        |
-| A8 上线与文档             | 部分完成   | README、中文发布、Sveltia、R2、账号、Release 和本验收矩阵已更新；稳定版流程已定义                                                                                             | 最终身份、内容、索引批准、稳定版批准         |
+| 阶段                      | 状态     | 已完成内容                                                                                                                                                                    | 尚需证据或输入                                      |
+| ------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| A0 基线与 Agent 规范      | 已完成   | 独立仓库历史、Node/pnpm 锁文件、38 个 vendored Skills、内容哈希锁、固定上游来源和 `AGENTS.md` 已提交                                                                          | 无                                                  |
+| A1 内容状态与 Schema      | 已完成   | 统一生命周期解析；Alias、301、410、404、404/301 分支；Draft、Scheduled、Published、Unlisted、Archived、Expired、Withdrawn；翻译状态；过期和归档时间；安全 HTTPS 媒体 URL 支持 | 无；Linux/Windows CI 与生产 Smoke 已通过            |
+| A2 Sveltia 配置与编辑体验 | 已完成   | 单栏全宽编辑器；可选预览；长短字段、双语、状态视图、自动 Alias、Callout、表格、R2 路径、自定义发布指南；Admin noindex、COOP 和 CSP                                            | 无；线上 Admin 已加载且无页面或控制台错误           |
+| A3 GitHub App 登录        | 已完成   | 限定单仓库的 GitHub App；Cloudflare Auth Worker；允许域；GitHub Client ID 和加密 Secret；CMS 登录已由所有者验证                                                               | 后续每次轮换时复查                                  |
+| A4 R2 与媒体              | 已完成   | Bucket、CORS、公开域、限定 Bucket 的 S3 凭据、WebP 转换、20 MB 上限、HTTPS 媒体安全检查；正式上传默认使用 R2，封面、OG、Gallery 和正文均可使用安全 HTTPS 外部图片             | 正式内容上传时继续检查版权、替代文本和隐私          |
+| A5 PR Preview 自动化      | 已完成   | CI 构建并校验 Preview artifact；Preview Workflow 只从同仓库可信 PR 读取 artifact；支持按 CI run 和完整 commit 手动引导；强制 noindex；回写 URL 和 Commit Status               | 无；PR #48 已产出成功 Preview 和 Commit Status      |
+| A6 自动发布与回滚         | 已完成   | `main` 使用同一次 CI artifact；校验 commit、mode、indexing、SHA-256；记录 Worker Version；Smoke 失败自动回滚                                                                  | 无；自动生产发布与 Smoke 已通过，回滚由发布演练覆盖 |
+| A7 定时发布与归档         | 已完成   | 15 分钟检查 `activateAt`、`expireAt`、`archiveAt`；无到期内容不部署；运行时不修改内容文件                                                                                     | 无；人工 Dispatch、重新构建、部署和 Smoke 已通过    |
+| A8 上线与文档             | 部分完成 | README、中文发布、Sveltia、R2、账号、Release 和本验收矩阵已更新；稳定版流程已定义                                                                                             | 最终身份、内容、索引批准、稳定版批准                |
 
 ## 接口与内容模型
 
@@ -139,6 +139,25 @@ PUBLIC_PREVIEW_CONTENT=true pnpm exec playwright test tests/e2e/preview-content.
 Linux CI、Windows CI、Preview Workflow、生产 Workflow、Production Smoke 和 Worker
 回滚记录是最终远程验收证据。本 VM 的 Pagefind 原生二进制兼容问题通过同版本
 Pagefind Extended + QEMU 执行，不改变 CI 中的原生 Linux/Windows 路径。
+
+## 远程验收证据
+
+2026-11-25 对提交 `7ef6f72b6d98af7ac4559ceff3093d202f7424bb` 完成以下核验：
+
+| 验收项            | 结果与证据                                                                                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| PR CI             | Linux checks 与 Windows build 成功                                                                     |
+| PR Preview        | Preview run `45620977493` 成功，部署、Smoke、PR 回写和 Commit Status 均成功                            |
+| Main CI           | Run `45621170620` 成功：依赖审计、Skills、CMS、单测、格式、构建、Playwright、发布演练和双候选 artifact |
+| 自动生产发布      | Run `45621430375` 成功；下载同提交 CI artifact，生产 Smoke 通过，未触发回滚                            |
+| 人工生产发布      | Run `45621709862` 成功；重新构建、校验、记录旧版本、部署和 Smoke 均成功                                |
+| Production Worker | 当前版本 `89ff5ec5-0768-4c2e-b102-2d683e331489`                                                        |
+| Admin 线上浏览器  | Sveltia 加载成功，CSP、COOP 和 noindex 响应存在，页面错误与控制台错误均为空                            |
+| 外部媒体          | 生产页面可输出安全 HTTPS 外部 `og:image`；HTTP URL 和带凭据 URL 被 Schema 拒绝                         |
+| 依赖安全          | GitHub Dependabot 当前开放告警为 0                                                                     |
+
+代码、Schema、本地验收、PR Preview、自动生产发布、人工生产发布和线上 Admin
+复核已闭环。A8 仍需要所有者批准正式索引和稳定版，并提供最终上线资料。
 
 ## 只能由所有者提供或批准
 
