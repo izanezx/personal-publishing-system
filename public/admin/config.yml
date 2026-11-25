@@ -116,7 +116,7 @@ collections:
         required: true
         pattern:
           [
-            '^[\\p{L}\\p{N}]+(?:-[\\p{L}\\p{N}]+)*$',
+            '/^[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*$/u',
             "只能使用一个 URL 段：字母、数字和连字符",
           ]
         hint: 发布后尽量保持不变。修改 URL 时把旧值加入 previousSlugs。
@@ -331,7 +331,7 @@ collections:
         widget: string
         required: true
         pattern:
-          ['^[\\p{L}\\p{N}]+(?:-[\\p{L}\\p{N}]+)*$', "只能使用一个 URL 段"]
+          ['/^[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*$/u', "只能使用一个 URL 段"]
       - name: translationKey
         label: 翻译关联键
         widget: string
