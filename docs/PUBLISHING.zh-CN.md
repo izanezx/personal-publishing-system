@@ -201,6 +201,8 @@ https://zanezx.com/en/posts/my-new-article/
 - Sveltia CMS 上传的图片放在 Cloudflare R2，公开地址以
   `https://media.zanezx.com/cms/` 开头。
 - 旧本地内容仍可使用仓库内图片，但新图片默认使用 R2。
+- Markdown 正文可以使用安全的 HTTPS 外部图片进行功能测试或引用。
+  `pnpm media:check` 只拒绝不安全的外部 URL，不会禁止 HTTPS 图片。
 - 每张有意义的图片必须有说明性替代文本。
 - 保存创作者、来源、许可证和署名记录。
 - 上传前清除位置、设备和隐私元数据。

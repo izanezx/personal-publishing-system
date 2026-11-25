@@ -154,6 +154,9 @@ redirectTo: /posts/new-address/
 https://media.zanezx.com/cms/
 ```
 
+Markdown 正文仍可使用安全 HTTPS 外部图片进行功能测试；R2 是正式内容上传的
+默认位置。
+
 上传前应：
 
 - 确认拥有发布授权。

@@ -8,7 +8,7 @@ aliases:
   - /posts/legacy-publishing-baseline/
 kind: article
 title: 个人出版基线
-description: 用于验证 Markdown、中文搜索和双语链接的公开示例。
+description: 用于验证 Markdown、中文搜索和双语链接的公开示例。111111111111111111111111111111111111111111111111
 pubDatetime: 2026-01-10T10:00:00Z
 status: published
 featured: true
@@ -26,11 +26,9 @@ hideEditPost: false
 timezone: Asia/Shanghai
 ---
 
-## 个人出版
+## ![](https://picsum.photos/id/76/1920/1280.webp)个人出版
 
 这是用于验证发布流程的合成内容。站内搜索应能找到“个人出版”，并返回中文页面。
-
-![用于验证本地媒体的合成插图](../../../assets/images/comic.webp)
 
 > [!NOTE]
 > 提示块需要在 Markdown 中正常显示。

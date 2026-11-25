@@ -4,11 +4,6 @@ import { readFile, readdir } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 const directory = resolve(process.argv[2] ?? "dist");
-const allowedOrigins = new Set([
-  new URL(process.env.PUBLIC_SITE_ORIGIN ?? "https://zanezx.com").origin,
-  new URL(process.env.PUBLIC_MEDIA_ORIGIN ?? "https://media.zanezx.com").origin,
-]);
-
 const attribute = (tag, name) => {
   const pattern = new RegExp(
     `\\b${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`,
@@ -34,13 +29,11 @@ const assertAllowed = (value, file) => {
   try {
     url = new URL(candidate);
   } catch {
-    return;
+    throw new Error(`${file}: invalid media URL: ${candidate}`);
   }
-  if (url.protocol !== "https:" || !allowedOrigins.has(url.origin)) {
+  if (url.protocol !== "https:" || url.username || url.password) {
     throw new Error(
-      `${file}: external media must use ${[...allowedOrigins].join(
-        " or "
-      )}: ${candidate}`
+      `${file}: external media must use a safe HTTPS URL: ${candidate}`
     );
   }
 };
@@ -87,7 +80,5 @@ for (const file of htmlFiles) {
 }
 
 process.stdout.write(
-  `Verified ${inspected} media sources in ${htmlFiles.length} HTML files; allowed origins: ${[
-    ...allowedOrigins,
-  ].join(", ")}\n`
+  `Verified ${inspected} media sources in ${htmlFiles.length} HTML files; external media use safe HTTPS URLs\n`
 );

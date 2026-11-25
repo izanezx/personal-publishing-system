@@ -144,24 +144,24 @@ Read the [Chinese publishing guide](docs/PUBLISHING.zh-CN.md), [docs/PRODUCT.md]
 
 ## Commands
 
-| Command                 | Action                                                     |
-| ----------------------- | ---------------------------------------------------------- |
-| `pnpm dev`              | Start the Astro development server                         |
-| `pnpm build`            | Type-check, build the site and generate the Pagefind index |
-| `pnpm preview`          | Preview the generated static output                        |
-| `pnpm test`             | Run unit tests                                             |
-| `pnpm lint`             | Run ESLint                                                 |
-| `pnpm format:check`     | Verify Prettier formatting                                 |
-| `pnpm cms:check`        | Validate Sveltia Schema, SRI, workflow and R2 shape        |
-| `pnpm media:check`      | Reject media outside the site and R2 origins               |
-| `pnpm test:e2e`         | Run the Playwright browser suite                           |
-| `pnpm test:release`     | Rehearse preview policy, production responses and rollback |
-| `pnpm candidate:create` | Package a build with commit and policy metadata            |
-| `pnpm candidate:verify` | Reject a candidate whose commit, policy or files changed   |
-| `pnpm smoke`            | Verify a deployed preview or production site               |
-| `pnpm status:due`       | Check scheduled publication and expiration manifests       |
-| `pnpm security:audit`   | Fail on high or critical dependency advisories             |
-| `pnpm skills:check`     | Verify every vendored Skill against `skills-lock.json`     |
+| Command                 | Action                                                                 |
+| ----------------------- | ---------------------------------------------------------------------- |
+| `pnpm dev`              | Start the Astro development server                                     |
+| `pnpm build`            | Type-check, build the site and generate the Pagefind index             |
+| `pnpm preview`          | Preview the generated static output                                    |
+| `pnpm test`             | Run unit tests                                                         |
+| `pnpm lint`             | Run ESLint                                                             |
+| `pnpm format:check`     | Verify Prettier formatting                                             |
+| `pnpm cms:check`        | Validate Sveltia Schema, SRI, workflow and R2 shape                    |
+| `pnpm media:check`      | Reject insecure external media; R2 remains the production media origin |
+| `pnpm test:e2e`         | Run the Playwright browser suite                                       |
+| `pnpm test:release`     | Rehearse preview policy, production responses and rollback             |
+| `pnpm candidate:create` | Package a build with commit and policy metadata                        |
+| `pnpm candidate:verify` | Reject a candidate whose commit, policy or files changed               |
+| `pnpm smoke`            | Verify a deployed preview or production site                           |
+| `pnpm status:due`       | Check scheduled publication and expiration manifests                   |
+| `pnpm security:audit`   | Fail on high or critical dependency advisories                         |
+| `pnpm skills:check`     | Verify every vendored Skill against `skills-lock.json`                 |
 
 Before opening a pull request, run:
 
