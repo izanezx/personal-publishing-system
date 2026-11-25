@@ -165,6 +165,10 @@ PR 会收到 Preview 评论，内容包括：
 
 失败时，Workflow 自动回滚到部署前的 Worker Version。
 
+CMS 创建的 `src/data/**/*.md` 使用 Sveltia 自己的 frontmatter 和 Markdown
+序列化格式，不参与 Prettier 格式检查；`cms:check`、构建、单元测试和浏览器测试
+仍然会校验其语义。发布流程不会在 CMS 分支追加机器人格式化提交。
+
 ## 本地替代方式
 
 只有在修改代码、Schema、CMS 配置或工作流时才需要本地命令：

@@ -6,3 +6,6 @@ pnpm-lock.yaml
 public/pagefind/
 playwright-report/
 test-results/
+# Sveltia owns the frontmatter and Markdown serialization for CMS entries.
+# Their semantics are checked by cms:check, build and the test suite.
+src/data/**/*.md
