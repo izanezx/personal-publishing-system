@@ -109,7 +109,16 @@ for (const pathname of [
   await expectStatus(pathname, 200);
 }
 
-await expectStatus("/admin/", 200);
+const admin = await expectStatus("/admin/", 200);
+assert.equal(admin.headers.get("x-robots-tag"), "noindex, nofollow");
+assert.match(
+  admin.headers.get("content-security-policy") ?? "",
+  /frame-ancestors 'none'/
+);
+assert.match(
+  admin.headers.get("cross-origin-opener-policy") ?? "",
+  /same-origin-allow-popups/
+);
 await expectStatus("/__missing-smoke-fixture__/", 404);
 await expectStatus("/posts/deleted-example/", 404);
 await expectStatus("/en/posts/translation-pending-fixture/", 404);
