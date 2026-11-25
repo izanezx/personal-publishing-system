@@ -19,7 +19,7 @@ publish_mode: simple
 site_url: https://zanezx.com
 display_url: https://zanezx.com
 app_title: zanezx 内容发布台
-logo_url: https://zanezx.com/favicon.svg
+logo_url: /favicon.svg
 
 editor:
   preview: true
