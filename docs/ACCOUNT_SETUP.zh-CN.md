@@ -6,8 +6,8 @@
 ## 已完成的仓库与基础设施
 
 - `[已完成]` GitHub 仓库公开为 `izanezx/personal-publishing-system`。
-- `[已完成]` 仓库启用自动合并和合并后删除分支。
 - `[已完成]` `main` 要求 `Linux checks` 和 `Windows build`。
+- `[已完成]` 仓库管理员可以通过 Simple Workflow 直接保存内容到 `main`。
 - `[已完成]` `preview` 和 `production` Environment 已存在。
 - `[已完成]` Environment Secret：
   - `preview/CLOUDFLARE_API_TOKEN_PREVIEW`
@@ -149,15 +149,13 @@ https://github.com/izanezx/personal-publishing-system/settings/environments
 
 1. 把本分支合并到 `main`。
 2. 等新 Workflow 出现在默认分支。
-3. 新建一条测试内容 PR。
-4. 确认 Preview Workflow 成功并评论 Preview URL。
-5. 确认 `/admin/` 可以使用 GitHub App 登录。
-6. 在图片字段上传测试图片，确认 `media.zanezx.com/cms/...` 可访问。
-7. 把测试内容推进到 Pending Publish。
-8. 确认 CI 通过后自动 squash merge。
-9. 确认生产 Workflow 部署并完成 Smoke Test。
-10. 检查生产页面、RSS、Sitemap、搜索和 Worker Version。
-11. 删除测试内容，验证下线流程。
+3. 确认 `/admin/` 可以使用 GitHub App 登录。
+4. 在图片字段上传测试图片，确认 `media.zanezx.com/cms/...` 可访问。
+5. 新建一条测试内容并点击保存。
+6. 确认没有生成 CMS Pull Request，提交直接出现在 `main`。
+7. 确认 `CI` 成功，随后生产 Workflow 部署并完成 Smoke Test。
+8. 检查生产页面、RSS、Sitemap、搜索和 Worker Version。
+9. 删除测试内容，验证下线流程。
 
 ## 7. 首次正式索引
 

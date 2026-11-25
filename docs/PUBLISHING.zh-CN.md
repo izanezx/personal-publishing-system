@@ -234,9 +234,10 @@ MDX 文章可以嵌入同语言中已发布的 Gallery：
 <GalleryEmbed slug="my-gallery" limit={3} />
 ```
 
-## 草稿、定时与归档
+## 暂不公开、定时与归档
 
-当前统一使用 `status`：
+页面状态由 `status` 控制。它不会创建审核流程；CMS 保存仍会直接提交到 `main`。
+如果暂时不希望生成公开页面，可以设置：
 
 ```yaml
 status: draft
@@ -262,7 +263,7 @@ scheduledFor: 2026-12-01T09:00:00+08:00
 1. 保留 `uid`、`slug` 和 `translationKey`。
 2. 修改标题或正文。
 3. 对实质性修改填写 `modDatetime`。
-4. 在 Sveltia 中保存，推进到 Pending Publish，等待自动合并和部署。
+4. 在 Sveltia 中保存。内容直接进入 `main`，CI 通过后自动部署。
 
 不要因为标题、文件夹或摘要变化就修改 `slug`。公开 URL 应保持稳定。
 
@@ -293,18 +294,17 @@ pnpm install --frozen-lockfile
 cp .env.example .env
 ```
 
-新增或修改内容：
+需要手工调整内容时：
 
 ```bash
 git switch main
 git pull --ff-only
-git switch -c content/my-new-article
 pnpm dev
 ```
 
 开发服务器地址是 `http://localhost:4321`。
 
-提交 PR 前运行：
+推进站点代码改动前运行：
 
 ```bash
 pnpm security:audit
@@ -333,33 +333,36 @@ pnpm test:release
 - 搜索结果
 - RSS、Sitemap 和 404
 
-## 提交与合并
+## 保存、提交与上线
 
-使用 Sveltia 时，保存内容会自动创建分支和 PR。推进到 Pending Publish 后，
-系统只在变更全部位于允许的内容路径时启用自动合并。
+日常使用 Sveltia 时，只要点击保存：
 
-手动开发内容时仍然可以执行：
+1. 内容直接提交到 GitHub `main`。
+2. `CI` 自动执行安全、配置、单元、格式、构建、浏览器和发布检查。
+3. `CI` 成功后自动部署 Cloudflare 生产 Worker。
+4. 线上 Smoke Test 失败时自动回滚。
+
+编辑过程中尚未保存的内容由 Sveltia 自动备份在当前浏览器；离开页面后再次打开会
+提示恢复。日常写作不需要自己创建分支、提交文件或创建 PR。
+
+需要手工调整内容时，也可以执行：
 
 ```bash
 git add src/data/blog
 git commit -m "content: add my new article"
-git push -u origin content/my-new-article
+git push origin main
 ```
 
-在 GitHub 打开 PR，等待以下必需检查通过：
-
-- `Linux checks`
-- `Windows build`
-
-合并后，主分支 CI 成功会自动触发生产部署和 Smoke Test。
+直接推送 `main` 后同样由 CI 决定是否允许生产部署。站点代码、Schema、依赖或
+Workflow 改动仍建议使用分支和 PR，以便先查看 Preview。
 
 ## 发布到 Cloudflare
 
 正常内容发布由 GitHub Actions 自动完成：
 
-1. PR 自动部署到独立 Preview Worker。
-2. Pending Publish 触发内容路径校验和 auto-merge。
-3. `main` CI 成功后自动部署生产 Worker。
+1. Sveltia 保存后直接提交 `main`。
+2. `main` 的 CI 成功。
+3. 自动部署生产 Worker。
 4. 线上 Smoke Test 失败时自动回滚。
 
 CLI 只用于基础设施维护、故障诊断或首次配置，不再是日常发布步骤。
@@ -399,11 +402,11 @@ pnpm dlx wrangler@4.165.0 rollback <version-id> \
   --name personal-publishing-system
 ```
 
-内容错误也可用一次修复 PR 重新发布。不要通过强推 `main` 或删除历史来修复生产
+内容错误也可直接在 Sveltia 中修复并重新保存。不要通过强推 `main` 或删除历史来修复生产
 问题。
 
 ## 版本规则
 
-- 日常新增或修改文章：使用普通内容提交，不必给每个文章创建软件版本标签。
+- 日常新增或修改文章：Sveltia 保存后生成普通内容提交，不必创建分支、PR 或版本标签。
 - 站点功能、架构、依赖或发布流程变化：通过 PR 合并，并按发布计划创建里程碑版本。
 - 稳定的平台版本由维护者批准后再创建 Git 标签和 GitHub Release。

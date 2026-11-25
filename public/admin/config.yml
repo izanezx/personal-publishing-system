@@ -14,10 +14,7 @@ backend:
     uploadMedia: "media: upload {{path}}"
     deleteMedia: "media: delete {{path}}"
 
-publish_mode:
-  type: editorial_workflow
-  stages: [draft, pending_review, pending_publish]
-  allow_incomplete_drafts: false
+publish_mode: simple
 
 site_url: https://zanezx.com
 display_url: https://zanezx.com
@@ -67,7 +64,6 @@ collections:
   - name: publications
     label: 发布内容
     label_singular: 发布条目
-    publish: false
     description: Markdown 文章、Notes、Projects、Library 和 Garden 条目。MDX 交互文章由代码或 Agent 维护。
     folder: src/data/blog
     identifier_field: slug
@@ -100,7 +96,7 @@ collections:
       - label: 定时
         field: status
         pattern: scheduled
-      - label: 预发布审核
+      - label: 英文待发布
         field: translationStatus
         pattern: pending
       - label: AI 翻译草稿
@@ -163,7 +159,7 @@ collections:
         input_timezone: Asia/Shanghai
         output_utc: true
       - name: status
-        label: 发布状态
+        label: 页面状态
         widget: select
         i18n: duplicate
         options:
@@ -175,7 +171,7 @@ collections:
           - { label: 已撤下, value: withdrawn }
           - { label: 草稿（不生成页面）, value: draft }
         default: published
-        hint: 工作流中的 Draft/Review 阶段已由 PR 管理；合并后按这里的状态发布。
+        hint: 这里控制页面是否进入站点；保存 CMS 条目会直接提交到 GitHub。
       - name: scheduledFor
         label: 定时生效时间
         widget: datetime
@@ -312,7 +308,6 @@ collections:
   - name: galleries
     label: 图库
     label_singular: 图库
-    publish: false
     folder: src/data/galleries
     identifier_field: slug
     summary: "{{title}} · {{status}} · {{locales}}"
@@ -445,7 +440,6 @@ collections:
   - name: editorial-pages
     label: About 与 Now
     label_singular: 页面
-    publish: false
     i18n: true
     files:
       - name: about
@@ -518,7 +512,6 @@ collections:
   - name: tombstones
     label: 下线记录
     label_singular: 下线记录
-    publish: false
     description: 用于保留已删除页面、返回 410，或把旧地址 301 到新内容。
     folder: src/data/tombstones
     identifier_field: path

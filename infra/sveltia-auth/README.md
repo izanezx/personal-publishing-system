@@ -64,7 +64,7 @@ Review the other fields, which should already be set as follows:
 - Repository permissions:
   - Contents: **Read and write** (pre-filled)
   - Metadata: **Read-only** (selected automatically)
-  - Pull requests: **Read and write** (pre-filled; required for the [editorial workflow](https://sveltiacms.app/en/docs/workflows/editorial))
+  - Pull requests: **No access** (not required for this project's simple workflow; leave any existing grant unchanged unless you are reducing permissions)
   - Workflows: **No access**; change it to **Read and write** only if users need to edit files under `.github/workflows`
 - Where can this GitHub App be installed: **Only on this account**; change it to **Any account** if your site repository belongs to another account, such as an organization
 
@@ -76,7 +76,7 @@ Install the app on the account that owns your site repository:
 
 1. Select **Install App** in the sidebar, and click **Install** next to the account.
 1. Under **for these repositories**, choose **Only select repositories**, click **Select repositories** and select your site repository.
-1. Under **with these permissions**, make sure the app requests read access to metadata and read and write access to code and pull requests, plus workflows if you enabled them.
+1. Under **with these permissions**, make sure the app requests read access to metadata and read and write access to code, plus workflows only if you enabled them.
 1. Click **Install**.
 
 Anyone with write access to the repository can then sign into the CMS; they only need to authorize the app on their first sign-in, without installing it themselves. The authorization can be reviewed or revoked under **Settings** > **Applications** > **Authorized GitHub Apps**.
