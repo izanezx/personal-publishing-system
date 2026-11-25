@@ -45,12 +45,17 @@ const requiredCollections = [
   "editorial-pages",
   "tombstones",
 ];
-const collectionNames = new Set(
-  (config.collections ?? []).map(collection => collection.name)
-);
 for (const name of requiredCollections) {
-  if (!collectionNames.has(name)) {
+  const collection = config.collections.find(
+    candidate => candidate.name === name
+  );
+  if (!collection) {
     throw new Error(`Required Sveltia collection is missing: ${name}`);
+  }
+  if (collection.publish !== false) {
+    throw new Error(
+      `${name} must hide manual publishing; Pending Publish is the approval point`
+    );
   }
 }
 
